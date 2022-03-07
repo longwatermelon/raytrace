@@ -3,8 +3,10 @@
 
 int main(int argc, char **argv)
 {
-    struct Sphere *spheres[1] = {
-        sphere_alloc((Vec3f){ 0.f, 0.f, 5.f }, 1.f)
+    struct Sphere *spheres[3] = {
+        sphere_alloc((Vec3f){ 0.f, 0.f, 5.f }, 1.f),
+        sphere_alloc((Vec3f){ 1.f, 0.f, 8.f }, 2.f),
+        sphere_alloc((Vec3f){ -2.f, 1.f, 6.f }, 1.f)
     };
 
     size_t nspheres = sizeof(spheres) / sizeof(spheres[0]);
