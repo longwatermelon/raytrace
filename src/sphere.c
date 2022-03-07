@@ -32,8 +32,8 @@ bool sphere_ray_intersect(struct Sphere *s, Vec3f ro, Vec3f rdir, float *t)
     if (discrim < 0)
         return false;
 
-    float t1 = (-b * sqrtf(discrim)) / (2.f * a);
-    float t2 = (b * sqrtf(discrim)) / (2.f * a);
+    float t1 = (-b + sqrtf(discrim)) / (2.f * a);
+    float t2 = (-b - sqrtf(discrim)) / (2.f * a);
 
     // account for floating point errors
     if (t1 <= 1e-4f)
