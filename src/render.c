@@ -65,9 +65,19 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
 
     for (size_t i = 0; i < g_nlights; ++i)
     {
+        // shadow
+        Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
+        Vec3f sdir = vec_normalize(vec_sub(g_lights[i].pos, orig));
+        
+        Vec3f shadow_hit, shadow_norm;
+        if (render_scene_cast_ray(orig, sdir, &shadow_hit, &shadow_norm))
+            continue;
+
+        // diffuse
         Vec3f l = vec_normalize(vec_sub(g_lights[i].pos, hit));
         dlight += g_lights[i].in * fmax(0.f, vec_mulv(l, norm));
 
+        // specular
         Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_mulv(l, norm)));
         slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), 50.f);
     }

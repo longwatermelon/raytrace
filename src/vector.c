@@ -78,3 +78,13 @@ Vec3f vec_mulf(Vec3f v, float f)
         .z = v.z * f
     };
 }
+
+
+Vec3f vec_divf(Vec3f v, float f)
+{
+    return (Vec3f){
+        .x = v.x / f,
+        .y = v.y / f,
+        .z = v.z / f
+    };
+}
