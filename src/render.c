@@ -60,15 +60,19 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
     if (!render_scene_cast_ray(o, dir, &hit, &norm))
         return (Vec3f){ .5f, .5f, .9f };
 
-    float light = 0.f;
+    float dlight = 0.f;
+    float slight = 0.f;
 
     for (size_t i = 0; i < g_nlights; ++i)
     {
-        Vec3f v = vec_normalize(vec_sub(g_lights[i].pos, hit));
-        light += g_lights[i].in * fmax(0.f, vec_mulv(v, norm));
+        Vec3f l = vec_normalize(vec_sub(g_lights[i].pos, hit));
+        dlight += g_lights[i].in * fmax(0.f, vec_mulv(l, norm));
+
+        Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_mulv(l, norm)));
+        slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), 50.f);
     }
 
-    return vec_mulf((Vec3f){ 1.f, 0.f, 0.f }, light);
+    return vec_addf(vec_mulf((Vec3f){ 1.f, 0.95f, 0.7f }, dlight), slight);
 }
 
 

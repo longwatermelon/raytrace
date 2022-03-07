@@ -9,8 +9,9 @@ int main(int argc, char **argv)
 
     size_t nspheres = sizeof(spheres) / sizeof(spheres[0]);
 
-    Light lights[1] = {
-        (Light){ (Vec3f){ 3.f, 3.f, 5.f }, 0.8f }
+    Light lights[2] = {
+        (Light){ (Vec3f){ 3.f, 3.f, 5.f }, 0.8f },
+        (Light){ (Vec3f){ -1.f, -2.f, 3.f }, 0.8f }
     };
 
     size_t nlights = sizeof(lights) / sizeof(lights[0]);
