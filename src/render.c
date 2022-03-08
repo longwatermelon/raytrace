@@ -13,7 +13,7 @@ size_t g_nlights;
 
 void render_rend()
 {
-    Vec3f *frame = calloc(g_w * g_h, sizeof(Vec3f));
+    Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
 
     FILE *fp = fopen("out.ppm", "w");
     fprintf(fp, "P3\n%d %d\n255\n", g_w, g_h);
@@ -50,6 +50,8 @@ void render_rend()
 
     fclose(fp);
     printf("Done\n");
+
+    free(frame);
 }
 
 
