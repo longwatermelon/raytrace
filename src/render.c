@@ -84,7 +84,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), 50.f);
     }
 
-    return vec_addf(vec_mulf((Vec3f){ 1.f, 0.95f, 0.7f }, dlight), slight);
+    return vec_addf(vec_mulf((Vec3f){ 1.f, 0.7f, 0.95f }, dlight), slight);
 }
 
 
