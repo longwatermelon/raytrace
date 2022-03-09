@@ -3,6 +3,7 @@
 
 #include "sphere.h"
 #include "util.h"
+#include "mesh.h"
 
 #include <sys/types.h>
 #include <SDL2/SDL.h>
@@ -17,6 +18,7 @@ Vec3f *render_apply_antialiasing(Vec3f *frame);
 
 void render_set_spheres(struct Sphere **spheres, size_t nspheres);
 void render_set_lights(Light *lights, size_t nlights);
+void render_set_meshes(struct Mesh **meshes, size_t nmeshes);
 void render_set_dim(int x, int y);
 
 #endif

@@ -8,6 +8,9 @@ int g_w, g_h;
 struct Sphere **g_spheres;
 size_t g_nspheres;
 
+struct Mesh **g_meshes;
+size_t g_nmeshes;
+
 Light *g_lights;
 size_t g_nlights;
 
@@ -33,7 +36,7 @@ void render_rend()
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
+            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, -1.f, -4.f }, dir);
         }
     }
 
@@ -89,6 +92,8 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), 50.f);
     }
 
+    // dlight = fminf(dlight, 1.f);
+    // slight = fminf(slight, 1.f);
     return vec_addf(vec_mulf((Vec3f){ 1.f, 0.7f, 0.95f }, dlight), slight);
 }
 
@@ -106,6 +111,19 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n)
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
             *n = vec_normalize(vec_sub(*hit, g_spheres[i]->c));
+        }
+    }
+
+    for (size_t i = 0; i < g_nmeshes; ++i)
+    {
+        float dist;
+        Triangle tri;
+
+        if (mesh_ray_intersect(g_meshes[i], o, dir, &dist, &tri) && dist < nearest)
+        {
+            nearest = dist;
+            *hit = vec_addv(o, vec_mulf(dir, dist));
+            *n = vec_normalize(mesh_tri_normal(g_meshes[i], tri));
         }
     }
 
@@ -156,6 +174,13 @@ void render_set_lights(Light *lights, size_t nlights)
 {
     g_lights = lights;
     g_nlights = nlights;
+}
+
+
+void render_set_meshes(struct Mesh **meshes, size_t nmeshes)
+{
+    g_meshes = meshes;
+    g_nmeshes = nmeshes;
 }
 
 

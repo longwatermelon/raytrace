@@ -88,3 +88,20 @@ Vec3f vec_divf(Vec3f v, float f)
         .z = v.z / f
     };
 }
+
+
+Vec3f vec_cross(Vec3f v1, Vec3f v2)
+{
+    Vec3f cross;
+    cross.x = v1.y * v2.z - v1.z * v2.y;
+    cross.y = v1.z * v2.x - v1.x * v2.z;
+    cross.z = v1.x * v2.y - v1.y * v2.x;
+
+    return cross;
+}
+
+
+bool vec_cmp(Vec3f v1, Vec3f v2)
+{
+    return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+}
