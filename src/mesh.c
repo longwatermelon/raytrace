@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 
 struct Mesh *mesh_alloc(Vec3f pos, const char *fp)
@@ -45,19 +46,49 @@ void mesh_read(struct Mesh *m, const char *fp)
 
     while ((read = getline(&line, &len, f)) != -1)
     {
-        if (line[0] == 'p')
+        if (line[0] == 'v')
         {
             m->pts = realloc(m->pts, sizeof(Vec3f) * ++m->npts);
             Vec3f *p = &m->pts[m->npts - 1];
 
             sscanf(line, "%*s %f %f %f", &p->x, &p->y, &p->z);
         }
-        else if (line[0] == 't')
+        else if (line[0] == 'f')
         {
-            m->tris = realloc(m->tris, sizeof(Triangle) * ++m->ntris);
-            Triangle *t = &m->tris[m->ntris - 1];
+            int ws = 0;
+            for (int i = 0; i < strlen(line); ++i)
+            {
+                if (line[i] == ' ')
+                    ++ws;
+            }
 
-            sscanf(line, "%*s %d %d %d", &t->idx[0], &t->idx[1], &t->idx[2]);
+            if (ws == 4)
+            {
+                m->ntris += 2;
+                m->tris = realloc(m->tris, sizeof(Triangle) * m->ntris);
+
+                int idx[4];
+                sscanf(line, "%*s %d%*s %d%*s %d%*s %d%*s", idx, idx + 1, idx + 2, idx + 3);
+
+                m->tris[m->ntris - 2].idx[0] = idx[2] - 1;
+                m->tris[m->ntris - 2].idx[1] = idx[1] - 1;
+                m->tris[m->ntris - 2].idx[2] = idx[0] - 1;
+
+                m->tris[m->ntris - 1].idx[0] = idx[2] - 1;
+                m->tris[m->ntris - 1].idx[1] = idx[0] - 1;
+                m->tris[m->ntris - 1].idx[2] = idx[3] - 1;
+            }
+            else
+            {
+                m->tris = realloc(m->tris, sizeof(Triangle) * ++m->ntris);
+
+                int idx[3];
+                sscanf(line, "%*s %d%*s %d%*s %d%*s", idx, idx + 1, idx + 2);
+
+                m->tris[m->ntris - 1].idx[0] = idx[0] - 1;
+                m->tris[m->ntris - 1].idx[1] = idx[1] - 1;
+                m->tris[m->ntris - 1].idx[2] = idx[2] - 1;
+            }
         }
     }
 

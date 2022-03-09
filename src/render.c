@@ -36,8 +36,11 @@ void render_rend()
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, -1.f, -4.f }, dir);
+            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, -4.f, -4.f }, dir);
         }
+
+        if (y % 100 == 0)
+            printf("%d%% done\n", (int)(((float)y / g_h) * 100));
     }
 
     printf("Applying antialiasing\n");
