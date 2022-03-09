@@ -37,13 +37,17 @@ void render_rend()
         }
     }
 
+    printf("Applying antialiasing\n");
+
+    Vec3f *avg = render_apply_antialiasing(frame);
+
     printf("Writing to file\n");
 
     for (int i = 0; i < g_w * g_h; ++i)
     {
-        int r = 255.f * fmin(1.f, fmax(0.f, frame[i].x));
-        int g = 255.f * fmin(1.f, fmax(0.f, frame[i].y));
-        int b = 255.f * fmin(1.f, fmax(0.f, frame[i].z));
+        int r = 255.f * fmin(1.f, fmax(0.f, avg[i].x));
+        int g = 255.f * fmin(1.f, fmax(0.f, avg[i].y));
+        int b = 255.f * fmin(1.f, fmax(0.f, avg[i].z));
 
         fprintf(fp, "%d %d %d\n", r, g, b);
     }
@@ -52,6 +56,7 @@ void render_rend()
     printf("Done\n");
 
     free(frame);
+    free(avg);
 }
 
 
@@ -105,6 +110,38 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n)
     }
 
     return nearest < 1000.f;
+}
+
+
+Vec3f *render_apply_antialiasing(Vec3f *frame)
+{
+    Vec3f *avg = malloc(sizeof(Vec3f) * (g_w * g_h));
+
+    for (int y = 1; y < g_h - 1; ++y)
+    {
+        for (int x = 1; x < g_w - 1; ++x)
+        {
+            Vec3f a = { 0.f, 0.f, 0.f };
+            
+            for (int i = y - 1; i <= y + 1; ++i)
+            {
+                for (int j = x - 1; j <= x + 1; ++j)
+                {
+                    a.x += frame[i * g_w + j].x;
+                    a.y += frame[i * g_w + j].y;
+                    a.z += frame[i * g_w + j].z;
+                }
+            }
+
+            a.x /= 9.f;
+            a.y /= 9.f;
+            a.z /= 9.f;
+
+            avg[y * g_w + x] = a;
+        }
+    }
+
+    return avg;
 }
 
 
