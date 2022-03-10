@@ -22,6 +22,8 @@ struct Mesh
     size_t ntris;
 
     Vec3f col;
+
+    bool invert_normal;
 };
 
 struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col);

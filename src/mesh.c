@@ -18,6 +18,8 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col)
 
     m->col = col;
 
+    m->invert_normal = false;
+
     if (fp)
         mesh_read(m, fp);
 
@@ -95,6 +97,14 @@ void mesh_read(struct Mesh *m, const char *fp)
         }
     }
 
+    // blender objects can't seem to get their vertex ordering consistently right.
+    // if the normals are wrong just invert them all, they're all consistent within
+    // a single mesh.
+    Vec3f norm = mesh_tri_normal(m, m->tris[0]);
+
+    if (vec_mulv(norm, m->pts[m->tris[0].idx[0]]) < 0.f)
+        m->invert_normal = true;
+
     free(line);
     fclose(f);
 }
@@ -107,6 +117,9 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, float *t, Triangle
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
+        if (mesh_tri_normal(m, m->tris[i]).z > 0.f)
+            continue;
+
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))
         {
             if (nearest < *t)
@@ -164,5 +177,14 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
 
 Vec3f mesh_tri_normal(struct Mesh *m, Triangle t)
 {
-    return vec_cross(vec_sub(m->pts[t.idx[2]], m->pts[t.idx[0]]), vec_sub(m->pts[t.idx[1]], m->pts[t.idx[0]]));
+    int i1 = 2;
+    int i2 = 1;
+
+    if (m->invert_normal)
+    {
+        i1 = 1;
+        i2 = 2;
+    }
+
+    return vec_cross(vec_sub(m->pts[t.idx[i1]], m->pts[t.idx[0]]), vec_sub(m->pts[t.idx[i2]], m->pts[t.idx[0]]));
 }

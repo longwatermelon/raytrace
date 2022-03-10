@@ -40,7 +40,7 @@ void render_rend()
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, -2.f, 0.f }, dir);
+            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -10.f }, dir);
         }
 
         clock_gettime(CLOCK_MONOTONIC, &now);
