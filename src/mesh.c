@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -21,7 +22,10 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col)
     m->invert_normal = false;
 
     if (fp)
+    {
         mesh_read(m, fp);
+        mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, -5.f });
+    }
 
     return m;
 }
@@ -168,6 +172,59 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
     float x = (c1 - (b1 * y)) / a1;
 
     return (x >= 0.f && x <= 1.f && y >= 0.f && y <= 1.f && x + y >= 0.f && x + y <= 1.f && *t >= 0.f);
+}
+
+
+void mesh_find_bounds(struct Mesh *m, Vec3f ro)
+{
+    // Vec3f l = { INFINITY, 0.f, 0.f };
+    // int lx = INFINITY;
+
+    // Vec3f r = { -INFINITY, 0.f, 0.f };
+    // Vec3f t = { 0.f, INFINITY, 0.f };
+    // Vec3f b = { 0.f, -INFINITY, 0.f };
+
+    Vec3f l, r, t, b;
+    float lx = INFINITY;
+    float rx = -INFINITY;
+    float ty = INFINITY;
+    float by = -INFINITY;
+
+    for (size_t i = 0; i < m->npts; ++i)
+    {
+        Vec3f adjusted = vec_addv(m->pts[i], m->pos);
+        SDL_Point p = util_project_point(adjusted, 1000, 1000);
+
+        if (p.x < lx)
+        {
+            lx = p.x;
+            l = adjusted;
+        }
+
+        if (p.x > rx)
+        {
+            rx = p.x;
+            r = adjusted;
+        }
+
+        if (p.y < ty)
+        {
+            ty = p.y;
+            t = adjusted;
+        }
+
+        if (p.y > by)
+        {
+            by = p.y;
+            b = adjusted;
+        }
+    }
+    printf("%f %f\n", ty, by);
+
+    m->top_ry = vec_normalize(vec_sub(t, ro)).y;
+    m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
+    printf("%f %f\n", m->top_ry, m->bot_ry);
+    (void)l; (void)r;
 }
 
 

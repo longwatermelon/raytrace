@@ -37,6 +37,14 @@ void render_rend()
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
             frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
+
+            // for (size_t i = 0; i < g_nmeshes; ++i)
+            // {
+            //     if (dir.y >= g_meshes[i]->top_ry && dir.y <= g_meshes[i]->bot_ry)
+            //     {
+            //         frame[y * g_w + x] = (Vec3f){ 1.f, 0.f, 0.f };
+            //     }
+            // }
         }
 
         if (y % 50 == 0)
@@ -74,7 +82,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
 {
     Vec3f hit, norm, col;
 
-    if (!render_scene_cast_ray(o, dir, &hit, &norm, &col))
+    if (!render_scene_cast_ray(o, dir, true, &hit, &norm, &col))
         return (Vec3f){ .5f, .5f, .9f };
 
     float dlight = 0.f;
@@ -87,7 +95,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         Vec3f sdir = vec_normalize(vec_sub(g_lights[i].pos, orig));
         
         Vec3f shadow_hit, shadow_norm, shadow_col;
-        if (render_scene_cast_ray(orig, sdir, &shadow_hit, &shadow_norm, &shadow_col))
+        if (render_scene_cast_ray(orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_col))
             continue;
 
         // diffuse
@@ -103,7 +111,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
 }
 
 
-bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n, Vec3f *col)
+bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, Vec3f *col)
 {
     float nearest = INFINITY;
 
@@ -122,6 +130,9 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n, Vec3f *col)
 
     for (size_t i = 0; i < g_nmeshes; ++i)
     {
+        if (optimize_meshes && (dir.y < g_meshes[i]->top_ry || dir.y > g_meshes[i]->bot_ry))
+            continue;
+
         float dist;
         Triangle tri;
 

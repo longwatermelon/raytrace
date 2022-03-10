@@ -1,4 +1,5 @@
 #include "render.h"
+#include <math.h>
 
 
 int main(int argc, char **argv)
@@ -33,6 +34,9 @@ int main(int argc, char **argv)
     mfloor->tris[1].idx[0] = 1;
     mfloor->tris[1].idx[1] = 2;
     mfloor->tris[1].idx[2] = 3;
+
+    mfloor->top_ry = -INFINITY;
+    mfloor->bot_ry = INFINITY;
 
     for (size_t i = 0; i < mfloor->ntris; ++i)
         mfloor->tris[i].norm = mesh_tri_normal(mfloor, mfloor->tris[i]);
