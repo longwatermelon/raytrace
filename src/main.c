@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         mfloor,
         mesh_alloc((Vec3f){ 2.f, 3.f, 12.f }, "res/icosphere.obj", (Vec3f){ .9f, .6f, .7f }),
         mesh_alloc((Vec3f){ -1.f, 2.2f, 18.f }, "res/donut.obj", (Vec3f){ .6f, .7f, .9f }),
-        mesh_alloc((Vec3f){ -.4f, 3.4f, 7.f }, "res/monkey.obj", (Vec3f){ .3f, .9f, .9f })
+        mesh_alloc((Vec3f){ -.4f, 3.4f, 7.f }, "res/monkey.obj", (Vec3f){ .95f, .7f, .95f })
     };
 
     size_t nmeshes = sizeof(meshes) / sizeof(meshes[0]);

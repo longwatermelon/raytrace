@@ -141,13 +141,13 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
 {
     // find intersection point
     Vec3f a = m->pts[tri.idx[0]];
-    a = (Vec3f){ a.x + m->pos.x, a.y + m->pos.y, a.z + m->pos.z };
+    a = vec_addv(a, m->pos);
 
     Vec3f b = m->pts[tri.idx[1]];
-    b = (Vec3f){ b.x + m->pos.x, b.y + m->pos.y, b.z + m->pos.z };
+    b = vec_addv(b, m->pos);
 
     Vec3f c = m->pts[tri.idx[2]];
-    c = (Vec3f){ c.x + m->pos.x, c.y + m->pos.y, c.z + m->pos.z };
+    c = vec_addv(c, m->pos);
 
     *t = (vec_mulv(a, tri.norm) - vec_mulv(ro, tri.norm)) / vec_mulv(rdir, tri.norm);
 
