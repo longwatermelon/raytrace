@@ -35,11 +35,11 @@ int main(int argc, char **argv)
     mfloor->tris[1].idx[2] = 3;
 
     struct Mesh *meshes[] = {
-        mesh_alloc((Vec3f){ -3.f, 3.f, 15.f }, "untitled.obj", (Vec3f){ .7f, .95f, 1.f }),
+        mesh_alloc((Vec3f){ -3.f, 3.f, 15.f }, "res/untitled.obj", (Vec3f){ .7f, .95f, 1.f }),
         mfloor,
-        mesh_alloc((Vec3f){ 2.f, 3.f, 12.f }, "icosphere.obj", (Vec3f){ .9f, .6f, .7f }),
-        mesh_alloc((Vec3f){ -1.f, 2.2f, 18.f }, "donut.obj", (Vec3f){ .6f, .7f, .9f }),
-        mesh_alloc((Vec3f){ -.4f, 3.2f, 7.f }, "monkey.obj", (Vec3f){ .3f, .9f, .9f })
+        mesh_alloc((Vec3f){ 2.f, 3.f, 12.f }, "res/icosphere.obj", (Vec3f){ .9f, .6f, .7f }),
+        mesh_alloc((Vec3f){ -1.f, 2.2f, 18.f }, "res/donut.obj", (Vec3f){ .6f, .7f, .9f }),
+        mesh_alloc((Vec3f){ -.4f, 3.2f, 7.f }, "res/monkey.obj", (Vec3f){ .3f, .9f, .9f })
     };
 
     size_t nmeshes = sizeof(meshes) / sizeof(meshes[0]);
