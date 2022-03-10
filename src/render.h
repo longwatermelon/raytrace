@@ -11,7 +11,7 @@
 void render_rend();
 void render_print_progress();
 
-typedef struct { Vec3f *frame; int x1; int x2; } render_cast_rays_args;
+typedef struct { Vec3f *frame; int y; int step; } render_cast_rays_args;
 void *render_cast_rays(void *args);
 Vec3f render_cast_ray(Vec3f o, Vec3f dir);
 // hit: intersection point

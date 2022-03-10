@@ -19,7 +19,7 @@ Light *g_lights;
 size_t g_nlights;
 
 size_t g_threads_finished;
-size_t g_cols_rendered;
+size_t g_rows_rendered;
 
 void render_rend()
 {
@@ -32,22 +32,25 @@ void render_rend()
 
     pthread_t threads[NTHREADS];
     g_threads_finished = 0;
-    g_cols_rendered = 0;
+    g_rows_rendered = 0;
+
+    int rows_per_thread = g_h / NTHREADS;
+    printf("Rows per thread: %d\n", rows_per_thread);
     
     for (int i = 0; i < NTHREADS; ++i)
     {
         render_cast_rays_args *args = malloc(sizeof(render_cast_rays_args));
         args->frame = frame;
-        args->x1 = i * (g_w / NTHREADS);
-        args->x2 = args->x1 + (g_w / NTHREADS);
+        args->y = i;
+        args->step = NTHREADS;
         pthread_create(&threads[i], 0, render_cast_rays, (void*)args);
-        printf("Thread #%d: Render from x = %d to x = %d.\n", i + 1, args->x1, args->x2);
+        printf("Started thread #%d.\n", i + 1);
     }
 
     while (g_threads_finished < NTHREADS)
     {
         render_print_progress();
-        sleep(1);
+        sleep(2);
     }
 
     render_print_progress();
@@ -78,8 +81,8 @@ void render_rend()
 
 void render_print_progress()
 {
-    printf("%zu (%.2f%%) columns rendered | %zu / 8 threads finished\r", g_cols_rendered,
-            ((float)g_cols_rendered / g_w) * 100.f, g_threads_finished);
+    printf("%zu (%.2f%%) rows rendered | %zu / %d threads finished\r", g_rows_rendered,
+            ((float)g_rows_rendered / g_h) * 100.f, g_threads_finished, NTHREADS);
     fflush(stdout);
 }
 
@@ -89,9 +92,9 @@ void *render_cast_rays(void *arg)
     render_cast_rays_args *args = (render_cast_rays_args*)arg;
     float fov = 1.f;
 
-    for (int x = args->x1; x < args->x2; ++x)
+    for (int y = args->y; y < g_h; y += args->step)
     {
-        for (int y = 0; y < g_h; ++y)
+        for (int x = 0; x < g_w; ++x)
         {
             float ha = ((float)x / (float)g_w) * fov - (fov / 2.f);
             float va = ((float)y / (float)g_h) * fov - (fov / 2.f);
@@ -103,9 +106,9 @@ void *render_cast_rays(void *arg)
             args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
         }
 
-        ++g_cols_rendered;
+        ++g_rows_rendered;
     }
-
+        
     ++g_threads_finished;
     pthread_exit(0);
 }
