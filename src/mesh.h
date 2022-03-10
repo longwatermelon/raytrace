@@ -9,6 +9,7 @@
 typedef struct
 {
     int idx[3];
+    Vec3f norm;
 } Triangle;
 
 struct Mesh

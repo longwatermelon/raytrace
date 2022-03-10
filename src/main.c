@@ -34,6 +34,9 @@ int main(int argc, char **argv)
     mfloor->tris[1].idx[1] = 2;
     mfloor->tris[1].idx[2] = 3;
 
+    for (size_t i = 0; i < mfloor->ntris; ++i)
+        mfloor->tris[i].norm = mesh_tri_normal(mfloor, mfloor->tris[i]);
+
     struct Mesh *meshes[] = {
         mesh_alloc((Vec3f){ -3.f, 3.f, 15.f }, "res/untitled.obj", (Vec3f){ .7f, .95f, 1.f }),
         mfloor,
@@ -43,7 +46,6 @@ int main(int argc, char **argv)
     };
 
     size_t nmeshes = sizeof(meshes) / sizeof(meshes[0]);
-    // (void)nmeshes;
 
     render_set_dim(1000, 1000);
     render_set_spheres(spheres, nspheres);

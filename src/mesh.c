@@ -105,6 +105,9 @@ void mesh_read(struct Mesh *m, const char *fp)
     if (vec_mulv(norm, m->pts[m->tris[0].idx[0]]) < 0.f)
         m->invert_normal = true;
 
+    for (size_t i = 0; i < m->ntris; ++i)
+        m->tris[i].norm = mesh_tri_normal(m, m->tris[i]);
+
     free(line);
     fclose(f);
 }
@@ -117,7 +120,7 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, float *t, Triangle
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
-        if (mesh_tri_normal(m, m->tris[i]).z > 0.f)
+        if (m->tris[i].norm.z > 0.f)
             continue;
 
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))
@@ -146,29 +149,19 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
     Vec3f c = m->pts[tri.idx[2]];
     c = (Vec3f){ c.x + m->pos.x, c.y + m->pos.y, c.z + m->pos.z };
 
-    Vec3f n = mesh_tri_normal(m, tri);
-
-    *t = (vec_mulv(a, n) - vec_mulv(ro, n)) / vec_mulv(rdir, n);
+    *t = (vec_mulv(a, tri.norm) - vec_mulv(ro, tri.norm)) / vec_mulv(rdir, tri.norm);
 
     // check if inside triangle
     Vec3f p = vec_addv(ro, vec_mulf(rdir, *t));
-    // if (!vec_cmp(vec_cross(vec_sub(p, a), vec_sub(c, a)), vec_cross(vec_sub(b, a), vec_sub(c, a))))
-    //     return false;
-
-    // if (!vec_cmp(vec_cross(vec_sub(p, c), vec_sub(a, c)), vec_cross(vec_sub(b, c), vec_sub(a, c))))
-    //     return false;
-
-    // if (!vec_cmp(vec_cross(vec_sub(p, b), vec_sub(c, b)), vec_cross(vec_sub(a, b), vec_sub(c, b))))
-    //     return false;
 
     float a1 = vec_mulv(vec_sub(b, a), vec_sub(b, a));
     float b1 = vec_mulv(vec_sub(c, a), vec_sub(b, a));
-    float a2 = vec_mulv(vec_sub(c, a), vec_sub(b, a));
     float b2 = vec_mulv(vec_sub(c, a), vec_sub(c, a));
+
     float c1 = vec_mulv(vec_sub(b, a), vec_sub(p, a));
     float c2 = vec_mulv(vec_sub(c, a), vec_sub(p, a));
 
-    float y = ((c1 * a2) - (c2 * a1)) / ((a2 * b1) - (a1 * b2));
+    float y = ((c1 * b1) - (c2 * a1)) / ((b1 * b1) - (a1 * b2));
     float x = (c1 - (b1 * y)) / a1;
 
     return (x >= 0.f && x <= 1.f && y >= 0.f && y <= 1.f && x + y >= 0.f && x + y <= 1.f && *t >= 0.f);
@@ -186,5 +179,5 @@ Vec3f mesh_tri_normal(struct Mesh *m, Triangle t)
         i2 = 2;
     }
 
-    return vec_cross(vec_sub(m->pts[t.idx[i1]], m->pts[t.idx[0]]), vec_sub(m->pts[t.idx[i2]], m->pts[t.idx[0]]));
+    return vec_normalize(vec_cross(vec_sub(m->pts[t.idx[i1]], m->pts[t.idx[0]]), vec_sub(m->pts[t.idx[i2]], m->pts[t.idx[0]])));
 }
