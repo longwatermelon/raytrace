@@ -34,5 +34,8 @@ int main(int argc, char **argv)
     for (size_t i = 0; i < nspheres; ++i)
         sphere_free(spheres[i]);
 
+    for (size_t i = 0; i < nmeshes; ++i)
+        mesh_free(meshes[i]);
+
     return 0;
 }
