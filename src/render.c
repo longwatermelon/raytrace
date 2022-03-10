@@ -2,6 +2,10 @@
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#define NTHREADS 8
 
 int g_w, g_h;
 
@@ -14,6 +18,8 @@ size_t g_nmeshes;
 Light *g_lights;
 size_t g_nlights;
 
+size_t g_threads_finished;
+
 void render_rend()
 {
     Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
@@ -21,42 +27,23 @@ void render_rend()
     FILE *fp = fopen("out.ppm", "w");
     fprintf(fp, "P3\n%d %d\n255\n", g_w, g_h);
 
-    float fov = 1.f;
-
     printf("Casting rays\n");
 
-    for (int y = 0; y < g_h; ++y)
+    pthread_t threads[NTHREADS];
+    g_threads_finished = 0;
+    
+    for (int i = 0; i < NTHREADS; ++i)
     {
-        for (int x = 0; x < g_w; ++x)
-        {
-            float ha = ((float)x / (float)g_w) * fov - (fov / 2.f);
-            float va = ((float)y / (float)g_h) * fov - (fov / 2.f);
-
-            float px = sinf(ha);
-            float py = sinf(va);
-
-            Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
-
-            // for (size_t i = 0; i < g_nmeshes; ++i)
-            // {
-            //     if (i == 1)
-            //         continue;
-
-            //     if (dir.y >= g_meshes[i]->top_ry && dir.y <= g_meshes[i]->bot_ry &&
-            //         dir.x >= g_meshes[i]->left_rx && dir.x <= g_meshes[i]->right_rx)
-            //     {
-            //         frame[y * g_w + x] = (Vec3f){ 1.f, 0.f, 0.f };
-            //     }
-            // }
-        }
-
-        if (y % 50 == 0)
-        {
-            printf("\r%d%% done", (int)(((float)y / g_h) * 100));
-            fflush(stdout);
-        }
+        render_cast_rays_args *args = malloc(sizeof(render_cast_rays_args));
+        args->frame = frame;
+        args->x1 = i * (g_w / NTHREADS);
+        args->x2 = args->x1 + (g_w / NTHREADS);
+        pthread_create(&threads[0], 0, render_cast_rays, (void*)args);
+        printf("Starting thread from x = %d to x = %d.\n", args->x1, args->x2);
     }
+
+    while (g_threads_finished < NTHREADS)
+        sleep(1);
 
     printf("\n");
     printf("Applying antialiasing\n");
@@ -79,6 +66,35 @@ void render_rend()
 
     free(frame);
     free(avg);
+}
+
+
+void *render_cast_rays(void *arg)
+{
+    render_cast_rays_args *args = (render_cast_rays_args*)arg;
+    float fov = 1.f;
+
+    for (int x = args->x1; x < args->x2; ++x)
+    {
+        for (int y = 0; y < g_h; ++y)
+        {
+            float ha = ((float)x / (float)g_w) * fov - (fov / 2.f);
+            float va = ((float)y / (float)g_h) * fov - (fov / 2.f);
+
+            float px = sinf(ha);
+            float py = sinf(va);
+
+            Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
+            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
+        }
+
+        if (x % 50 == 0)
+            printf("Rendered column %d\n", x);
+    }
+
+    ++g_threads_finished;
+    printf("%zu / %d threads completed.\n", g_threads_finished, NTHREADS);
+    pthread_exit(0);
 }
 
 
