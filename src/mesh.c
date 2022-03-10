@@ -154,12 +154,15 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
     // check if inside triangle
     Vec3f p = vec_addv(ro, vec_mulf(rdir, *t));
 
-    float a1 = vec_mulv(vec_sub(b, a), vec_sub(b, a));
-    float b1 = vec_mulv(vec_sub(c, a), vec_sub(b, a));
-    float b2 = vec_mulv(vec_sub(c, a), vec_sub(c, a));
+    Vec3f ca = vec_sub(c, a);
+    Vec3f ba = vec_sub(b, a);
 
-    float c1 = vec_mulv(vec_sub(b, a), vec_sub(p, a));
-    float c2 = vec_mulv(vec_sub(c, a), vec_sub(p, a));
+    float a1 = vec_mulv(ba, ba);
+    float b1 = vec_mulv(ca, ba);
+    float b2 = vec_mulv(ca, ca);
+
+    float c1 = vec_mulv(ba, vec_sub(p, a));
+    float c2 = vec_mulv(ca, vec_sub(p, a));
 
     float y = ((c1 * b1) - (c2 * a1)) / ((b1 * b1) - (a1 * b2));
     float x = (c1 - (b1 * y)) / a1;

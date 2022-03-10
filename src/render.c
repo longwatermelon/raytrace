@@ -2,7 +2,6 @@
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 int g_w, g_h;
 
@@ -26,9 +25,6 @@ void render_rend()
 
     printf("Casting rays\n");
 
-    struct timespec t1, now;
-    clock_gettime(CLOCK_MONOTONIC, &t1);
-
     for (int y = 0; y < g_h; ++y)
     {
         for (int x = 0; x < g_w; ++x)
@@ -43,13 +39,10 @@ void render_rend()
             frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &now);
-
-        if (now.tv_sec - t1.tv_sec >= 5)
+        if (y % 50 == 0)
         {
             printf("\r%d%% done", (int)(((float)y / g_h) * 100));
             fflush(stdout);
-            clock_gettime(CLOCK_MONOTONIC, &t1);
         }
     }
 
