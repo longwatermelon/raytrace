@@ -2,6 +2,7 @@
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 int g_w, g_h;
 
@@ -25,6 +26,9 @@ void render_rend()
 
     printf("Casting rays\n");
 
+    struct timespec t1, now;
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+
     for (int y = 0; y < g_h; ++y)
     {
         for (int x = 0; x < g_w; ++x)
@@ -36,13 +40,20 @@ void render_rend()
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, -4.f, -4.f }, dir);
+            frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, -2.f, 0.f }, dir);
         }
 
-        if (y % 100 == 0)
-            printf("%d%% done\n", (int)(((float)y / g_h) * 100));
+        clock_gettime(CLOCK_MONOTONIC, &now);
+
+        if (now.tv_sec - t1.tv_sec >= 5)
+        {
+            printf("\r%d%% done", (int)(((float)y / g_h) * 100));
+            fflush(stdout);
+            clock_gettime(CLOCK_MONOTONIC, &t1);
+        }
     }
 
+    printf("\n");
     printf("Applying antialiasing\n");
 
     Vec3f *avg = render_apply_antialiasing(frame);
