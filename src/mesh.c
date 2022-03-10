@@ -219,12 +219,11 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
             b = adjusted;
         }
     }
-    printf("%f %f\n", ty, by);
 
     m->top_ry = vec_normalize(vec_sub(t, ro)).y;
     m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
-    printf("%f %f\n", m->top_ry, m->bot_ry);
-    (void)l; (void)r;
+    m->left_rx = vec_normalize(vec_sub(l, ro)).x;
+    m->right_rx = vec_normalize(vec_sub(r, ro)).x;
 }
 
 

@@ -27,7 +27,7 @@ struct Mesh
     bool invert_normal;
 
     // optimization
-    float top_ry, bot_ry; // ray y component for highest and lowest point
+    float left_rx, right_rx, top_ry, bot_ry; // normalized ray x and y components pointing to farthest left, right, top, and bottom points
 };
 
 struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col);

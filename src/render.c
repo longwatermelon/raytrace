@@ -40,7 +40,11 @@ void render_rend()
 
             // for (size_t i = 0; i < g_nmeshes; ++i)
             // {
-            //     if (dir.y >= g_meshes[i]->top_ry && dir.y <= g_meshes[i]->bot_ry)
+            //     if (i == 1)
+            //         continue;
+
+            //     if (dir.y >= g_meshes[i]->top_ry && dir.y <= g_meshes[i]->bot_ry &&
+            //         dir.x >= g_meshes[i]->left_rx && dir.x <= g_meshes[i]->right_rx)
             //     {
             //         frame[y * g_w + x] = (Vec3f){ 1.f, 0.f, 0.f };
             //     }
@@ -130,7 +134,9 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
 
     for (size_t i = 0; i < g_nmeshes; ++i)
     {
-        if (optimize_meshes && (dir.y < g_meshes[i]->top_ry || dir.y > g_meshes[i]->bot_ry))
+        if (optimize_meshes &&
+            (dir.y < g_meshes[i]->top_ry || dir.y > g_meshes[i]->bot_ry ||
+            dir.x < g_meshes[i]->left_rx || dir.x > g_meshes[i]->right_rx))
             continue;
 
         float dist;

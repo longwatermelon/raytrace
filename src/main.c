@@ -37,6 +37,8 @@ int main(int argc, char **argv)
 
     mfloor->top_ry = -INFINITY;
     mfloor->bot_ry = INFINITY;
+    mfloor->left_rx = -INFINITY;
+    mfloor->right_rx = INFINITY;
 
     for (size_t i = 0; i < mfloor->ntris; ++i)
         mfloor->tris[i].norm = mesh_tri_normal(mfloor, mfloor->tris[i]);
