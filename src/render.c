@@ -19,6 +19,7 @@ Light *g_lights;
 size_t g_nlights;
 
 size_t g_threads_finished;
+size_t g_cols_rendered;
 
 void render_rend()
 {
@@ -31,6 +32,7 @@ void render_rend()
 
     pthread_t threads[NTHREADS];
     g_threads_finished = 0;
+    g_cols_rendered = 0;
     
     for (int i = 0; i < NTHREADS; ++i)
     {
@@ -38,12 +40,17 @@ void render_rend()
         args->frame = frame;
         args->x1 = i * (g_w / NTHREADS);
         args->x2 = args->x1 + (g_w / NTHREADS);
-        pthread_create(&threads[0], 0, render_cast_rays, (void*)args);
-        printf("Starting thread from x = %d to x = %d.\n", args->x1, args->x2);
+        pthread_create(&threads[i], 0, render_cast_rays, (void*)args);
+        printf("Thread #%d: Render from x = %d to x = %d.\n", i + 1, args->x1, args->x2);
     }
 
     while (g_threads_finished < NTHREADS)
+    {
+        render_print_progress();
         sleep(1);
+    }
+
+    render_print_progress();
 
     printf("\n");
     printf("Applying antialiasing\n");
@@ -69,6 +76,14 @@ void render_rend()
 }
 
 
+void render_print_progress()
+{
+    printf("%zu (%.2f%%) columns rendered | %zu / 8 threads finished\r", g_cols_rendered,
+            ((float)g_cols_rendered / g_w) * 100.f, g_threads_finished);
+    fflush(stdout);
+}
+
+
 void *render_cast_rays(void *arg)
 {
     render_cast_rays_args *args = (render_cast_rays_args*)arg;
@@ -88,12 +103,10 @@ void *render_cast_rays(void *arg)
             args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
         }
 
-        if (x % 50 == 0)
-            printf("Rendered column %d\n", x);
+        ++g_cols_rendered;
     }
 
     ++g_threads_finished;
-    printf("%zu / %d threads completed.\n", g_threads_finished, NTHREADS);
     pthread_exit(0);
 }
 
