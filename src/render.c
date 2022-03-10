@@ -79,9 +79,9 @@ void render_rend()
 
 Vec3f render_cast_ray(Vec3f o, Vec3f dir)
 {
-    Vec3f hit, norm;
+    Vec3f hit, norm, col;
 
-    if (!render_scene_cast_ray(o, dir, &hit, &norm))
+    if (!render_scene_cast_ray(o, dir, &hit, &norm, &col))
         return (Vec3f){ .5f, .5f, .9f };
 
     float dlight = 0.f;
@@ -93,8 +93,8 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
         Vec3f sdir = vec_normalize(vec_sub(g_lights[i].pos, orig));
         
-        Vec3f shadow_hit, shadow_norm;
-        if (render_scene_cast_ray(orig, sdir, &shadow_hit, &shadow_norm))
+        Vec3f shadow_hit, shadow_norm, shadow_col;
+        if (render_scene_cast_ray(orig, sdir, &shadow_hit, &shadow_norm, &shadow_col))
             continue;
 
         // diffuse
@@ -106,13 +106,11 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), 50.f);
     }
 
-    // dlight = fminf(dlight, 1.f);
-    // slight = fminf(slight, 1.f);
-    return vec_addf(vec_mulf((Vec3f){ 1.f, 0.7f, 0.95f }, dlight), slight);
+    return vec_addf(vec_mulf(col, dlight), slight);
 }
 
 
-bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n)
+bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n, Vec3f *col)
 {
     float nearest = INFINITY;
 
@@ -125,6 +123,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n)
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
             *n = vec_normalize(vec_sub(*hit, g_spheres[i]->c));
+            *col = g_spheres[i]->col;
         }
     }
 
@@ -138,6 +137,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, Vec3f *hit, Vec3f *n)
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
             *n = vec_normalize(mesh_tri_normal(g_meshes[i], tri));
+            *col = g_meshes[i]->col;
         }
     }
 

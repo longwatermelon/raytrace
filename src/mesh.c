@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-struct Mesh *mesh_alloc(Vec3f pos, const char *fp)
+struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col)
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
     m->pos = pos;
@@ -16,7 +16,10 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp)
     m->tris = 0;
     m->ntris = 0;
 
-    mesh_read(m, fp);
+    m->col = col;
+
+    if (fp)
+        mesh_read(m, fp);
 
     return m;
 }

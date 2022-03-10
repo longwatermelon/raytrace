@@ -3,14 +3,17 @@
 
 #include "vector.h"
 #include <stdbool.h>
+#include <SDL2/SDL.h>
 
 struct Sphere
 {
     Vec3f c; // center
     float r; // radius
+
+    Vec3f col;
 };
 
-struct Sphere *sphere_alloc(Vec3f c, float r);
+struct Sphere *sphere_alloc(Vec3f c, float r, Vec3f col);
 void sphere_free(struct Sphere *s);
 
 // ro: ray origin

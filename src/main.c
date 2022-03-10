@@ -4,7 +4,7 @@
 int main(int argc, char **argv)
 {
     struct Sphere *spheres[] = {
-        sphere_alloc((Vec3f){ 0.f, 1.f, 12.f }, 1.f),
+        sphere_alloc((Vec3f){ 0.f, 1.f, 12.f }, 1.f, (Vec3f){ 1.f, .95f, .7f }),
         // sphere_alloc((Vec3f){ -1.f, 0.f, 9.f }, 0.1f)
     };
 
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     size_t nlights = sizeof(lights) / sizeof(lights[0]);
 
     struct Mesh *meshes[] = {
-        mesh_alloc((Vec3f){ -1.f, 2.f, 10.f }, "untitled.obj")
+        mesh_alloc((Vec3f){ -1.f, 2.f, 10.f }, "untitled.obj", (Vec3f){ .7f, .95f, 1.f })
     };
 
     size_t nmeshes = sizeof(meshes) / sizeof(meshes[0]);

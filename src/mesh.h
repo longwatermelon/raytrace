@@ -4,6 +4,7 @@
 #include "vector.h"
 #include <stdbool.h>
 #include <sys/types.h>
+#include <SDL2/SDL.h>
 
 typedef struct
 {
@@ -19,9 +20,11 @@ struct Mesh
 
     Triangle *tris;
     size_t ntris;
+
+    Vec3f col;
 };
 
-struct Mesh *mesh_alloc(Vec3f pos, const char *fp);
+struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col);
 void mesh_free(struct Mesh *m);
 
 void mesh_read(struct Mesh *m, const char *fp);
