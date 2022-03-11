@@ -103,7 +103,7 @@ void *render_cast_rays(void *arg)
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, -5.f }, dir);
+            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
         }
 
         ++g_rows_rendered;

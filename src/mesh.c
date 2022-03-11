@@ -24,7 +24,7 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col)
     if (fp)
     {
         mesh_read(m, fp);
-        mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, -5.f });
+        mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, 0.f });
     }
 
     return m;
