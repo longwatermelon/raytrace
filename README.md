@@ -2,7 +2,7 @@
 Raytracing in C
 
 4000x3000 render
-![out](https://user-images.githubusercontent.com/73869536/157763555-ead9ce3e-93c6-4994-8de0-839b029ae5a7.png)
+![out](https://user-images.githubusercontent.com/73869536/157809960-2b05aff1-0ba4-49d3-ab58-a2d7a7712bb8.png)
 
 # Building
 ```
