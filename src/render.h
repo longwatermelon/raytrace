@@ -10,6 +10,7 @@
 
 void render_rend();
 void render_print_progress();
+void render_print_config();
 
 typedef struct { Vec3f *frame; int y; int step; } render_cast_rays_args;
 void *render_cast_rays(void *args);
@@ -23,5 +24,8 @@ void render_set_spheres(struct Sphere **spheres, size_t nspheres);
 void render_set_lights(Light *lights, size_t nlights);
 void render_set_meshes(struct Mesh **meshes, size_t nmeshes);
 void render_set_dim(int x, int y);
+
+void render_enable_antialiasing();
+void render_set_threads(int threads);
 
 #endif

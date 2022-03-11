@@ -5,8 +5,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define NTHREADS 4
-
 int g_w, g_h;
 
 struct Sphere **g_spheres;
@@ -21,32 +19,31 @@ size_t g_nlights;
 size_t g_threads_finished;
 size_t g_rows_rendered;
 
+bool g_antialiasing = false;
+size_t g_nthreads = 4;
+
 void render_rend()
 {
     Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
 
-    FILE *fp = fopen("out.ppm", "w");
-    fprintf(fp, "P3\n%d %d\n255\n", g_w, g_h);
-
     printf("Casting rays\n");
 
-    pthread_t threads[NTHREADS];
+    pthread_t threads[g_nthreads];
     g_threads_finished = 0;
     g_rows_rendered = 0;
 
-    int rows_per_thread = g_h / NTHREADS;
-    printf("%d threads | %d rows per thread\n", NTHREADS, rows_per_thread);
-    
-    for (int i = 0; i < NTHREADS; ++i)
+    render_print_config();
+
+    for (int i = 0; i < g_nthreads; ++i)
     {
         render_cast_rays_args *args = malloc(sizeof(render_cast_rays_args));
         args->frame = frame;
         args->y = i;
-        args->step = NTHREADS;
+        args->step = g_nthreads;
         pthread_create(&threads[i], 0, render_cast_rays, (void*)args);
     }
 
-    while (g_threads_finished < NTHREADS)
+    while (g_threads_finished < g_nthreads)
     {
         render_print_progress();
         sleep(2);
@@ -56,6 +53,9 @@ void render_rend()
 
     printf("\n");
     printf("Writing to file\n");
+
+    FILE *fp = fopen("out.ppm", "w");
+    fprintf(fp, "P3\n%d %d\n255\n", g_w, g_h);
 
     for (int i = 0; i < g_w * g_h; ++i)
     {
@@ -81,6 +81,14 @@ void render_print_progress()
 }
 
 
+void render_print_config()
+{
+    int rows_per_thread = g_h / g_nthreads;
+    printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
+    printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
+}
+
+
 void *render_cast_rays(void *arg)
 {
     render_cast_rays_args *args = (render_cast_rays_args*)arg;
@@ -99,23 +107,29 @@ void *render_cast_rays(void *arg)
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
             Vec3f c = { 0.f, 0.f, 0.f };
 
-            // subpixel ray casts for antialiasing
-            for (float y = -1.f; y <= 1.f; ++y)
+            if (g_antialiasing)
             {
-                for (float x = -1.f; x <= 1.f; ++x)
+                for (float y = -1.f; y <= 1.f; ++y)
                 {
-                    float dx = 5.f * g_w;
-                    float dy = 5.f * g_h;
-                    Vec3f ndir = vec_normalize(vec_addv(dir, (Vec3f){ x / dx, y / dy, 0.f }));
-                    c = vec_addv(c, render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, ndir));
+                    for (float x = -1.f; x <= 1.f; ++x)
+                    {
+                        float dx = 5.f * g_w;
+                        float dy = 5.f * g_h;
+                        Vec3f ndir = vec_normalize(vec_addv(dir, (Vec3f){ x / dx, y / dy, 0.f }));
+                        c = vec_addv(c, render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, ndir));
+                    }
                 }
+
+                c.x /= 9.f;
+                c.y /= 9.f;
+                c.z /= 9.f;
+            }
+            else
+            {
+                c = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
             }
 
-            c.x /= 9.f;
-            c.y /= 9.f;
-            c.z /= 9.f;
-
-            args->frame[y * g_w + x] = c;//render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
+            args->frame[y * g_w + x] = c;
         }
 
         ++g_rows_rendered;
@@ -205,13 +219,11 @@ void render_set_spheres(struct Sphere **spheres, size_t nspheres)
     g_nspheres = nspheres;
 }
 
-
 void render_set_lights(Light *lights, size_t nlights)
 {
     g_lights = lights;
     g_nlights = nlights;
 }
-
 
 void render_set_meshes(struct Mesh **meshes, size_t nmeshes)
 {
@@ -219,9 +231,18 @@ void render_set_meshes(struct Mesh **meshes, size_t nmeshes)
     g_nmeshes = nmeshes;
 }
 
-
 void render_set_dim(int x, int y)
 {
     g_w = x;
     g_h = y;
+}
+
+void render_enable_antialiasing()
+{
+    g_antialiasing = true;
+}
+
+void render_set_threads(int threads)
+{
+    g_nthreads = threads;
 }

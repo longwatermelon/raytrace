@@ -39,6 +39,9 @@ int main(int argc, char **argv)
     render_set_lights(lights, nlights);
     render_set_meshes(meshes, nmeshes);
 
+    render_enable_antialiasing();
+    render_set_threads(8);
+
     render_rend();
 
     for (size_t i = 0; i < nspheres; ++i)
