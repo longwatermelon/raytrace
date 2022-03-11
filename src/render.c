@@ -35,7 +35,7 @@ void render_rend()
     g_rows_rendered = 0;
 
     int rows_per_thread = g_h / NTHREADS;
-    printf("Rows per thread: %d\n", rows_per_thread);
+    printf("%d threads | %d rows per thread\n", NTHREADS, rows_per_thread);
     
     for (int i = 0; i < NTHREADS; ++i)
     {
@@ -75,8 +75,8 @@ void render_rend()
 
 void render_print_progress()
 {
-    printf("\r%zu rows rendered (%.2f%%) | %d threads", g_rows_rendered,
-            ((float)g_rows_rendered / g_h) * 100.f, NTHREADS);
+    printf("\r%zu rows rendered (%.2f%%)", g_rows_rendered,
+            ((float)g_rows_rendered / g_h) * 100.f);
     fflush(stdout);
 }
 
