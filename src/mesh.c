@@ -102,9 +102,6 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, float *t, Triangle
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
-        if (m->norms[m->tris[i].nidx].z > 0.f)
-            continue;
-
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))
         {
             if (nearest < *t)
