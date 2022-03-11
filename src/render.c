@@ -178,7 +178,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
         {
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
-            *n = tri.norm;
+            *n = g_meshes[i]->norms[tri.nidx];
             *col = g_meshes[i]->col;
         }
     }

@@ -17,9 +17,10 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col)
     m->tris = 0;
     m->ntris = 0;
 
-    m->col = col;
+    m->norms = 0;
+    m->nnorms = 0;
 
-    m->invert_normal = false;
+    m->col = col;
 
     if (fp)
     {
@@ -35,6 +36,7 @@ void mesh_free(struct Mesh *m)
 {
     free(m->pts);
     free(m->tris);
+    free(m->norms);
     free(m);
 }
 
@@ -57,60 +59,36 @@ void mesh_read(struct Mesh *m, const char *fp)
     {
         if (line[0] == 'v')
         {
-            m->pts = realloc(m->pts, sizeof(Vec3f) * ++m->npts);
-            Vec3f *p = &m->pts[m->npts - 1];
+            if (line[1] == ' ')
+            {
+                m->pts = realloc(m->pts, sizeof(Vec3f) * ++m->npts);
+                Vec3f *p = &m->pts[m->npts - 1];
 
-            sscanf(line, "%*s %f %f %f", &p->x, &p->y, &p->z);
+                sscanf(line, "%*s %f %f %f", &p->x, &p->y, &p->z);
+            }
+            else if (line[1] == 'n')
+            {
+                m->norms = realloc(m->norms, sizeof(Vec3f) * ++m->nnorms);
+                Vec3f *n = &m->norms[m->nnorms - 1];
+
+                sscanf(line, "%*s %f %f %f", &n->x, &n->y, &n->z);
+            }
         }
         else if (line[0] == 'f')
         {
-            int ws = 0;
-            for (int i = 0; i < strlen(line); ++i)
-            {
-                if (line[i] == ' ')
-                    ++ws;
-            }
+            m->tris = realloc(m->tris, sizeof(Triangle) * ++m->ntris);
 
-            if (ws == 4)
-            {
-                m->ntris += 2;
-                m->tris = realloc(m->tris, sizeof(Triangle) * m->ntris);
+            int idx[3];
+            int norm;
+            sscanf(line, "%*s %d%*c%*d%*c%d %d%*s %d%*s", idx, &norm, idx + 1, idx + 2);
 
-                int idx[4];
-                sscanf(line, "%*s %d%*s %d%*s %d%*s %d%*s", idx, idx + 1, idx + 2, idx + 3);
+            m->tris[m->ntris - 1].idx[0] = idx[0] - 1;
+            m->tris[m->ntris - 1].idx[1] = idx[1] - 1;
+            m->tris[m->ntris - 1].idx[2] = idx[2] - 1;
 
-                m->tris[m->ntris - 2].idx[0] = idx[2] - 1;
-                m->tris[m->ntris - 2].idx[1] = idx[1] - 1;
-                m->tris[m->ntris - 2].idx[2] = idx[0] - 1;
-
-                m->tris[m->ntris - 1].idx[0] = idx[2] - 1;
-                m->tris[m->ntris - 1].idx[1] = idx[0] - 1;
-                m->tris[m->ntris - 1].idx[2] = idx[3] - 1;
-            }
-            else
-            {
-                m->tris = realloc(m->tris, sizeof(Triangle) * ++m->ntris);
-
-                int idx[3];
-                sscanf(line, "%*s %d%*s %d%*s %d%*s", idx, idx + 1, idx + 2);
-
-                m->tris[m->ntris - 1].idx[0] = idx[0] - 1;
-                m->tris[m->ntris - 1].idx[1] = idx[1] - 1;
-                m->tris[m->ntris - 1].idx[2] = idx[2] - 1;
-            }
+            m->tris[m->ntris - 1].nidx = norm - 1;
         }
     }
-
-    // blender objects can't seem to get their vertex ordering consistently right.
-    // if the normals are wrong just invert them all, they're all consistent within
-    // a single mesh.
-    Vec3f norm = mesh_tri_normal(m, m->tris[0]);
-
-    if (vec_mulv(norm, m->pts[m->tris[0].idx[0]]) < 0.f)
-        m->invert_normal = true;
-
-    for (size_t i = 0; i < m->ntris; ++i)
-        m->tris[i].norm = mesh_tri_normal(m, m->tris[i]);
 
     free(line);
     fclose(f);
@@ -124,7 +102,7 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, float *t, Triangle
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
-        if (m->tris[i].norm.z > 0.f)
+        if (m->norms[m->tris[i].nidx].z > 0.f)
             continue;
 
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))
@@ -153,7 +131,8 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
     Vec3f c = m->pts[tri.idx[2]];
     c = vec_addv(c, m->pos);
 
-    *t = (vec_mulv(a, tri.norm) - vec_mulv(ro, tri.norm)) / vec_mulv(rdir, tri.norm);
+    Vec3f norm = m->norms[tri.nidx];
+    *t = (vec_mulv(a, norm) - vec_mulv(ro, norm)) / vec_mulv(rdir, norm);
 
     // check if inside triangle
     Vec3f p = vec_addv(ro, vec_mulf(rdir, *t));
@@ -239,19 +218,4 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
         m->right_rx = 1.f;
     else
         m->right_rx = vec_normalize(vec_sub(r, ro)).x;
-}
-
-
-Vec3f mesh_tri_normal(struct Mesh *m, Triangle t)
-{
-    int i1 = 2;
-    int i2 = 1;
-
-    if (m->invert_normal)
-    {
-        i1 = 1;
-        i2 = 2;
-    }
-
-    return vec_normalize(vec_cross(vec_sub(m->pts[t.idx[i1]], m->pts[t.idx[0]]), vec_sub(m->pts[t.idx[i2]], m->pts[t.idx[0]])));
 }

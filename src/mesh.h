@@ -9,7 +9,7 @@
 typedef struct
 {
     int idx[3];
-    Vec3f norm;
+    int nidx;
 } Triangle;
 
 struct Mesh
@@ -21,10 +21,11 @@ struct Mesh
 
     Triangle *tris;
     size_t ntris;
+    
+    Vec3f *norms;
+    size_t nnorms;
 
     Vec3f col;
-
-    bool invert_normal;
 
     // optimization
     float left_rx, right_rx, top_ry, bot_ry; // normalized ray x and y components pointing to farthest left, right, top, and bottom points
@@ -41,7 +42,5 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, float *t, Triangle
 bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, float *t);
 
 void mesh_find_bounds(struct Mesh *m, Vec3f ro);
-
-Vec3f mesh_tri_normal(struct Mesh *m, Triangle t);
 
 #endif
