@@ -7,17 +7,17 @@
 
 int g_w, g_h;
 
-struct Sphere **g_spheres;
-size_t g_nspheres;
+struct Sphere **g_spheres = 0;
+size_t g_nspheres = 0;
 
-struct Mesh **g_meshes;
-size_t g_nmeshes;
+struct Mesh **g_meshes = 0;
+size_t g_nmeshes = 0;
 
-Light *g_lights;
-size_t g_nlights;
+Light *g_lights = 0;
+size_t g_nlights = 0;
 
-size_t g_threads_finished;
-size_t g_rows_rendered;
+size_t g_threads_finished = 0;
+size_t g_rows_rendered = 0;
 
 bool g_antialiasing = false;
 size_t g_nthreads = 4;
@@ -29,8 +29,6 @@ void render_rend()
     printf("Casting rays\n");
 
     pthread_t threads[g_nthreads];
-    g_threads_finished = 0;
-    g_rows_rendered = 0;
 
     render_print_config();
 
@@ -92,6 +90,9 @@ void render_print_progress()
 
 void render_print_config()
 {
+    printf("Output image dimensions: %dx%d\n", g_w, g_h);
+    printf("%lu spheres, %lu meshes, %lu lights\n", g_nspheres, g_nmeshes, g_nlights);
+
     int rows_per_thread = g_h / g_nthreads;
     printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
     printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
