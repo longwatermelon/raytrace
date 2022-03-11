@@ -44,7 +44,6 @@ void render_rend()
         args->y = i;
         args->step = NTHREADS;
         pthread_create(&threads[i], 0, render_cast_rays, (void*)args);
-        printf("Started thread #%d.\n", i + 1);
     }
 
     while (g_threads_finished < NTHREADS)
@@ -81,8 +80,8 @@ void render_rend()
 
 void render_print_progress()
 {
-    printf("%zu (%.2f%%) rows rendered | %zu / %d threads finished\r", g_rows_rendered,
-            ((float)g_rows_rendered / g_h) * 100.f, g_threads_finished, NTHREADS);
+    printf("\r%zu rows rendered (%.2f%%) | %d threads", g_rows_rendered,
+            ((float)g_rows_rendered / g_h) * 100.f, NTHREADS);
     fflush(stdout);
 }
 
