@@ -220,10 +220,25 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
         }
     }
 
-    m->top_ry = vec_normalize(vec_sub(t, ro)).y;
-    m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
-    m->left_rx = vec_normalize(vec_sub(l, ro)).x;
-    m->right_rx = vec_normalize(vec_sub(r, ro)).x;
+    if (t.z < ro.z)
+        m->top_ry = -1.f;
+    else
+        m->top_ry = vec_normalize(vec_sub(t, ro)).y;
+
+    if (b.z < ro.z)
+        m->bot_ry = 1.f;
+    else
+        m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
+
+    if (l.z < ro.z)
+        m->left_rx = -1.f;
+    else
+        m->left_rx = vec_normalize(vec_sub(l, ro)).x;
+
+    if (r.z < ro.z)
+        m->right_rx = 1.f;
+    else
+        m->right_rx = vec_normalize(vec_sub(r, ro)).x;
 }
 
 
