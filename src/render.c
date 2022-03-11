@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define NTHREADS 8
+#define NTHREADS 4
 
 int g_w, g_h;
 
@@ -55,17 +55,13 @@ void render_rend()
     render_print_progress();
 
     printf("\n");
-    printf("Applying antialiasing\n");
-
-    Vec3f *avg = render_apply_antialiasing(frame);
-
     printf("Writing to file\n");
 
     for (int i = 0; i < g_w * g_h; ++i)
     {
-        int r = 255.f * fmin(1.f, fmax(0.f, avg[i].x));
-        int g = 255.f * fmin(1.f, fmax(0.f, avg[i].y));
-        int b = 255.f * fmin(1.f, fmax(0.f, avg[i].z));
+        int r = 255.f * fmin(1.f, fmax(0.f, frame[i].x));
+        int g = 255.f * fmin(1.f, fmax(0.f, frame[i].y));
+        int b = 255.f * fmin(1.f, fmax(0.f, frame[i].z));
 
         fprintf(fp, "%d %d %d\n", r, g, b);
     }
@@ -74,7 +70,6 @@ void render_rend()
     printf("Done\n");
 
     free(frame);
-    free(avg);
 }
 
 
@@ -102,7 +97,25 @@ void *render_cast_rays(void *arg)
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
+            Vec3f c = { 0.f, 0.f, 0.f };
+
+            // subpixel ray casts for antialiasing
+            for (float y = -1.f; y <= 1.f; ++y)
+            {
+                for (float x = -1.f; x <= 1.f; ++x)
+                {
+                    float dx = 5.f * g_w;
+                    float dy = 5.f * g_h;
+                    Vec3f ndir = vec_normalize(vec_addv(dir, (Vec3f){ x / dx, y / dy, 0.f }));
+                    c = vec_addv(c, render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, ndir));
+                }
+            }
+
+            c.x /= 9.f;
+            c.y /= 9.f;
+            c.z /= 9.f;
+
+            args->frame[y * g_w + x] = c;//render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
         }
 
         ++g_rows_rendered;
@@ -183,38 +196,6 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
     }
 
     return nearest < 1000.f;
-}
-
-
-Vec3f *render_apply_antialiasing(Vec3f *frame)
-{
-    Vec3f *avg = malloc(sizeof(Vec3f) * (g_w * g_h));
-
-    for (int y = 1; y < g_h - 1; ++y)
-    {
-        for (int x = 1; x < g_w - 1; ++x)
-        {
-            Vec3f a = { 0.f, 0.f, 0.f };
-            
-            for (int i = y - 1; i <= y + 1; ++i)
-            {
-                for (int j = x - 1; j <= x + 1; ++j)
-                {
-                    a.x += frame[i * g_w + j].x;
-                    a.y += frame[i * g_w + j].y;
-                    a.z += frame[i * g_w + j].z;
-                }
-            }
-
-            a.x /= 9.f;
-            a.y /= 9.f;
-            a.z /= 9.f;
-
-            avg[y * g_w + x] = a;
-        }
-    }
-
-    return avg;
 }
 
 
