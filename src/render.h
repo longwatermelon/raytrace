@@ -31,4 +31,6 @@ void render_set_dim(int x, int y);
 void render_enable_antialiasing();
 void render_set_threads(int threads);
 
+void render_free_objects();
+
 #endif

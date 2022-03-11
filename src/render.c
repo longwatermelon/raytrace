@@ -270,3 +270,18 @@ void render_set_threads(int threads)
 {
     g_nthreads = threads;
 }
+
+void render_free_objects()
+{
+    for (size_t i = 0; i < g_nspheres; ++i)
+        sphere_free(g_spheres[i]);
+
+    free(g_spheres);
+
+    for (size_t i = 0; i < g_nmeshes; ++i)
+        mesh_free(g_meshes[i]);
+
+    free(g_meshes);
+
+    free(g_lights);
+}
