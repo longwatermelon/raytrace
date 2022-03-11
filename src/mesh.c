@@ -76,6 +76,20 @@ void mesh_read(struct Mesh *m, const char *fp)
         }
         else if (line[0] == 'f')
         {
+            int ws = 0;
+
+            for (int i = 0; i < strlen(line); ++i)
+            {
+                if (line[i] == ' ')
+                    ++ws;
+            }
+
+            if (ws != 3)
+            {
+                fprintf(stderr, "Error in file '%s': faces must be triangulated.\n", fp);
+                exit(EXIT_FAILURE);
+            }
+
             m->tris = realloc(m->tris, sizeof(Triangle) * ++m->ntris);
 
             int idx[3];
