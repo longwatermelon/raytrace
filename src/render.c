@@ -52,6 +52,15 @@ void render_rend()
     render_print_progress();
 
     printf("\n");
+    
+    if (g_antialiasing)
+    {
+        printf("Applying antialiasing\n");
+        Vec3f *avg = render_apply_antialiasing(frame);
+        free(frame);
+        frame = avg;
+    }
+
     printf("Writing to file\n");
 
     FILE *fp = fopen("out.ppm", "w");
@@ -105,31 +114,7 @@ void *render_cast_rays(void *arg)
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            Vec3f c = { 0.f, 0.f, 0.f };
-
-            if (g_antialiasing)
-            {
-                for (float y = -1.f; y <= 1.f; ++y)
-                {
-                    for (float x = -1.f; x <= 1.f; ++x)
-                    {
-                        float dx = 5.f * g_w;
-                        float dy = 5.f * g_h;
-                        Vec3f ndir = vec_normalize(vec_addv(dir, (Vec3f){ x / dx, y / dy, 0.f }));
-                        c = vec_addv(c, render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, ndir));
-                    }
-                }
-
-                c.x /= 9.f;
-                c.y /= 9.f;
-                c.z /= 9.f;
-            }
-            else
-            {
-                c = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
-            }
-
-            args->frame[y * g_w + x] = c;
+            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
         }
 
         ++g_rows_rendered;
@@ -210,6 +195,44 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
     }
 
     return nearest < 1000.f;
+}
+
+
+Vec3f *render_apply_antialiasing(Vec3f *frame)
+{
+    size_t size = sizeof(Vec3f) * (g_w * g_h);
+    Vec3f *avg = malloc(size);
+    memcpy(avg, frame, size);
+
+    for (int y = 0; y < g_h; ++y)
+    {
+        for (int x = 0; x < g_w; ++x)
+        {
+            avg[y * g_w + x] = render_smoothen(frame, x, y);
+        }
+    }
+
+    return avg;
+}
+
+
+Vec3f render_smoothen(Vec3f *frame, int cx, int cy)
+{
+    Vec3f avg = { 0.f, 0.f, 0.f };
+
+    float c = 1.f / 45.f;
+    for (int y = -1; y <= 1; y += 2)
+        for (int x = -1; x <= 1; x += 2)
+            avg = vec_addv(avg, vec_mulf(frame[(cy + y) * g_w + (cx + x)], c));
+
+    c = 4.f / 45.f;
+    avg = vec_addv(avg, vec_mulf(frame[(cy - 1) * g_w + cx], c));
+    avg = vec_addv(avg, vec_mulf(frame[cy * g_w + (cx + 1)], c));
+    avg = vec_addv(avg, vec_mulf(frame[cy * g_w + (cx - 1)], c));
+    avg = vec_addv(avg, vec_mulf(frame[(cy + 1) * g_w + cx], c));
+
+    avg = vec_addv(avg, vec_mulf(frame[cy * g_w + cx], 5.f / 9.f));
+    return avg;
 }
 
 

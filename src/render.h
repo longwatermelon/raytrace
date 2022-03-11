@@ -20,6 +20,9 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir);
 // optimize_meshes: don't calculate meshes that aren't within range when true
 bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, Vec3f *col);
 
+Vec3f *render_apply_antialiasing(Vec3f *frame);
+Vec3f render_smoothen(Vec3f *frame, int cx, int cy);
+
 void render_set_spheres(struct Sphere **spheres, size_t nspheres);
 void render_set_lights(Light *lights, size_t nlights);
 void render_set_meshes(struct Mesh **meshes, size_t nmeshes);
