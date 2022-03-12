@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic
-LIBS=-lm
+CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic -O3 -Ofast
+LIBS=-lm -lpthread
 
 SRC=$(wildcard src/*.c)
 OBJS=$(notdir $(SRC:.c=.o))
