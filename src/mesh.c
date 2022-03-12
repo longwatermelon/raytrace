@@ -94,7 +94,7 @@ void mesh_read(struct Mesh *m, const char *fp)
 
             int idx[3];
             int norm;
-            sscanf(line, "%*s %d%*c%*d%*c%d %d%*s %d%*s", idx, &norm, idx + 1, idx + 2);
+            sscanf(line, "%*s %d/%*d/%d %d%*s %d%*s", idx, &norm, idx + 1, idx + 2);
 
             m->tris[m->ntris - 1].idx[0] = idx[0] - 1;
             m->tris[m->ntris - 1].idx[1] = idx[1] - 1;
