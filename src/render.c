@@ -45,6 +45,9 @@ void render_rend()
         sleep(2);
     }
 
+    for (size_t i = 0; i < g_nthreads; ++i)
+        pthread_join(threads[i], 0);
+
     render_print_progress();
 
     printf("\n");
@@ -203,9 +206,9 @@ Vec3f *render_apply_antialiasing(Vec3f *frame)
     Vec3f *avg = malloc(size);
     memcpy(avg, frame, size);
 
-    for (int y = 0; y < g_h; ++y)
+    for (int y = 1; y < g_h - 1; ++y)
     {
-        for (int x = 0; x < g_w; ++x)
+        for (int x = 1; x < g_w - 1; ++x)
         {
             avg[y * g_w + x] = render_smoothen(frame, x, y);
         }
