@@ -170,13 +170,6 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
 
 void mesh_find_bounds(struct Mesh *m, Vec3f ro)
 {
-    // Vec3f l = { INFINITY, 0.f, 0.f };
-    // int lx = INFINITY;
-
-    // Vec3f r = { -INFINITY, 0.f, 0.f };
-    // Vec3f t = { 0.f, INFINITY, 0.f };
-    // Vec3f b = { 0.f, -INFINITY, 0.f };
-
     Vec3f l, r, t, b;
     float lx = INFINITY;
     float rx = -INFINITY;
@@ -213,23 +206,8 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
         }
     }
 
-    if (t.z < ro.z)
-        m->top_ry = -1.f;
-    else
-        m->top_ry = vec_normalize(vec_sub(t, ro)).y;
-
-    if (b.z < ro.z)
-        m->bot_ry = 1.f;
-    else
-        m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
-
-    if (l.z < ro.z)
-        m->left_rx = -1.f;
-    else
-        m->left_rx = vec_normalize(vec_sub(l, ro)).x;
-
-    if (r.z < ro.z)
-        m->right_rx = 1.f;
-    else
-        m->right_rx = vec_normalize(vec_sub(r, ro)).x;
+    m->top_ry = vec_normalize(vec_sub(t, ro)).y;
+    m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
+    m->left_rx = vec_normalize(vec_sub(l, ro)).x;
+    m->right_rx = vec_normalize(vec_sub(r, ro)).x;
 }
