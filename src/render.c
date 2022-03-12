@@ -29,16 +29,14 @@ void render_rend()
     printf("Casting rays\n");
 
     pthread_t threads[g_nthreads];
+    render_cast_rays_args args[g_nthreads];
 
     render_print_config();
 
     for (int i = 0; i < g_nthreads; ++i)
     {
-        render_cast_rays_args *args = malloc(sizeof(render_cast_rays_args));
-        args->frame = frame;
-        args->y = i;
-        args->step = g_nthreads;
-        pthread_create(&threads[i], 0, render_cast_rays, (void*)args);
+        args[i] = (render_cast_rays_args){ .frame = frame, .y = i, .step = g_nthreads };
+        pthread_create(&threads[i], 0, render_cast_rays, (void*)&args[i]);
     }
 
     while (g_threads_finished < g_nthreads)
