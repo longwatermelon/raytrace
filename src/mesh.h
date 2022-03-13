@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include "vector.h"
+#include "util.h"
 #include <stdbool.h>
 #include <sys/types.h>
 #include <SDL2/SDL.h>
@@ -25,13 +26,13 @@ struct Mesh
     Vec3f *norms;
     size_t nnorms;
 
-    Vec3f col;
+    Material mat;
 
     // optimization
     float left_rx, right_rx, top_ry, bot_ry; // normalized ray x and y components pointing to farthest left, right, top, and bottom points
 };
 
-struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Vec3f col);
+struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Material mat);
 void mesh_free(struct Mesh *m);
 
 void mesh_read(struct Mesh *m, const char *fp);

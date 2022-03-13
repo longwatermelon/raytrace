@@ -3,13 +3,13 @@
 #include <stdlib.h>
 
 
-struct Sphere *sphere_alloc(Vec3f c, float r, Vec3f col)
+struct Sphere *sphere_alloc(Vec3f c, float r, Material mat)
 {
     struct Sphere *s = malloc(sizeof(struct Sphere));
     s->c = c;
     s->r = r;
 
-    s->col = col;
+    s->mat = mat;
 
     return s;
 }

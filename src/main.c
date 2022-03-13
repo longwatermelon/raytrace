@@ -27,6 +27,9 @@ void configure(const char *fp)
     Light *lights = 0;
     size_t nlights = 0;
 
+    Material *materials = 0;
+    size_t nmaterials = 0;
+
     while ((read = getline(&line, &len, f)) != -1)
     {
         if (read == 1)
@@ -43,14 +46,15 @@ void configure(const char *fp)
         }
         else if (strcmp(word, "sphere") == 0)
         {
-            Vec3f pos, col;
+            Vec3f pos;
             float radius;
+            int mat_idx;
 
-            sscanf(line, "%*s %f %f %f|%f %f %f|%f\n", &pos.x, &pos.y, &pos.z,
-                    &col.x, &col.y, &col.z, &radius);
+            sscanf(line, "%*s %f %f %f|%d|%f\n", &pos.x, &pos.y, &pos.z,
+                    &mat_idx, &radius);
 
             spheres = realloc(spheres, sizeof(struct Sphere*) * ++nspheres);
-            spheres[nspheres - 1] = sphere_alloc(pos, radius, col);
+            spheres[nspheres - 1] = sphere_alloc(pos, radius, materials[mat_idx]);
         }
         else if (strcmp(word, "light") == 0)
         {
@@ -64,15 +68,16 @@ void configure(const char *fp)
         }
         else if (strcmp(word, "mesh") == 0)
         {
-            Vec3f pos, col;
+            Vec3f pos;
             char fp[PATH_MAX];
             int fullscreen_bounds;
+            int mat_idx;
 
-            sscanf(line, "%*s %f %f %f|%f %f %f|%s %d", &pos.x, &pos.y, &pos.z,
-                    &col.x, &col.y, &col.z, fp, &fullscreen_bounds);
+            sscanf(line, "%*s %f %f %f|%d|%s %d", &pos.x, &pos.y, &pos.z,
+                    &mat_idx, fp, &fullscreen_bounds);
 
             meshes = realloc(meshes, sizeof(struct Mesh*) * ++nmeshes);
-            meshes[nmeshes - 1] = mesh_alloc(pos, fp, col);
+            meshes[nmeshes - 1] = mesh_alloc(pos, fp, materials[mat_idx]);
 
             if (fullscreen_bounds)
             {
@@ -83,6 +88,14 @@ void configure(const char *fp)
                 m->bot_ry = 1.f;
                 m->top_ry = -1.f;
             }
+        }
+        else if (strcmp(word, "material") == 0)
+        {
+            Material mat;
+            sscanf(line, "%*s %f %f %f|%f", &mat.col.x, &mat.col.y, &mat.col.z, &mat.specular_exp);
+
+            materials = realloc(materials, sizeof(Material) * ++nmaterials);
+            materials[nmaterials - 1] = mat;
         }
         else if (strcmp(word, "threads") == 0)
         {

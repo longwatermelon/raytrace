@@ -2,6 +2,7 @@
 #define SPHERE_H
 
 #include "vector.h"
+#include "util.h"
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
@@ -10,10 +11,10 @@ struct Sphere
     Vec3f c; // center
     float r; // radius
 
-    Vec3f col;
+    Material mat;
 };
 
-struct Sphere *sphere_alloc(Vec3f c, float r, Vec3f col);
+struct Sphere *sphere_alloc(Vec3f c, float r, Material mat);
 void sphere_free(struct Sphere *s);
 
 // ro: ray origin

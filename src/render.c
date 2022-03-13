@@ -129,9 +129,10 @@ void *render_cast_rays(void *arg)
 
 Vec3f render_cast_ray(Vec3f o, Vec3f dir)
 {
-    Vec3f hit, norm, col;
+    Vec3f hit, norm;
+    Material mat;
 
-    if (!render_scene_cast_ray(o, dir, true, &hit, &norm, &col))
+    if (!render_scene_cast_ray(o, dir, true, &hit, &norm, &mat))
         return (Vec3f){ .5f, .5f, .9f };
 
     float dlight = 0.f;
@@ -143,8 +144,9 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
         Vec3f sdir = vec_normalize(vec_sub(g_lights[i].pos, orig));
         
-        Vec3f shadow_hit, shadow_norm, shadow_col;
-        if (render_scene_cast_ray(orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_col))
+        Vec3f shadow_hit, shadow_norm;
+        Material shadow_mat;
+        if (render_scene_cast_ray(orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_mat))
             continue;
 
         // diffuse
@@ -153,14 +155,14 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
 
         // specular
         Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_mulv(l, norm)));
-        slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), 50.f);
+        slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), mat.specular_exp);
     }
 
-    return vec_addf(vec_mulf(col, dlight), slight);
+    return vec_addf(vec_mulf(mat.col, dlight), slight);
 }
 
 
-bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, Vec3f *col)
+bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, Material *mat)
 {
     float nearest = INFINITY;
 
@@ -173,7 +175,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
             *n = vec_normalize(vec_sub(*hit, g_spheres[i]->c));
-            *col = g_spheres[i]->col;
+            *mat = g_spheres[i]->mat;
         }
     }
 
@@ -192,7 +194,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
             *n = g_meshes[i]->norms[tri.nidx];
-            *col = g_meshes[i]->col;
+            *mat = g_meshes[i]->mat;
         }
     }
 
