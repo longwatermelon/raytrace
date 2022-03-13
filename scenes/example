@@ -1,7 +1,7 @@
 dim 1000 1000
 threads 4
 antialias
-//optimize backface
+optimize backface
 
 // meshes
 material .6 .95 .6|.9 .1|10
