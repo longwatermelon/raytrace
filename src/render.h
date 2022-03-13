@@ -32,7 +32,7 @@ void render_set_bg(Vec3f col);
 void render_enable_antialiasing();
 void render_set_threads(int threads);
 
-void render_enable_optimizations(int flag);
+void render_enable_optimizations(Uint32 flag);
 
 void render_free_objects();
 

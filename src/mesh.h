@@ -39,7 +39,7 @@ void mesh_read(struct Mesh *m, const char *fp);
 
 // ro: ray origin
 // t: nearest intersection
-bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, int opt, float *t, Triangle *tri);
+bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, Uint32 opt, float *t, Triangle *tri);
 bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, float *t);
 
 void mesh_find_bounds(struct Mesh *m, Vec3f ro);

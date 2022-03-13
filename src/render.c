@@ -23,7 +23,7 @@ size_t g_rows_rendered = 0;
 bool g_antialiasing = false;
 size_t g_nthreads = 4;
 
-int g_optimization = 0;
+Uint32 g_optimization = 0;
 
 void render_rend()
 {
@@ -291,7 +291,7 @@ void render_set_threads(int threads)
     g_nthreads = threads;
 }
 
-void render_enable_optimizations(int flag)
+void render_enable_optimizations(Uint32 flag)
 {
     g_optimization |= flag;
 }
