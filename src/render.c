@@ -158,7 +158,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), mat.specular_exp);
     }
 
-    return vec_addf(vec_mulf(mat.col, dlight), slight);
+    return vec_addf(vec_mulf(vec_mulf(mat.col, dlight), mat.ref_diffuse), slight * mat.ref_specular);
 }
 
 

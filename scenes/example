@@ -2,8 +2,8 @@ dim 1000 1000
 threads 4
 antialias
 
-material 1 .95 .7|50
-material .7 1 .7|50
+material 1 .95 .7|.8 .8|50
+material .7 1 .7|.9 .1|200
 
 sphere -3 3 14|0|1
 sphere 2 2 25|0|2
