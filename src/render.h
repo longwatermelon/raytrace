@@ -27,6 +27,7 @@ void render_set_spheres(struct Sphere **spheres, size_t nspheres);
 void render_set_lights(Light *lights, size_t nlights);
 void render_set_meshes(struct Mesh **meshes, size_t nmeshes);
 void render_set_dim(int x, int y);
+void render_set_bg(Vec3f col);
 
 void render_enable_antialiasing();
 void render_set_threads(int threads);

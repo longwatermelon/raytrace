@@ -104,6 +104,12 @@ void configure(const char *fp)
             sscanf(line, "%*s %d", &threads);
             render_set_threads(threads);
         }
+        else if (strcmp(word, "bg") == 0)
+        {
+            Vec3f bg;
+            sscanf(line, "%*s %f %f %f", &bg.x, &bg.y, &bg.z);
+            render_set_bg(bg);
+        }
         else if (strcmp(word, "antialias") == 0)
         {
             render_enable_antialiasing();

@@ -1,0 +1,10 @@
+dim 1000 1000
+threads 4
+antialias
+bg 0 0 0
+
+material .9 .9 .9|1 3|40
+
+mesh 3 -3 8|0|res/dagger.obj 1
+
+light -1 1 5|1

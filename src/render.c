@@ -5,7 +5,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
-int g_w, g_h;
+int g_w = 1000, g_h = 1000;
+Vec3f g_bg = { .6f, .6f, .9f };
 
 struct Sphere **g_spheres = 0;
 size_t g_nspheres = 0;
@@ -133,7 +134,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
     Material mat;
 
     if (!render_scene_cast_ray(o, dir, true, &hit, &norm, &mat))
-        return (Vec3f){ .5f, .5f, .9f };
+        return g_bg;
 
     float dlight = 0.f;
     float slight = 0.f;
@@ -265,6 +266,11 @@ void render_set_dim(int x, int y)
 {
     g_w = x;
     g_h = y;
+}
+
+void render_set_bg(Vec3f col)
+{
+    g_bg = col;
 }
 
 void render_enable_antialiasing()
