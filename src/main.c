@@ -114,9 +114,24 @@ void configure(const char *fp)
         {
             render_enable_antialiasing();
         }
+        else if (strcmp(word, "optimize") == 0)
+        {
+            char next[11] = { 0 };
+            sscanf(line, "%*s %10s", next);
+
+            if (strcmp(next, "backface") == 0) render_enable_optimizations(OPT_BACKFACE_CULLING);
+            else
+            {
+                printf("** WARNING **: Unrecognized optimization '%s'; skipping.\n", next);
+            }
+        }
+        else if (strncmp(word, "//", 2) == 0)
+        {
+            continue;
+        }
         else
         {
-            printf("** WARNING **: Unrecognized directive '%s' in config file '%s'; skipping.\n", word, fp);
+            printf("** WARNING **: Unrecognized directive '%s'; skipping.\n", word);
         }
     }
 

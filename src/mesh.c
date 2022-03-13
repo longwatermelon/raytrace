@@ -109,14 +109,14 @@ void mesh_read(struct Mesh *m, const char *fp)
 }
 
 
-bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, float *t, Triangle *tri)
+bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, int opt, float *t, Triangle *tri)
 {
     float nearest = INFINITY;
     *t = INFINITY;
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
-        if (vec_mulv(rdir, m->norms[m->tris[i].nidx]) > 0.f)
+        if (opt & OPT_BACKFACE_CULLING && vec_mulv(rdir, m->norms[m->tris[i].nidx]) > 0.f)
             continue;
 
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))

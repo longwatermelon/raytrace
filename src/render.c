@@ -23,6 +23,8 @@ size_t g_rows_rendered = 0;
 bool g_antialiasing = false;
 size_t g_nthreads = 4;
 
+int g_optimization = 0;
+
 void render_rend()
 {
     Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
@@ -98,6 +100,12 @@ void render_print_config()
     int rows_per_thread = g_h / g_nthreads;
     printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
     printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
+
+    printf("Optimizations: ");
+    if (g_optimization == 0) printf("none");
+    if (g_optimization & OPT_BACKFACE_CULLING) printf("backface culling");
+    
+    printf("\n");
 }
 
 
@@ -193,7 +201,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
         float dist;
         Triangle tri;
 
-        if (mesh_ray_intersect(g_meshes[i], o, dir, &dist, &tri) && dist < nearest)
+        if (mesh_ray_intersect(g_meshes[i], o, dir, g_optimization, &dist, &tri) && dist < nearest)
         {
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
@@ -281,6 +289,11 @@ void render_enable_antialiasing()
 void render_set_threads(int threads)
 {
     g_nthreads = threads;
+}
+
+void render_enable_optimizations(int flag)
+{
+    g_optimization |= flag;
 }
 
 void render_free_objects()

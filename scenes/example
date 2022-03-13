@@ -1,13 +1,16 @@
 dim 1000 1000
 threads 4
 antialias
+//optimize backface
 
+// meshes
 material .6 .95 .6|.9 .1|10
 material .7 .95 1|1 .6|10
 material .9 .6 .7|1 2|50
 material .6 .7 .9|.9 .05|10
 material .95 .7 .95|1 1|50
 
+// spheres
 material .8 .8 .9|1 .5|70
 material .9 .7 .7|.7 .1|1
 
