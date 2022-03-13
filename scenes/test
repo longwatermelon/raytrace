@@ -4,7 +4,7 @@ antialias
 optimize backface
 bg 0 0 0
 
-material .9 .9 .9|1 3|40
+material .08 .08 .08|1 50|40
 
 mesh 3 -3 8|0|res/dagger.obj 0
 
