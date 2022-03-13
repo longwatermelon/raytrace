@@ -147,7 +147,10 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         Vec3f shadow_hit, shadow_norm;
         Material shadow_mat;
         if (render_scene_cast_ray(orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_mat))
-            continue;
+        {
+            if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(g_lights[i].pos, hit)))
+                continue;
+        }
 
         // diffuse
         Vec3f l = vec_normalize(vec_sub(g_lights[i].pos, hit));
