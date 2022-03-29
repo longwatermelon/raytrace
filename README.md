@@ -9,5 +9,5 @@ Raytracing in C
 git clone https://github.com/longwatermelon/raytrace
 cd raytrace
 make
-./raytrace
+./raytrace [config file (ex. scenes/example)]
 ```
