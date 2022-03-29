@@ -3,3 +3,5 @@
 *.ppm
 *.jpg
 raytrace
+.cache
+compile_commands.json
