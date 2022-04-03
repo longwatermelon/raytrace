@@ -17,7 +17,7 @@ struct Scene
     size_t nlights;
 };
 
-struct Scene *scene_alloc(struct Sphere **spheres, size_t nspheres, struct Mesh **meshes, size_t nmeshes, Light *lights, size_t nlights);
+struct Scene *scene_alloc(const char *fp);
 void scene_free(struct Scene *s);
 
 #endif
