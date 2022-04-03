@@ -17,6 +17,8 @@ size_t g_nmeshes = 0;
 Light *g_lights = 0;
 size_t g_nlights = 0;
 
+int g_max_bounces = 3;
+
 size_t g_threads_finished = 0;
 size_t g_rows_rendered = 0;
 
@@ -175,7 +177,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
 
     Vec3f hcol = vec_addf(vec_mulf(vec_mulf(mat.col, dlight), mat.ref_diffuse), slight * mat.ref_specular);
 
-    if (mat.ref_mirror < 1.f && bounce < 3)
+    if (mat.ref_mirror < 1.f && bounce < g_max_bounces)
     {
         Vec3f col = render_cast_ray(morig, norm, false, bounce + 1);
         hcol = vec_mulf(vec_addv(hcol, vec_mulf(col, .6f)), mat.ref_mirror);
@@ -290,6 +292,11 @@ void render_set_dim(int x, int y)
 void render_set_bg(Vec3f col)
 {
     g_bg = col;
+}
+
+void render_set_max_bounces(int i)
+{
+    g_max_bounces = i;
 }
 
 void render_enable_antialiasing()

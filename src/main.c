@@ -125,6 +125,12 @@ void configure(const char *fp)
                 printf("** WARNING **: Unrecognized optimization '%s'; skipping.\n", next);
             }
         }
+        else if (strcmp(word, "bounces") == 0)
+        {
+            int b;
+            sscanf(line, "%*s %d", &b);
+            render_set_max_bounces(b);
+        }
         else if (strncmp(word, "//", 2) == 0)
         {
             continue;
