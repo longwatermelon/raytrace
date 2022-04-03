@@ -12,8 +12,8 @@ material .6 .7 .9|.9 .05 1|10
 material .95 .7 .95|1 1 1|50
 
 // spheres
-material .8 .8 .9|1 1 .7|70
-material .9 .7 .7|1 1 .7|70
+material .8 .8 .9|1 1 .8|70
+material .9 .7 .7|1 1 .6|70
 
 sphere -3 3 14|5|1
 sphere 2 2 25|6|2
