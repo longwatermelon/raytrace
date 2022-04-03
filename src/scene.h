@@ -15,6 +15,9 @@ struct Scene
 
     Light *lights;
     size_t nlights;
+
+    Material *mats;
+    size_t nmats;
 };
 
 struct Scene *scene_alloc(const char *fp);

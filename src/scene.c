@@ -6,6 +6,8 @@
 
 struct Scene *scene_alloc(const char *fp)
 {
+    struct Scene *s = malloc(sizeof(struct Scene));
+
     FILE *f = fopen(fp, "r");
 
     if (!f)
@@ -17,18 +19,6 @@ struct Scene *scene_alloc(const char *fp)
     char *line = 0;
     size_t len = 0;
     ssize_t read;
-
-    struct Sphere **spheres = 0;
-    size_t nspheres = 0;
-
-    struct Mesh **meshes = 0;
-    size_t nmeshes = 0;
-
-    Light *lights = 0;
-    size_t nlights = 0;
-
-    Material *materials = 0;
-    size_t nmaterials = 0;
 
     while ((read = getline(&line, &len, f)) != -1)
     {
@@ -50,8 +40,8 @@ struct Scene *scene_alloc(const char *fp)
             while (*new != ' ') ++new;
             ++new;
 
-            spheres = realloc(spheres, sizeof(struct Sphere*) * ++nspheres);
-            spheres[nspheres - 1] = scene_parse_sphere(new, materials);
+            s->spheres = realloc(s->spheres, sizeof(struct Sphere*) * ++s->nspheres);
+            s->spheres[s->nspheres - 1] = scene_parse_sphere(new, s->mats);
         }
         else if (strcmp(word, "light") == 0)
         {
@@ -59,8 +49,8 @@ struct Scene *scene_alloc(const char *fp)
             while (*new != ' ') ++new;
             ++new;
 
-            lights = realloc(lights, sizeof(Light) * ++nlights);
-            lights[nlights - 1] = scene_parse_light(new);
+            s->lights = realloc(s->lights, sizeof(Light) * ++s->nlights);
+            s->lights[s->nlights - 1] = scene_parse_light(new);
         }
         else if (strcmp(word, "mesh") == 0)
         {
@@ -68,8 +58,8 @@ struct Scene *scene_alloc(const char *fp)
             while (*new != ' ') ++new;
             ++new;
 
-            meshes = realloc(meshes, sizeof(struct Mesh*) * ++nmeshes);
-            meshes[nmeshes - 1] = scene_parse_mesh(new, materials);
+            s->meshes = realloc(s->meshes, sizeof(struct Mesh*) * ++s->nmeshes);
+            s->meshes[s->nmeshes - 1] = scene_parse_mesh(new, s->mats);
         }
         else if (strcmp(word, "material") == 0)
         {
@@ -77,8 +67,8 @@ struct Scene *scene_alloc(const char *fp)
             sscanf(line, "%*s %f %f %f|%f %f %f|%f", &mat.col.x, &mat.col.y, &mat.col.z,
                     &mat.ref_diffuse, &mat.ref_specular, &mat.ref_mirror, &mat.specular_exp);
 
-            materials = realloc(materials, sizeof(Material) * ++nmaterials);
-            materials[nmaterials - 1] = mat;
+            s->mats = realloc(s->mats, sizeof(Material) * ++s->nmats);
+            s->mats[s->nmats - 1] = mat;
         }
         else if (strcmp(word, "threads") == 0)
         {
@@ -125,16 +115,6 @@ struct Scene *scene_alloc(const char *fp)
 
     free(line);
     fclose(f);
-
-    struct Scene *s = malloc(sizeof(struct Scene));
-    s->spheres = spheres;
-    s->nspheres = nspheres;
-
-    s->meshes = meshes;
-    s->nmeshes = nmeshes;
-
-    s->lights = lights;
-    s->nlights = nlights;
 
     return s;
 }
