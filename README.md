@@ -13,9 +13,14 @@ make
 
 `raytrace [config file]` to raytrace an image or a video. At the top of the file, write either `image` to raytrace an image or `video` to raytrace a video.
 
-`raytrace scenes/example`
-![0](https://user-images.githubusercontent.com/73869536/161447563-5e709170-2e8b-455d-ba01-c111c4a63a0a.png)
+<details>
+  <summary>raytrace scenes/example</summary>
+  
+  ![out](https://user-images.githubusercontent.com/73869536/161448017-22c53765-7434-49ce-8ec1-6cf895b511ed.png)
+  </details>
 
-`raytrace videos/example`
+<details>
+  <summary>raytrace videos/example</summary>
 
-![out](https://user-images.githubusercontent.com/73869536/161447504-6ed30bd3-0403-4713-b942-4f7677755b63.gif)
+  https://user-images.githubusercontent.com/73869536/161447827-64ac6f14-a522-49a6-a790-7de40a81ab84.mp4
+  </details>
