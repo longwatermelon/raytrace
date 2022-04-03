@@ -8,14 +8,7 @@
 int g_w = 1000, g_h = 1000;
 Vec3f g_bg = { .6f, .6f, .9f };
 
-struct Sphere **g_spheres = 0;
-size_t g_nspheres = 0;
-
-struct Mesh **g_meshes = 0;
-size_t g_nmeshes = 0;
-
-Light *g_lights = 0;
-size_t g_nlights = 0;
+struct Scene *g_scene = 0;
 
 int g_max_bounces = 3;
 
@@ -26,6 +19,34 @@ bool g_antialiasing = false;
 size_t g_nthreads = 4;
 
 Uint32 g_optimization = 0;
+
+struct Scene *scene_alloc(struct Sphere **spheres, size_t nspheres, struct Mesh **meshes, size_t nmeshes, Light *lights, size_t nlights)
+{
+    struct Scene *s = malloc(sizeof(struct Scene));
+    s->spheres = spheres;
+    s->nspheres = nspheres;
+
+    s->meshes = meshes;
+    s->nmeshes = nmeshes;
+
+    s->lights = lights;
+    s->nlights = nlights;
+
+    return s;
+}
+
+void scene_free(struct Scene *s)
+{
+    for (size_t i = 0; i < s->nspheres; ++i)
+        sphere_free(s->spheres[i]);
+
+    for (size_t i = 0; i < s->nmeshes; ++i)
+        mesh_free(s->meshes[i]);
+
+    free(s->lights);
+    free(s);
+}
+
 
 void render_rend()
 {
@@ -97,7 +118,7 @@ void render_print_progress()
 void render_print_config()
 {
     printf("Output image dimensions: %dx%d\n", g_w, g_h);
-    printf("%lu spheres, %lu meshes, %lu lights\n", g_nspheres, g_nmeshes, g_nlights);
+    printf("%lu spheres, %lu meshes, %lu lights\n", g_scene->nspheres, g_scene->nmeshes, g_scene->nlights);
 
     int rows_per_thread = g_h / g_nthreads;
     printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
@@ -149,23 +170,23 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
     float dlight = 0.f;
     float slight = 0.f;
 
-    for (size_t i = 0; i < g_nlights; ++i)
+    for (size_t i = 0; i < g_scene->nlights; ++i)
     {
         // shadow
         Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
-        Vec3f sdir = vec_normalize(vec_sub(g_lights[i].pos, orig));
+        Vec3f sdir = vec_normalize(vec_sub(g_scene->lights[i].pos, orig));
         
         Vec3f shadow_hit, shadow_norm;
         Material shadow_mat;
         if (render_scene_cast_ray(orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_mat))
         {
-            if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(g_lights[i].pos, hit)))
+            if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(g_scene->lights[i].pos, hit)))
                 continue;
         }
 
         // diffuse
-        Vec3f l = vec_normalize(vec_sub(g_lights[i].pos, hit));
-        dlight += g_lights[i].in * fmax(0.f, vec_dot(l, norm));
+        Vec3f l = vec_normalize(vec_sub(g_scene->lights[i].pos, hit));
+        dlight += g_scene->lights[i].in * fmax(0.f, vec_dot(l, norm));
 
         // specular
         Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_dot(l, norm)));
@@ -191,35 +212,35 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
 {
     float nearest = INFINITY;
 
-    for (size_t i = 0; i < g_nspheres; ++i)
+    for (size_t i = 0; i < g_scene->nspheres; ++i)
     {
         float dist;
 
-        if (sphere_ray_intersect(g_spheres[i], o, dir, &dist) && dist < nearest)
+        if (sphere_ray_intersect(g_scene->spheres[i], o, dir, &dist) && dist < nearest)
         {
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
-            *n = vec_normalize(vec_sub(*hit, g_spheres[i]->c));
-            *mat = g_spheres[i]->mat;
+            *n = vec_normalize(vec_sub(*hit, g_scene->spheres[i]->c));
+            *mat = g_scene->spheres[i]->mat;
         }
     }
 
-    for (size_t i = 0; i < g_nmeshes; ++i)
+    for (size_t i = 0; i < g_scene->nmeshes; ++i)
     {
         if (optimize_meshes &&
-            (dir.y < g_meshes[i]->top_ry || dir.y > g_meshes[i]->bot_ry ||
-            dir.x < g_meshes[i]->left_rx || dir.x > g_meshes[i]->right_rx))
+            (dir.y < g_scene->meshes[i]->top_ry || dir.y > g_scene->meshes[i]->bot_ry ||
+            dir.x < g_scene->meshes[i]->left_rx || dir.x > g_scene->meshes[i]->right_rx))
             continue;
 
         float dist;
         Triangle tri;
 
-        if (mesh_ray_intersect(g_meshes[i], o, dir, g_optimization, &dist, &tri) && dist < nearest)
+        if (mesh_ray_intersect(g_scene->meshes[i], o, dir, g_optimization, &dist, &tri) && dist < nearest)
         {
             nearest = dist;
             *hit = vec_addv(o, vec_mulf(dir, dist));
-            *n = g_meshes[i]->norms[tri.nidx];
-            *mat = g_meshes[i]->mat;
+            *n = g_scene->meshes[i]->norms[tri.nidx];
+            *mat = g_scene->meshes[i]->mat;
         }
     }
 
@@ -264,23 +285,9 @@ Vec3f render_smoothen(Vec3f *frame, int cx, int cy)
     return avg;
 }
 
-
-void render_set_spheres(struct Sphere **spheres, size_t nspheres)
+void render_set_scene(struct Scene *s)
 {
-    g_spheres = spheres;
-    g_nspheres = nspheres;
-}
-
-void render_set_lights(Light *lights, size_t nlights)
-{
-    g_lights = lights;
-    g_nlights = nlights;
-}
-
-void render_set_meshes(struct Mesh **meshes, size_t nmeshes)
-{
-    g_meshes = meshes;
-    g_nmeshes = nmeshes;
+    g_scene = s;
 }
 
 void render_set_dim(int x, int y)
@@ -314,17 +321,3 @@ void render_enable_optimizations(Uint32 flag)
     g_optimization |= flag;
 }
 
-void render_free_objects()
-{
-    for (size_t i = 0; i < g_nspheres; ++i)
-        sphere_free(g_spheres[i]);
-
-    free(g_spheres);
-
-    for (size_t i = 0; i < g_nmeshes; ++i)
-        mesh_free(g_meshes[i]);
-
-    free(g_meshes);
-
-    free(g_lights);
-}

@@ -4,7 +4,7 @@
 #include <math.h>
 #include <linux/limits.h>
 
-void configure(const char *fp)
+struct Scene *configure(const char *fp)
 {
     FILE *f = fopen(fp, "r");
 
@@ -141,12 +141,14 @@ void configure(const char *fp)
         }
     }
 
-    render_set_spheres(spheres, nspheres);
-    render_set_lights(lights, nlights);
-    render_set_meshes(meshes, nmeshes);
-
     free(line);
     fclose(f);
+
+    return scene_alloc(
+        spheres, nspheres,
+        meshes, nmeshes,
+        lights, nlights
+    );
 }
 
 int main(int argc, char **argv)
@@ -157,10 +159,10 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    configure(argv[1]);
-
+    struct Scene *scene = configure(argv[1]);
+    render_set_scene(scene);
     render_rend();
-    render_free_objects();
+    scene_free(scene);
 
     return 0;
 }

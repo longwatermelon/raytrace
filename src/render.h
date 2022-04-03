@@ -9,6 +9,21 @@
 #include <sys/types.h>
 #include <SDL2/SDL.h>
 
+struct Scene
+{
+    struct Sphere **spheres;
+    size_t nspheres;
+
+    struct Mesh **meshes;
+    size_t nmeshes;
+
+    Light *lights;
+    size_t nlights;
+};
+
+struct Scene *scene_alloc(struct Sphere **spheres, size_t nspheres, struct Mesh **meshes, size_t nmeshes, Light *lights, size_t nlights);
+void scene_free(struct Scene *s);
+
 void render_rend();
 void render_print_progress();
 void render_print_config();
@@ -25,9 +40,7 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
 Vec3f *render_apply_antialiasing(Vec3f *frame);
 Vec3f render_smoothen(Vec3f *frame, int cx, int cy);
 
-void render_set_spheres(struct Sphere **spheres, size_t nspheres);
-void render_set_lights(Light *lights, size_t nlights);
-void render_set_meshes(struct Mesh **meshes, size_t nmeshes);
+void render_set_scene(struct Scene *s);
 void render_set_dim(int x, int y);
 void render_set_bg(Vec3f col);
 void render_set_max_bounces(int i);
@@ -37,6 +50,5 @@ void render_set_threads(int threads);
 
 void render_enable_optimizations(Uint32 flag);
 
-void render_free_objects();
-
 #endif
+
