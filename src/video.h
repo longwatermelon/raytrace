@@ -6,7 +6,7 @@
 
 struct VideoEvent
 {
-    enum { VE_SPHERE } type; // object type for casting
+    enum { VE_SPHERE, VE_MESH } type; // object type for casting
     void *obj; // original object
     void *delta; // change
 

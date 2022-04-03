@@ -1,4 +1,5 @@
 #include "video.h"
+#include "mesh.h"
 #include "scene.h"
 #include "render.h"
 #include <string.h>
@@ -97,6 +98,7 @@ void video_load_config(struct Video *v, const char *config)
             switch (vtype)
             {
             case VE_SPHERE: obj = (void*)v->base->spheres[obj_idx]; break;
+            case VE_MESH: obj = (void*)v->base->meshes[obj_idx]; break;
             default: obj = 0; break;
             }
 
@@ -116,6 +118,7 @@ void *video_parse_obj(struct Video *v, char *line, int type)
     switch (type)
     {
     case VE_SPHERE: return (void*)scene_parse_sphere(s, v->base->mats);
+    case VE_MESH: return (void*)scene_parse_mesh(s, v->base->mats);
     }
 
     return 0;
@@ -141,6 +144,8 @@ void video_create(struct Video *v)
         sprintf(cmd, "ffmpeg -i out.ppm frames/%zu.png", i);
         system(cmd);
     }
+
+    system("ffmpeg -i frames/%d.png out.mp4");
 }
 
 
@@ -155,6 +160,14 @@ void video_apply_delta(void *obj, void *delta, int type)
 
         sphere->c = vec_addv(sphere->c, d->c);
         sphere->r += d->r;
+    } break;
+    case VE_MESH:
+    {
+        struct Mesh *m = (struct Mesh*)obj;
+        struct Mesh *d = (struct Mesh*)delta;
+
+        m->pos = vec_addv(m->pos, d->pos);
+        mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, 0.f });
     } break;
     }
 }
