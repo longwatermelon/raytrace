@@ -1,4 +1,5 @@
 #include "scene.h"
+#include "light.h"
 #include "render.h"
 #include "util.h"
 #include <limits.h>
@@ -51,7 +52,7 @@ struct Scene *scene_alloc(const char *fp)
             while (*new != ' ') ++new;
             ++new;
 
-            s->lights = realloc(s->lights, sizeof(Light) * ++s->nlights);
+            s->lights = realloc(s->lights, sizeof(struct Light*) * ++s->nlights);
             s->lights[s->nlights - 1] = scene_parse_light(new);
         }
         else if (strcmp(word, "mesh") == 0)
@@ -65,12 +66,13 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "material") == 0)
         {
-            Material mat;
-            sscanf(line, "%*s %f %f %f|%f %f %f|%f", &mat.col.x, &mat.col.y, &mat.col.z,
-                    &mat.ref_diffuse, &mat.ref_specular, &mat.ref_mirror, &mat.specular_exp);
+            Vec3f col;
+            float rd, rs, rm, se;
+            sscanf(line, "%*s %f %f %f|%f %f %f|%f", &col.x, &col.y, &col.z,
+                    &rd, &rs, &rm, &se);
 
-            s->mats = realloc(s->mats, sizeof(Material) * ++s->nmats);
-            s->mats[s->nmats - 1] = mat;
+            s->mats = realloc(s->mats, sizeof(struct Material*) * ++s->nmats);
+            s->mats[s->nmats - 1] = mat_alloc(col, se, rd, rs, rm);
         }
         else if (strcmp(word, "threads") == 0)
         {
@@ -134,13 +136,22 @@ void scene_free(struct Scene *s)
     for (size_t i = 0; i < s->nmeshes; ++i)
         mesh_free(s->meshes[i]);
 
+    for (size_t i = 0; i < s->nlights; ++i)
+        light_free(s->lights[i]);
+
+    for (size_t i = 0; i < s->nmats; ++i)
+        mat_free(s->mats[i]);
+
     free(s->lights);
     free(s->mats);
+    free(s->spheres);
+    free(s->meshes);
+
     free(s);
 }
 
 
-struct Sphere *scene_parse_sphere(char *s, Material *mats)
+struct Sphere *scene_parse_sphere(char *s, struct Material **mats)
 {
     Vec3f pos;
     float radius;
@@ -153,7 +164,7 @@ struct Sphere *scene_parse_sphere(char *s, Material *mats)
 }
 
 
-struct Mesh *scene_parse_mesh(char *s, Material *mats)
+struct Mesh *scene_parse_mesh(char *s, struct Material **mats)
 {
     Vec3f pos;
     char fp[PATH_MAX];
@@ -177,14 +188,14 @@ struct Mesh *scene_parse_mesh(char *s, Material *mats)
 }
 
 
-Light scene_parse_light(char *s)
+struct Light *scene_parse_light(char *s)
 {
     Vec3f pos;
     float in;
 
     sscanf(s, "%f %f %f|%f", &pos.x, &pos.y, &pos.z, &in);
 
-    Light l = { pos, in };
+    struct Light *l = light_alloc(pos, in);
     return l;
 }
 

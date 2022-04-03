@@ -137,7 +137,7 @@ void *render_cast_rays(void *arg)
 Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
 {
     Vec3f hit, norm;
-    Material mat;
+    struct Material *mat;
 
     if (!render_scene_cast_ray(o, dir, optimize_meshes, &hit, &norm, &mat))
         return g_bg;
@@ -149,41 +149,41 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
     {
         // shadow
         Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
-        Vec3f sdir = vec_normalize(vec_sub(g_scene->lights[i].pos, orig));
+        Vec3f sdir = vec_normalize(vec_sub(g_scene->lights[i]->pos, orig));
         
         Vec3f shadow_hit, shadow_norm;
-        Material shadow_mat;
+        struct Material *shadow_mat;
         if (render_scene_cast_ray(orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_mat))
         {
-            if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(g_scene->lights[i].pos, hit)))
+            if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(g_scene->lights[i]->pos, hit)))
                 continue;
         }
 
         // diffuse
-        Vec3f l = vec_normalize(vec_sub(g_scene->lights[i].pos, hit));
-        dlight += g_scene->lights[i].in * fmax(0.f, vec_dot(l, norm));
+        Vec3f l = vec_normalize(vec_sub(g_scene->lights[i]->pos, hit));
+        dlight += g_scene->lights[i]->in * fmax(0.f, vec_dot(l, norm));
 
         // specular
         Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_dot(l, norm)));
-        slight += powf(fmax(0.f, vec_dot(r, vec_normalize(hit))), mat.specular_exp);
+        slight += powf(fmax(0.f, vec_dot(r, vec_normalize(hit))), mat->specular_exp);
     }
 
     // mirror reflection
     Vec3f morig = vec_addv(hit, vec_divf(norm, 1e3f));
 
-    Vec3f hcol = vec_addf(vec_mulf(vec_mulf(mat.col, dlight), mat.ref_diffuse), slight * mat.ref_specular);
+    Vec3f hcol = vec_addf(vec_mulf(vec_mulf(mat->col, dlight), mat->ref_diffuse), slight * mat->ref_specular);
 
-    if (mat.ref_mirror < 1.f && bounce < g_max_bounces)
+    if (mat->ref_mirror < 1.f && bounce < g_max_bounces)
     {
         Vec3f col = render_cast_ray(morig, norm, false, bounce + 1);
-        hcol = vec_mulf(vec_addv(hcol, vec_mulf(col, .5f)), mat.ref_mirror);
+        hcol = vec_mulf(vec_addv(hcol, vec_mulf(col, .5f)), mat->ref_mirror);
     }
 
     return hcol;
 }
 
 
-bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, Material *mat)
+bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, struct Material **mat)
 {
     float nearest = INFINITY;
 

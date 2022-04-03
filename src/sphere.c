@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 
-struct Sphere *sphere_alloc(Vec3f c, float r, Material mat)
+struct Sphere *sphere_alloc(Vec3f c, float r, struct Material *mat)
 {
     struct Sphere *s = malloc(sizeof(struct Sphere));
     s->c = c;

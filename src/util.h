@@ -4,19 +4,6 @@
 #include "vector.h"
 #include <SDL2/SDL.h>
 
-typedef struct
-{
-    Vec3f pos;
-    float in; // intensity
-} Light;
-
-typedef struct
-{
-    Vec3f col;
-    float specular_exp;
-
-    float ref_diffuse, ref_specular, ref_mirror; // reflectiveness of diffuse, specular, and mirror (0.f - 1.f)
-} Material;
 
 enum
 {

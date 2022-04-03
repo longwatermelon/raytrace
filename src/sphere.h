@@ -11,10 +11,10 @@ struct Sphere
     Vec3f c; // center
     float r; // radius
 
-    Material mat;
+    struct Material *mat;
 };
 
-struct Sphere *sphere_alloc(Vec3f c, float r, Material mat);
+struct Sphere *sphere_alloc(Vec3f c, float r, struct Material *mat);
 void sphere_free(struct Sphere *s);
 
 // ro: ray origin

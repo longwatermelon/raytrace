@@ -6,7 +6,7 @@
 #include <string.h>
 
 
-struct Mesh *mesh_alloc(Vec3f pos, const char *fp, Material mat)
+struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat)
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
     m->pos = pos;

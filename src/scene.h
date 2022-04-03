@@ -13,19 +13,19 @@ struct Scene
     struct Mesh **meshes;
     size_t nmeshes;
 
-    Light *lights;
+    struct Light **lights;
     size_t nlights;
 
-    Material *mats;
+    struct Material **mats;
     size_t nmats;
 };
 
 struct Scene *scene_alloc(const char *fp);
 void scene_free(struct Scene *s);
 
-struct Sphere *scene_parse_sphere(char *s, Material *mats);
-struct Mesh *scene_parse_mesh(char *s, Material *mats);
-Light scene_parse_light(char *s);
+struct Sphere *scene_parse_sphere(char *s, struct Material **mats);
+struct Mesh *scene_parse_mesh(char *s, struct Material **mats);
+struct Light *scene_parse_light(char *s);
 
 #endif
 
