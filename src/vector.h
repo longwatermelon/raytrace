@@ -17,7 +17,7 @@ Vec3f vec_addf(Vec3f v, float f);
 Vec3f vec_sub(Vec3f v1, Vec3f v2);
 Vec3f vec_neg(Vec3f v);
 
-float vec_mulv(Vec3f v1, Vec3f v2);
+float vec_dot(Vec3f v1, Vec3f v2);
 Vec3f vec_mulf(Vec3f v, float f);
 
 Vec3f vec_divf(Vec3f v, float f);

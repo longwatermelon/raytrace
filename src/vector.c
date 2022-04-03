@@ -64,7 +64,7 @@ Vec3f vec_neg(Vec3f v)
 }
 
 
-float vec_mulv(Vec3f v1, Vec3f v2)
+float vec_dot(Vec3f v1, Vec3f v2)
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }

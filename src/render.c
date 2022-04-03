@@ -165,11 +165,11 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
 
         // diffuse
         Vec3f l = vec_normalize(vec_sub(g_lights[i].pos, hit));
-        dlight += g_lights[i].in * fmax(0.f, vec_mulv(l, norm));
+        dlight += g_lights[i].in * fmax(0.f, vec_dot(l, norm));
 
         // specular
-        Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_mulv(l, norm)));
-        slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), mat.specular_exp);
+        Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_dot(l, norm)));
+        slight += powf(fmax(0.f, vec_dot(r, vec_normalize(hit))), mat.specular_exp);
     }
 
     // mirror reflection
@@ -180,7 +180,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
     if (mat.ref_mirror < 1.f && bounce < g_max_bounces)
     {
         Vec3f col = render_cast_ray(morig, norm, false, bounce + 1);
-        hcol = vec_mulf(vec_addv(hcol, vec_mulf(col, .6f)), mat.ref_mirror);
+        hcol = vec_mulf(vec_addv(hcol, vec_mulf(col, .5f)), mat.ref_mirror);
     }
 
     return hcol;

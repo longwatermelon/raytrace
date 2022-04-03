@@ -116,7 +116,7 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, Uint32 opt, float 
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
-        if (opt & OPT_BACKFACE_CULLING && vec_mulv(rdir, m->norms[m->tris[i].nidx]) > 0.f)
+        if (opt & OPT_BACKFACE_CULLING && vec_dot(rdir, m->norms[m->tris[i].nidx]) > 0.f)
             continue;
 
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))
@@ -146,7 +146,7 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
     c = vec_addv(c, m->pos);
 
     Vec3f norm = m->norms[tri.nidx];
-    *t = (vec_mulv(a, norm) - vec_mulv(ro, norm)) / vec_mulv(rdir, norm);
+    *t = (vec_dot(a, norm) - vec_dot(ro, norm)) / vec_dot(rdir, norm);
 
     // check if inside triangle
     Vec3f p = vec_addv(ro, vec_mulf(rdir, *t));
@@ -154,12 +154,12 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
     Vec3f ca = vec_sub(c, a);
     Vec3f ba = vec_sub(b, a);
 
-    float a1 = vec_mulv(ba, ba);
-    float b1 = vec_mulv(ca, ba);
-    float b2 = vec_mulv(ca, ca);
+    float a1 = vec_dot(ba, ba);
+    float b1 = vec_dot(ca, ba);
+    float b2 = vec_dot(ca, ca);
 
-    float c1 = vec_mulv(ba, vec_sub(p, a));
-    float c2 = vec_mulv(ca, vec_sub(p, a));
+    float c1 = vec_dot(ba, vec_sub(p, a));
+    float c2 = vec_dot(ca, vec_sub(p, a));
 
     float y = ((c1 * b1) - (c2 * a1)) / ((b1 * b1) - (a1 * b2));
     float x = (c1 - (b1 * y)) / a1;

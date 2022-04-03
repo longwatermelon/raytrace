@@ -25,9 +25,9 @@ bool sphere_ray_intersect(struct Sphere *s, Vec3f ro, Vec3f rdir, float *t)
 {
     Vec3f co = vec_sub(ro, s->c);
 
-    float a = vec_mulv(rdir, rdir);
-    float b = vec_mulv(co, rdir) * 2.f;
-    float c = vec_mulv(co, co) - s->r * s->r;
+    float a = vec_dot(rdir, rdir);
+    float b = vec_dot(co, rdir) * 2.f;
+    float c = vec_dot(co, co) - s->r * s->r;
 
     float discrim = b * b - 4.f * a * c;
 
