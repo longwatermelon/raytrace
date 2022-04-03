@@ -129,6 +129,8 @@ void video_create(struct Video *v)
 
     for (size_t i = 0; i < v->nframes; ++i)
     {
+        printf("== Frame %zu (%.2f%%) ==\n", i + 1, ((float)(i + 1) / (float)v->nframes) * 100.f);
+
         for (size_t j = 0; j < v->nevents; ++j)
         {
             struct VideoEvent *evt = v->events[j];
@@ -139,11 +141,11 @@ void video_create(struct Video *v)
 
         render_rend();
         char cmd[100] = { 0 };
-        sprintf(cmd, "ffmpeg -i out.ppm frames/%zu.png", i);
+        sprintf(cmd, "ffmpeg -i out.ppm frames/%zu.png &> /dev/null", i);
         system(cmd);
     }
 
-    system("ffmpeg -i frames/%d.png out.mp4");
+    system("ffmpeg -i frames/%d.png out.mp4 &> /dev/null");
 }
 
 

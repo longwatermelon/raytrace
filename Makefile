@@ -12,6 +12,9 @@ all:
 raytrace: $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
+circle: tools/circle.c
+	$(CC) $< -o $@ -lm
+
 obj/src/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
 
