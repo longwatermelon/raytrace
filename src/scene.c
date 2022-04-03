@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "render.h"
+#include "util.h"
 #include <limits.h>
 
 
@@ -45,48 +46,30 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "sphere") == 0)
         {
-            Vec3f pos;
-            float radius;
-            int mat_idx;
-
-            sscanf(line, "%*s %f %f %f|%d|%f\n", &pos.x, &pos.y, &pos.z,
-                    &mat_idx, &radius);
+            char *new = line;
+            while (*new != ' ') ++new;
+            ++new;
 
             spheres = realloc(spheres, sizeof(struct Sphere*) * ++nspheres);
-            spheres[nspheres - 1] = sphere_alloc(pos, radius, materials[mat_idx]);
+            spheres[nspheres - 1] = scene_parse_sphere(new, materials);
         }
         else if (strcmp(word, "light") == 0)
         {
-            Vec3f pos;
-            float in;
-
-            sscanf(line, "%*s %f %f %f|%f", &pos.x, &pos.y, &pos.z, &in);
+            char *new = line;
+            while (*new != ' ') ++new;
+            ++new;
 
             lights = realloc(lights, sizeof(Light) * ++nlights);
-            lights[nlights - 1] = (Light){ pos, in };
+            lights[nlights - 1] = scene_parse_light(new);
         }
         else if (strcmp(word, "mesh") == 0)
         {
-            Vec3f pos;
-            char fp[PATH_MAX];
-            int fullscreen_bounds;
-            int mat_idx;
-
-            sscanf(line, "%*s %f %f %f|%d|%s %d", &pos.x, &pos.y, &pos.z,
-                    &mat_idx, fp, &fullscreen_bounds);
+            char *new = line;
+            while (*new != ' ') ++new;
+            ++new;
 
             meshes = realloc(meshes, sizeof(struct Mesh*) * ++nmeshes);
-            meshes[nmeshes - 1] = mesh_alloc(pos, fp, materials[mat_idx]);
-
-            if (fullscreen_bounds)
-            {
-                struct Mesh *m = meshes[nmeshes - 1];
-
-                m->left_rx = -1.f;
-                m->right_rx = 1.f;
-                m->bot_ry = 1.f;
-                m->top_ry = -1.f;
-            }
+            meshes[nmeshes - 1] = scene_parse_mesh(new, materials);
         }
         else if (strcmp(word, "material") == 0)
         {
@@ -167,5 +150,54 @@ void scene_free(struct Scene *s)
 
     free(s->lights);
     free(s);
+}
+
+
+struct Sphere *scene_parse_sphere(char *s, Material *mats)
+{
+    Vec3f pos;
+    float radius;
+    int mat_idx;
+
+    sscanf(s, "%f %f %f|%d|%f\n", &pos.x, &pos.y, &pos.z,
+        &mat_idx, &radius);
+
+    return sphere_alloc(pos, radius, mats[mat_idx]);
+}
+
+
+struct Mesh *scene_parse_mesh(char *s, Material *mats)
+{
+    Vec3f pos;
+    char fp[PATH_MAX];
+    int fullscreen_bounds;
+    int mat_idx;
+
+    sscanf(s, "%f %f %f|%d|%s %d", &pos.x, &pos.y, &pos.z,
+            &mat_idx, fp, &fullscreen_bounds);
+
+    struct Mesh *m = mesh_alloc(pos, fp, mats[mat_idx]);
+
+    if (fullscreen_bounds)
+    {
+        m->left_rx = -1.f;
+        m->right_rx = 1.f;
+        m->bot_ry = 1.f;
+        m->top_ry = -1.f;
+    }
+
+    return m;
+}
+
+
+Light scene_parse_light(char *s)
+{
+    Vec3f pos;
+    float in;
+
+    sscanf(s, "%f %f %f|%f", &pos.x, &pos.y, &pos.z, &in);
+
+    Light l = { pos, in };
+    return l;
 }
 

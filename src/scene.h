@@ -20,5 +20,9 @@ struct Scene
 struct Scene *scene_alloc(const char *fp);
 void scene_free(struct Scene *s);
 
+struct Sphere *scene_parse_sphere(char *s, Material *mats);
+struct Mesh *scene_parse_mesh(char *s, Material *mats);
+Light scene_parse_light(char *s);
+
 #endif
 
