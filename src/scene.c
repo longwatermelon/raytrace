@@ -7,14 +7,16 @@
 struct Scene *scene_alloc(const char *fp)
 {
     struct Scene *s = malloc(sizeof(struct Scene));
+    s->spheres = 0;
+    s->nspheres = 0;
+    s->mats = 0;
+    s->nmats = 0;
+    s->lights = 0;
+    s->nlights = 0;
+    s->meshes = 0;
+    s->nmeshes = 0;
 
     FILE *f = fopen(fp, "r");
-
-    if (!f)
-    {
-        fprintf(stderr, "Error: file '%s' does not exist.\n", fp);
-        exit(EXIT_FAILURE);
-    }
 
     char *line = 0;
     size_t len = 0;
@@ -104,6 +106,10 @@ struct Scene *scene_alloc(const char *fp)
             render_set_max_bounces(b);
         }
         else if (strncmp(word, "//", 2) == 0)
+        {
+            continue;
+        }
+        else if (strcmp(word, "image") == 0)
         {
             continue;
         }

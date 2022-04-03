@@ -31,6 +31,10 @@ struct Video *video_alloc(const char *config)
 {
     struct Video *v = malloc(sizeof(struct Video));
     v->base = 0;
+    v->events = 0;
+    v->nevents = 0;
+    v->nframes = 0;
+
     video_load_config(v, config);
 
     return v;
@@ -49,12 +53,6 @@ void video_free(struct Video *v)
 void video_load_config(struct Video *v, const char *config)
 {
     FILE *fp = fopen(config, "r");
-
-    if (!fp)
-    {
-        fprintf(stderr, "Error: file '%s' does not exist.\n", config);
-        exit(EXIT_FAILURE);
-    }
 
     char *line = 0;
     size_t len = 0;

@@ -13,18 +13,30 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (argc >= 3 && strcmp(argv[2], "video") == 0)
+    FILE *fp = fopen(argv[1], "r");
+
+    if (!fp)
     {
-        struct Video *v = video_alloc(argv[1]);
-        video_create(v);
-        video_free(v);
+        fprintf(stderr, "ERROR: '%s' does not exist.\n", argv[1]);
+        exit(EXIT_FAILURE);
     }
-    else
+
+    char type[11] = { 0 };
+    fscanf(fp, "%s", type);
+    fclose(fp);
+
+    if (strcmp(type, "image") == 0)
     {
         struct Scene *scene = scene_alloc(argv[1]);
         render_set_scene(scene);
         render_rend();
         scene_free(scene);
+    }
+    else if (strcmp(type, "video") == 0)
+    {
+        struct Video *v = video_alloc(argv[1]);
+        video_create(v);
+        video_free(v);
     }
 
     return 0;
