@@ -1,7 +1,8 @@
-*.o
+.cache
+compile_commands.json
+obj
+raytrace
 *.png
 *.ppm
 *.jpg
-raytrace
-.cache
-compile_commands.json
+

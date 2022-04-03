@@ -22,6 +22,9 @@ Uint32 g_optimization = 0;
 
 void render_rend()
 {
+    g_threads_finished = 0;
+    g_rows_rendered = 0;
+
     Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
 
     printf("Casting rays\n");
