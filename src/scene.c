@@ -129,6 +129,7 @@ void scene_free(struct Scene *s)
         mesh_free(s->meshes[i]);
 
     free(s->lights);
+    free(s->mats);
     free(s);
 }
 
