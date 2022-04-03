@@ -125,7 +125,7 @@ void *render_cast_rays(void *arg)
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir);
+            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir, true, 0);
         }
 
         ++g_rows_rendered;
@@ -136,12 +136,12 @@ void *render_cast_rays(void *arg)
 }
 
 
-Vec3f render_cast_ray(Vec3f o, Vec3f dir)
+Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
 {
     Vec3f hit, norm;
     Material mat;
 
-    if (!render_scene_cast_ray(o, dir, true, &hit, &norm, &mat))
+    if (!render_scene_cast_ray(o, dir, optimize_meshes, &hit, &norm, &mat))
         return g_bg;
 
     float dlight = 0.f;
@@ -170,7 +170,18 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir)
         slight += powf(fmax(0.f, vec_mulv(r, vec_normalize(hit))), mat.specular_exp);
     }
 
-    return vec_addf(vec_mulf(vec_mulf(mat.col, dlight), mat.ref_diffuse), slight * mat.ref_specular);
+    // mirror reflection
+    Vec3f morig = vec_addv(hit, vec_divf(norm, 1e3f));
+
+    Vec3f hcol = vec_addf(vec_mulf(vec_mulf(mat.col, dlight), mat.ref_diffuse), slight * mat.ref_specular);
+
+    if (bounce < 3)
+    {
+        Vec3f col = render_cast_ray(morig, norm, false, bounce + 1);
+        hcol = vec_mulf(vec_addv(hcol, col), mat.ref_mirror);
+    }
+
+    return hcol;
 }
 
 

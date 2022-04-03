@@ -15,7 +15,7 @@ typedef struct
     Vec3f col;
     float specular_exp;
 
-    float ref_diffuse, ref_specular; // reflectiveness of diffuse and specular (0.f - 1.f)
+    float ref_diffuse, ref_specular, ref_mirror; // reflectiveness of diffuse, specular, and mirror (0.f - 1.f)
 } Material;
 
 enum

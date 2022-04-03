@@ -92,8 +92,8 @@ void configure(const char *fp)
         else if (strcmp(word, "material") == 0)
         {
             Material mat;
-            sscanf(line, "%*s %f %f %f|%f %f|%f", &mat.col.x, &mat.col.y, &mat.col.z,
-                    &mat.ref_diffuse, &mat.ref_specular, &mat.specular_exp);
+            sscanf(line, "%*s %f %f %f|%f %f %f|%f", &mat.col.x, &mat.col.y, &mat.col.z,
+                    &mat.ref_diffuse, &mat.ref_specular, &mat.ref_mirror, &mat.specular_exp);
 
             materials = realloc(materials, sizeof(Material) * ++nmaterials);
             materials[nmaterials - 1] = mat;

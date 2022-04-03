@@ -5,6 +5,7 @@
 #include "util.h"
 #include "mesh.h"
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <SDL2/SDL.h>
 
@@ -14,7 +15,8 @@ void render_print_config();
 
 typedef struct { Vec3f *frame; int y; int step; } render_cast_rays_args;
 void *render_cast_rays(void *args);
-Vec3f render_cast_ray(Vec3f o, Vec3f dir);
+// bounce: number of times ray has bounced
+Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce);
 // hit: intersection point
 // n: normal
 // optimize_meshes: don't calculate meshes that aren't within range when true
