@@ -43,7 +43,7 @@ void render_rend()
     while (g_threads_finished < g_nthreads)
     {
         render_print_progress();
-        sleep(2);
+        sleep(1);
     }
 
     for (size_t i = 0; i < g_nthreads; ++i)
