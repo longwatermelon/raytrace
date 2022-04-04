@@ -176,7 +176,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
     if (mat->ref_mirror < 1.f && bounce < g_max_bounces)
     {
         Vec3f col = render_cast_ray(morig, norm, false, bounce + 1);
-        hcol = vec_mulf(vec_addv(hcol, vec_mulf(col, .5f)), mat->ref_mirror);
+        hcol = vec_addv(vec_mulf(hcol, mat->ref_mirror), vec_mulf(col, 1.f - mat->ref_mirror));
     }
 
     return hcol;
