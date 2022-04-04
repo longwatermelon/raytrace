@@ -22,5 +22,5 @@ make
 <details>
   <summary>raytrace videos/example</summary>
 
-  https://user-images.githubusercontent.com/73869536/161447827-64ac6f14-a522-49a6-a790-7de40a81ab84.mp4
+  https://user-images.githubusercontent.com/73869536/161463852-7472bb09-0eb9-4ec3-8278-613be680ceef.mp4
   </details>
