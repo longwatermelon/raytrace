@@ -1,8 +1,8 @@
 # raytrace
 Raytracing in C
 
-4000x3000 render ([scenes/example](https://github.com/longwatermelon/raytrace/blob/master/scenes/example))
-![out](https://user-images.githubusercontent.com/73869536/161411357-33d7449a-2132-4076-9327-7da3f1c8ba93.png)
+4000x4000 render ([scenes/example](https://github.com/longwatermelon/raytrace/blob/master/scenes/example))
+![out](https://user-images.githubusercontent.com/73869536/161472071-2e7adc69-382c-4e79-a805-0c0f3f9fb463.png)
 
 # Building
 ```
