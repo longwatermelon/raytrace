@@ -16,11 +16,11 @@ make
 <details>
   <summary>raytrace scenes/example</summary>
   
-  ![out](https://user-images.githubusercontent.com/73869536/161448017-22c53765-7434-49ce-8ec1-6cf895b511ed.png)
+  ![0](https://user-images.githubusercontent.com/73869536/161469414-7f5bf90e-14ff-4511-8278-a62637603663.png)
   </details>
 
 <details>
   <summary>raytrace videos/example</summary>
 
-  https://user-images.githubusercontent.com/73869536/161463852-7472bb09-0eb9-4ec3-8278-613be680ceef.mp4
+  https://user-images.githubusercontent.com/73869536/161469337-59b1b403-961d-43e5-a5bd-f1fd11295f46.mp4
   </details>
