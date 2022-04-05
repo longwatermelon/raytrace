@@ -7,6 +7,9 @@
 
 struct Scene
 {
+    size_t w, h;
+    Vec3f bg;
+
     struct Sphere **spheres;
     size_t nspheres;
 

@@ -5,9 +5,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-int g_w = 1000, g_h = 1000;
-Vec3f g_bg = { .6f, .6f, .9f };
-
 struct Scene *g_scene = 0;
 
 int g_max_bounces = 3;
@@ -19,7 +16,7 @@ Uint32 g_optimization = 0;
 
 void render_rend()
 {
-    Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
+    Vec3f *frame = malloc(sizeof(Vec3f) * (g_scene->w * g_scene->h));
 
     printf("Casting rays\n");
 
@@ -75,9 +72,9 @@ void render_rend()
     printf("Writing to file\n");
 
     FILE *fp = fopen("out.ppm", "w");
-    fprintf(fp, "P3\n%d %d\n255\n", g_w, g_h);
+    fprintf(fp, "P3\n%zu %zu\n255\n", g_scene->w, g_scene->h);
 
-    for (int i = 0; i < g_w * g_h; ++i)
+    for (int i = 0; i < g_scene->w * g_scene->h; ++i)
     {
         int r = 255.f * fmin(1.f, fmax(0.f, frame[i].x));
         int g = 255.f * fmin(1.f, fmax(0.f, frame[i].y));
@@ -101,17 +98,17 @@ void render_print_progress(size_t *rows_rendered)
         total += rows_rendered[i];
 
     printf("\r%zu rows rendered (%.2f%%)", total,
-            ((float)total / g_h) * 100.f);
+            ((float)total / g_scene->h) * 100.f);
     fflush(stdout);
 }
 
 
 void render_print_config()
 {
-    printf("Output image dimensions: %dx%d\n", g_w, g_h);
+    printf("Output image dimensions: %zux%zu\n", g_scene->w, g_scene->h);
     printf("%lu spheres, %lu meshes, %lu lights\n", g_scene->nspheres, g_scene->nmeshes, g_scene->nlights);
 
-    int rows_per_thread = g_h / g_nthreads;
+    int rows_per_thread = g_scene->h / g_nthreads;
     printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
     printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
 
@@ -128,18 +125,18 @@ void *render_cast_rays(void *arg)
     render_cast_rays_args *args = (render_cast_rays_args*)arg;
     float fov = 1.f;
 
-    for (int y = args->y; y < g_h; y += args->step)
+    for (int y = args->y; y < g_scene->h; y += args->step)
     {
-        for (int x = 0; x < g_w; ++x)
+        for (int x = 0; x < g_scene->w; ++x)
         {
-            float ha = ((float)x / (float)g_w) * fov - (fov / 2.f);
-            float va = ((float)y / (float)g_h) * fov - (fov / 2.f);
+            float ha = ((float)x / (float)g_scene->w) * fov - (fov / 2.f);
+            float va = ((float)y / (float)g_scene->h) * fov - (fov / 2.f);
 
             float px = sinf(ha);
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir, true, 0);
+            args->frame[y * g_scene->w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir, true, 0);
         }
 
         ++*args->rows_rendered;
@@ -156,7 +153,7 @@ Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
     struct Material *mat;
 
     if (!render_scene_cast_ray(o, dir, optimize_meshes, &hit, &norm, &mat))
-        return g_bg;
+        return g_scene->bg;
 
     float dlight = 0.f;
     float slight = 0.f;
@@ -241,15 +238,15 @@ bool render_scene_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit,
 
 Vec3f *render_apply_antialiasing(Vec3f *frame)
 {
-    size_t size = sizeof(Vec3f) * (g_w * g_h);
+    size_t size = sizeof(Vec3f) * (g_scene->w * g_scene->h);
     Vec3f *avg = malloc(size);
     memcpy(avg, frame, size);
 
-    for (int y = 1; y < g_h - 1; ++y)
+    for (int y = 1; y < g_scene->h - 1; ++y)
     {
-        for (int x = 1; x < g_w - 1; ++x)
+        for (int x = 1; x < g_scene->w - 1; ++x)
         {
-            avg[y * g_w + x] = render_smoothen(frame, x, y);
+            avg[y * g_scene->w + x] = render_smoothen(frame, x, y);
         }
     }
 
@@ -264,15 +261,15 @@ Vec3f render_smoothen(Vec3f *frame, int cx, int cy)
     float c = 1.f / 45.f;
     for (int y = -1; y <= 1; y += 2)
         for (int x = -1; x <= 1; x += 2)
-            avg = vec_addv(avg, vec_mulf(frame[(cy + y) * g_w + (cx + x)], c));
+            avg = vec_addv(avg, vec_mulf(frame[(cy + y) * g_scene->w + (cx + x)], c));
 
     c = 4.f / 45.f;
-    avg = vec_addv(avg, vec_mulf(frame[(cy - 1) * g_w + cx], c));
-    avg = vec_addv(avg, vec_mulf(frame[cy * g_w + (cx + 1)], c));
-    avg = vec_addv(avg, vec_mulf(frame[cy * g_w + (cx - 1)], c));
-    avg = vec_addv(avg, vec_mulf(frame[(cy + 1) * g_w + cx], c));
+    avg = vec_addv(avg, vec_mulf(frame[(cy - 1) * g_scene->w + cx], c));
+    avg = vec_addv(avg, vec_mulf(frame[cy * g_scene->w + (cx + 1)], c));
+    avg = vec_addv(avg, vec_mulf(frame[cy * g_scene->w + (cx - 1)], c));
+    avg = vec_addv(avg, vec_mulf(frame[(cy + 1) * g_scene->w + cx], c));
 
-    avg = vec_addv(avg, vec_mulf(frame[cy * g_w + cx], 5.f / 9.f));
+    avg = vec_addv(avg, vec_mulf(frame[cy * g_scene->w + cx], 5.f / 9.f));
     return avg;
 }
 
@@ -283,13 +280,13 @@ void render_set_scene(struct Scene *s)
 
 void render_set_dim(int x, int y)
 {
-    g_w = x;
-    g_h = y;
+    g_scene->w = x;
+    g_scene->h = y;
 }
 
 void render_set_bg(Vec3f col)
 {
-    g_bg = col;
+    g_scene->bg = col;
 }
 
 void render_set_max_bounces(int i)

@@ -17,6 +17,10 @@ struct Scene *scene_alloc(const char *fp)
     s->meshes = 0;
     s->nmeshes = 0;
 
+    s->w = 1000;
+    s->h = 1000;
+    s->bg = (Vec3f){ .6f, .6f, .9f };
+
     FILE *f = fopen(fp, "r");
 
     char *line = 0;
@@ -33,9 +37,7 @@ struct Scene *scene_alloc(const char *fp)
 
         if (strcmp(word, "dim") == 0)
         {
-            int x, y;
-            sscanf(line, "%*s %d %d", &x, &y);
-            render_set_dim(x, y);
+            sscanf(line, "%*s %zu %zu", &s->w, &s->h);
         }
         else if (strcmp(word, "sphere") == 0)
         {
@@ -82,9 +84,7 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "bg") == 0)
         {
-            Vec3f bg;
-            sscanf(line, "%*s %f %f %f", &bg.x, &bg.y, &bg.z);
-            render_set_bg(bg);
+            sscanf(line, "%*s %f %f %f", &s->bg.x, &s->bg.y, &s->bg.z);
         }
         else if (strcmp(word, "antialias") == 0)
         {
