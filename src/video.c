@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 
 struct VideoEvent *ve_alloc(struct Scene *sc, char *s)
@@ -21,6 +22,7 @@ struct VideoEvent *ve_alloc(struct Scene *sc, char *s)
     {
     case VE_SPHERE: ve->obj = (void*)sc->spheres[obj_idx]; break;
     case VE_MESH: ve->obj = (void*)sc->meshes[obj_idx]; break;
+    case VE_LIGHT: ve->obj = (void*)sc->lights[obj_idx]; break;
     default: ve->obj = 0; break;
     }
 
@@ -36,6 +38,7 @@ void ve_free(struct VideoEvent *ve)
     {
     case VE_SPHERE: sphere_free(ve->delta); break;
     case VE_MESH: mesh_free(ve->delta); break;
+    case VE_LIGHT: light_free(ve->delta); break;
     }
 
     free(ve);
@@ -52,6 +55,7 @@ void *ve_parse_obj(struct Scene *sc, char *line, int type)
     {
     case VE_SPHERE: return (void*)scene_parse_sphere(s, sc->mats);
     case VE_MESH: return (void*)scene_parse_mesh(s, sc->mats);
+    case VE_LIGHT: return (void*)scene_parse_light(s);
     }
 
     return 0;
@@ -131,6 +135,9 @@ void video_load_config(struct Video *v, const char *config)
 
 void video_create(struct Video *v)
 {
+    system("rm -rf frames out.mp4");
+    mkdir("frames", 0777);
+
     for (size_t i = 0; i < v->nframes; ++i)
     {
         printf("== Frame %zu (%.2f%%) ==\n", i + 1, ((float)(i + 1) / (float)v->nframes) * 100.f);
@@ -172,6 +179,14 @@ void video_apply_delta(void *obj, void *delta, int type)
 
         m->pos = vec_addv(m->pos, d->pos);
         mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, 0.f });
+    } break;
+    case VE_LIGHT:
+    {
+        struct Light *l = (struct Light*)obj;
+        struct Light *d = (struct Light*)delta;
+
+        l->pos = vec_addv(l->pos, d->pos);
+        l->in += d->in;
     } break;
     }
 }

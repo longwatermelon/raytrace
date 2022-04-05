@@ -4,7 +4,7 @@
 #include "scene.h"
 #include <stdlib.h>
 
-enum { VE_SPHERE, VE_MESH };
+enum { VE_SPHERE, VE_MESH, VE_LIGHT };
 
 struct VideoEvent
 {
