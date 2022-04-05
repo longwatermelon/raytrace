@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     if (strcmp(type, "image") == 0)
         raytrace_image(argv[1], "out.ppm");
     else if (strcmp(type, "video") == 0)
-        raytrace_image(argv[1], "out.mp4");
+        raytrace_video(argv[1], "out.mp4");
 
     return 0;
 }

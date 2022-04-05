@@ -2,20 +2,27 @@
 #include "mesh.h"
 #include "scene.h"
 #include "render.h"
+#include "sphere.h"
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 
 
-struct VideoEvent *ve_alloc(int type, void *obj, void *delta, size_t fbegin, size_t fcount)
+struct VideoEvent *ve_alloc(struct Scene *sc, char *s)
 {
     struct VideoEvent *ve = malloc(sizeof(struct VideoEvent));
-    ve->type = type;
-    ve->obj = obj;
-    ve->delta = delta;
 
-    ve->fbegin = fbegin;
-    ve->fcount = fcount;
+    int obj_idx;
+    sscanf(s, "%*s %d|%zu %zu|%d", &ve->type, &ve->fbegin, &ve->fcount, &obj_idx);
+
+    ve->delta = ve_parse_obj(sc, s, ve->type);
+
+    switch (ve->type)
+    {
+    case VE_SPHERE: ve->obj = (void*)sc->spheres[obj_idx]; break;
+    case VE_MESH: ve->obj = (void*)sc->meshes[obj_idx]; break;
+    default: ve->obj = 0; break;
+    }
 
     return ve;
 }
@@ -23,7 +30,31 @@ struct VideoEvent *ve_alloc(int type, void *obj, void *delta, size_t fbegin, siz
 
 void ve_free(struct VideoEvent *ve)
 {
+    // obj is non-owning, don't free
+
+    switch (ve->type)
+    {
+    case VE_SPHERE: sphere_free(ve->delta); break;
+    case VE_MESH: mesh_free(ve->delta); break;
+    }
+
     free(ve);
+}
+
+
+void *ve_parse_obj(struct Scene *sc, char *line, int type)
+{
+    char *s = line;
+    while (*s != '>') ++s;
+    ++s;
+
+    switch (type)
+    {
+    case VE_SPHERE: return (void*)scene_parse_sphere(s, sc->mats);
+    case VE_MESH: return (void*)scene_parse_mesh(s, sc->mats);
+    }
+
+    return 0;
 }
 
 
@@ -47,6 +78,9 @@ void video_free(struct Video *v)
         ve_free(v->events[i]);
 
     free(v->events);
+    scene_free(v->base);
+
+    free(v);
 }
 
 
@@ -85,41 +119,13 @@ void video_load_config(struct Video *v, const char *config)
                 exit(EXIT_FAILURE);
             }
 
-            int vtype;
-            int obj_idx;
-            size_t fbegin, fcount;
-
-            sscanf(line, "%*s %d|%zu %zu|%d", &vtype, &fbegin, &fcount, &obj_idx);
-            void *delta = video_parse_obj(v, line, vtype);
-
-            void *obj;
-            switch (vtype)
-            {
-            case VE_SPHERE: obj = (void*)v->base->spheres[obj_idx]; break;
-            case VE_MESH: obj = (void*)v->base->meshes[obj_idx]; break;
-            default: obj = 0; break;
-            }
-
             v->events = realloc(v->events, sizeof(struct VideoEvent*) * ++v->nevents);
-            v->events[v->nevents - 1] = ve_alloc(vtype, obj, delta, fbegin, fcount);
+            v->events[v->nevents - 1] = ve_alloc(v->base, line);
         }
     }
-}
 
-
-void *video_parse_obj(struct Video *v, char *line, int type)
-{
-    char *s = line;
-    while (*s != '>') ++s;
-    ++s;
-
-    switch (type)
-    {
-    case VE_SPHERE: return (void*)scene_parse_sphere(s, v->base->mats);
-    case VE_MESH: return (void*)scene_parse_mesh(s, v->base->mats);
-    }
-
-    return 0;
+    free(line);
+    fclose(fp);
 }
 
 
