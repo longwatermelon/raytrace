@@ -7,15 +7,21 @@
 #include <sys/types.h>
 #include <SDL2/SDL.h>
 
-void render_rend(struct Scene *sc);
-void render_print_progress(struct Scene *sc, size_t *rows_rendered);
-void render_print_config(struct Scene *sc);
-
 typedef struct
 {
     struct Scene *sc; Vec3f *frame; int y; int step;
     size_t *rows_rendered; bool *done;
 } render_cast_rays_args;
+
+void render_rend(struct Scene *sc);
+
+Vec3f *render_rend_cast_rays(struct Scene *sc);
+void render_rend_wait_cthreads(render_cast_rays_args **args);
+
+void render_write_to_file(struct Scene *sc, Vec3f *frame, const char *out);
+
+void render_print_progress(struct Scene *sc, size_t rows_rendered);
+void render_print_config(struct Scene *sc);
 
 void *render_cast_rays(void *args);
 // bounce: number of times ray has bounced

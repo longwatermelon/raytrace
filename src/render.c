@@ -14,50 +14,8 @@ Uint32 g_optimization = 0;
 
 void render_rend(struct Scene *sc)
 {
-    Vec3f *frame = malloc(sizeof(Vec3f) * (sc->w * sc->h));
-
     printf("Casting rays\n");
-
-    pthread_t threads[g_nthreads];
-    render_cast_rays_args args[g_nthreads];
-
-    render_print_config(sc);
-
-    size_t rows_rendered[g_nthreads];
-    bool threads_done[g_nthreads];
-
-    for (int i = 0; i < g_nthreads; ++i)
-    {
-        rows_rendered[i] = 0;
-        threads_done[i] = false;
-
-        args[i] = (render_cast_rays_args){ .sc = sc, .frame = frame, .y = i, .step = g_nthreads,
-            .rows_rendered = &rows_rendered[i], &threads_done[i] };
-        pthread_create(&threads[i], 0, render_cast_rays, (void*)&args[i]);
-    }
-
-    while (true)
-    {
-        bool done = true;
-
-        for (size_t i = 0; i < g_nthreads; ++i)
-        {
-            if (!threads_done[i])
-                done = false;
-        }
-
-        render_print_progress(sc, rows_rendered);
-
-        if (done)
-            break;
-
-        sleep(1);
-    }
-
-    for (size_t i = 0; i < g_nthreads; ++i)
-        pthread_join(threads[i], 0);
-
-    printf("\n");
+    Vec3f *frame = render_rend_cast_rays(sc);
     
     if (g_antialiasing)
     {
@@ -69,7 +27,85 @@ void render_rend(struct Scene *sc)
 
     printf("Writing to file\n");
 
-    FILE *fp = fopen("out.ppm", "w");
+    render_write_to_file(sc, frame, "out.ppm");
+
+    printf("Done\n");
+
+    free(frame);
+}
+
+
+Vec3f *render_rend_cast_rays(struct Scene *sc)
+{
+    Vec3f *frame = malloc(sizeof(Vec3f) * (sc->w * sc->h));
+
+    pthread_t threads[g_nthreads];
+    render_cast_rays_args *args[g_nthreads];
+
+    render_print_config(sc);
+
+    size_t rows_rendered[g_nthreads];
+    bool threads_done[g_nthreads];
+
+    for (int i = 0; i < g_nthreads; ++i)
+    {
+        rows_rendered[i] = 0;
+        threads_done[i] = false;
+
+        args[i] = malloc(sizeof(render_cast_rays_args));
+        args[i]->sc = sc;
+        args[i]->frame = frame;
+        args[i]->y = i;
+        args[i]->step = g_nthreads;
+        args[i]->rows_rendered = &rows_rendered[i];
+        args[i]->done = &threads_done[i];
+
+        pthread_create(&threads[i], 0, render_cast_rays, (void*)args[i]);
+    }
+
+    render_rend_wait_cthreads(args);
+
+    for (size_t i = 0; i < g_nthreads; ++i)
+    {
+        pthread_join(threads[i], 0);
+        free(args[i]);
+    }
+
+    printf("\n");
+    return frame;
+}
+
+
+void render_rend_wait_cthreads(render_cast_rays_args **args)
+{
+    struct Scene *sc = args[0]->sc;
+
+    while (true)
+    {
+        bool done = true;
+        size_t rows_rendered = 0;
+
+        for (size_t i = 0; i < g_nthreads; ++i)
+        {
+            if (!*args[i]->done)
+                done = false;
+
+            rows_rendered += *args[i]->rows_rendered;
+        }
+
+        render_print_progress(sc, rows_rendered);
+
+        if (done)
+            break;
+
+        sleep(1);
+    }
+}
+
+
+void render_write_to_file(struct Scene *sc, Vec3f *frame, const char *out)
+{
+    FILE *fp = fopen(out, "w");
     fprintf(fp, "P3\n%zu %zu\n255\n", sc->w, sc->h);
 
     for (int i = 0; i < sc->w * sc->h; ++i)
@@ -82,21 +118,13 @@ void render_rend(struct Scene *sc)
     }
 
     fclose(fp);
-    printf("Done\n");
-
-    free(frame);
 }
 
 
-void render_print_progress(struct Scene *sc, size_t *rows_rendered)
+void render_print_progress(struct Scene *sc, size_t rows_rendered)
 {
-    size_t total = 0;
-
-    for (size_t i = 0; i < g_nthreads; ++i)
-        total += rows_rendered[i];
-
-    printf("\r%zu rows rendered (%.2f%%)", total,
-            ((float)total / sc->h) * 100.f);
+    printf("\r%zu rows rendered (%.2f%%)", rows_rendered,
+            ((float)rows_rendered / sc->h) * 100.f);
     fflush(stdout);
 }
 
