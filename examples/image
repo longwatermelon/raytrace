@@ -1,5 +1,5 @@
 image
-dim 50 50
+dim 1000 1000
 threads 4
 antialias
 optimize backface
