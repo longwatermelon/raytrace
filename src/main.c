@@ -28,8 +28,7 @@ int main(int argc, char **argv)
     if (strcmp(type, "image") == 0)
     {
         struct Scene *scene = scene_alloc(argv[1]);
-        render_set_scene(scene);
-        render_rend();
+        render_rend(scene);
         scene_free(scene);
     }
     else if (strcmp(type, "video") == 0)

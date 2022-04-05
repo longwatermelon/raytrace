@@ -125,8 +125,6 @@ void *video_parse_obj(struct Video *v, char *line, int type)
 
 void video_create(struct Video *v)
 {
-    render_set_scene(v->base);
-
     for (size_t i = 0; i < v->nframes; ++i)
     {
         printf("== Frame %zu (%.2f%%) ==\n", i + 1, ((float)(i + 1) / (float)v->nframes) * 100.f);
@@ -139,7 +137,7 @@ void video_create(struct Video *v)
                 video_apply_delta(evt->obj, evt->delta, evt->type);
         }
 
-        render_rend();
+        render_rend(v->base);
         char cmd[100] = { 0 };
         sprintf(cmd, "ffmpeg -i out.ppm frames/%zu.png &> /dev/null", i);
         system(cmd);
