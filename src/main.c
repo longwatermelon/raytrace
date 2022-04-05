@@ -23,8 +23,6 @@ int main(int argc, char **argv)
     fscanf(fp, "%s", type);
     fclose(fp);
 
-    raytrace_loglevel(LOG_VERBOSE);
-
     if (strcmp(type, "image") == 0)
         raytrace_image(argv[1], "out.ppm");
     else if (strcmp(type, "video") == 0)

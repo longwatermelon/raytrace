@@ -140,7 +140,7 @@ void video_create(struct Video *v)
 
     for (size_t i = 0; i < v->nframes; ++i)
     {
-        printf("== Frame %zu (%.2f%%) ==\n", i + 1, ((float)(i + 1) / (float)v->nframes) * 100.f);
+        LOG(LOG_NORMAL, "== Frame %zu (%.2f%%) ==\n", i + 1, ((float)(i + 1) / (float)v->nframes) * 100.f);
 
         for (size_t j = 0; j < v->nevents; ++j)
         {
