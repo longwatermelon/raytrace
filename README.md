@@ -6,6 +6,7 @@ Raytracing in C
 
 # Runtime dependencies
 * [ffmpeg](https://ffmpeg.org/)
+* [rm](https://linux.die.net/man/1/rm)
 
 # Building
 ```
