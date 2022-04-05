@@ -11,7 +11,7 @@ void render_rend();
 void render_print_progress(size_t *rows_rendered);
 void render_print_config();
 
-typedef struct { Vec3f *frame; int y; int step; size_t *rows_rendered; } render_cast_rays_args;
+typedef struct { Vec3f *frame; int y; int step; size_t *rows_rendered; bool *done; } render_cast_rays_args;
 void *render_cast_rays(void *args);
 // bounce: number of times ray has bounced
 Vec3f render_cast_ray(Vec3f o, Vec3f dir, bool optimize_meshes, int bounce);

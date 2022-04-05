@@ -12,8 +12,6 @@ struct Scene *g_scene = 0;
 
 int g_max_bounces = 3;
 
-size_t g_threads_finished = 0;
-
 bool g_antialiasing = false;
 size_t g_nthreads = 4;
 
@@ -21,8 +19,6 @@ Uint32 g_optimization = 0;
 
 void render_rend()
 {
-    g_threads_finished = 0;
-
     Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
 
     printf("Casting rays\n");
@@ -33,26 +29,38 @@ void render_rend()
     render_print_config();
 
     size_t rows_rendered[g_nthreads];
+    bool threads_done[g_nthreads];
 
     for (int i = 0; i < g_nthreads; ++i)
     {
         rows_rendered[i] = 0;
+        threads_done[i] = false;
 
         args[i] = (render_cast_rays_args){ .frame = frame, .y = i, .step = g_nthreads,
-            .rows_rendered = &rows_rendered[i] };
+            .rows_rendered = &rows_rendered[i], &threads_done[i] };
         pthread_create(&threads[i], 0, render_cast_rays, (void*)&args[i]);
     }
 
-    while (g_threads_finished < g_nthreads)
+    while (true)
     {
+        bool done = true;
+
+        for (size_t i = 0; i < g_nthreads; ++i)
+        {
+            if (!threads_done[i])
+                done = false;
+        }
+
         render_print_progress(rows_rendered);
+
+        if (done)
+            break;
+
         sleep(1);
     }
 
     for (size_t i = 0; i < g_nthreads; ++i)
         pthread_join(threads[i], 0);
-
-    render_print_progress(rows_rendered);
 
     printf("\n");
     
@@ -137,7 +145,7 @@ void *render_cast_rays(void *arg)
         ++*args->rows_rendered;
     }
         
-    ++g_threads_finished;
+    *args->done = true;
     pthread_exit(0);
 }
 
