@@ -5,7 +5,7 @@ Raytracing in C
 ![out](https://user-images.githubusercontent.com/73869536/161472071-2e7adc69-382c-4e79-a805-0c0f3f9fb463.png)
 
 # Runtime dependencies
-* ffmpeg
+* [ffmpeg](https://ffmpeg.org/)
 
 # Building
 ```
