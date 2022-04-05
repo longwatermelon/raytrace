@@ -13,7 +13,6 @@ struct Scene *g_scene = 0;
 int g_max_bounces = 3;
 
 size_t g_threads_finished = 0;
-size_t g_rows_rendered = 0;
 
 bool g_antialiasing = false;
 size_t g_nthreads = 4;
@@ -23,7 +22,6 @@ Uint32 g_optimization = 0;
 void render_rend()
 {
     g_threads_finished = 0;
-    g_rows_rendered = 0;
 
     Vec3f *frame = malloc(sizeof(Vec3f) * (g_w * g_h));
 
@@ -34,22 +32,27 @@ void render_rend()
 
     render_print_config();
 
+    size_t rows_rendered[g_nthreads];
+
     for (int i = 0; i < g_nthreads; ++i)
     {
-        args[i] = (render_cast_rays_args){ .frame = frame, .y = i, .step = g_nthreads };
+        rows_rendered[i] = 0;
+
+        args[i] = (render_cast_rays_args){ .frame = frame, .y = i, .step = g_nthreads,
+            .rows_rendered = &rows_rendered[i] };
         pthread_create(&threads[i], 0, render_cast_rays, (void*)&args[i]);
     }
 
     while (g_threads_finished < g_nthreads)
     {
-        render_print_progress();
+        render_print_progress(rows_rendered);
         sleep(1);
     }
 
     for (size_t i = 0; i < g_nthreads; ++i)
         pthread_join(threads[i], 0);
 
-    render_print_progress();
+    render_print_progress(rows_rendered);
 
     printf("\n");
     
@@ -82,10 +85,15 @@ void render_rend()
 }
 
 
-void render_print_progress()
+void render_print_progress(size_t *rows_rendered)
 {
-    printf("\r%zu rows rendered (%.2f%%)", g_rows_rendered,
-            ((float)g_rows_rendered / g_h) * 100.f);
+    size_t total = 0;
+
+    for (size_t i = 0; i < g_nthreads; ++i)
+        total += rows_rendered[i];
+
+    printf("\r%zu rows rendered (%.2f%%)", total,
+            ((float)total / g_h) * 100.f);
     fflush(stdout);
 }
 
@@ -126,7 +134,7 @@ void *render_cast_rays(void *arg)
             args->frame[y * g_w + x] = render_cast_ray((Vec3f){ 0.f, 0.f, 0.f }, dir, true, 0);
         }
 
-        ++g_rows_rendered;
+        ++*args->rows_rendered;
     }
         
     ++g_threads_finished;
