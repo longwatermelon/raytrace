@@ -143,7 +143,7 @@ void video_create(struct Video *v)
         system(cmd);
     }
 
-    system("ffmpeg -i frames/%d.png out.mp4 &> /dev/null");
+    system("ffmpeg -framerate 25 -i frames/%d.png -c:v libx264 -pix_fmt yuv420p out.mp4 &> /dev/null");
 }
 
 
