@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#define LOG(x, ...) { if (x <= g_loglevel) printf(__VA_ARGS__); }
+
 int g_max_bounces = 3;
 
 bool g_antialiasing = false;
@@ -12,24 +14,25 @@ size_t g_nthreads = 4;
 
 Uint32 g_optimization = 0;
 
+int g_loglevel = LOG_SILENT;
+
 void render_rend(struct Scene *sc, const char *out)
 {
-    printf("Casting rays\n");
+    LOG(LOG_VERBOSE, "Casting rays\n");
+    render_print_config(sc);
+
     Vec3f *frame = render_rend_cast_rays(sc);
-    
+
     if (g_antialiasing)
     {
-        printf("Applying antialiasing\n");
+        LOG(LOG_VERBOSE, "Applying antialiasing\n");
         Vec3f *avg = render_apply_antialiasing(sc, frame);
         free(frame);
         frame = avg;
     }
 
-    printf("Writing to file\n");
-
+    LOG(LOG_VERBOSE, "Writing to file\n");
     render_write_to_file(sc, frame, out);
-
-    printf("Done\n");
 
     free(frame);
 }
@@ -41,8 +44,6 @@ Vec3f *render_rend_cast_rays(struct Scene *sc)
 
     pthread_t threads[g_nthreads];
     render_cast_rays_args *args[g_nthreads];
-
-    render_print_config(sc);
 
     size_t rows_rendered[g_nthreads];
     bool threads_done[g_nthreads];
@@ -71,7 +72,6 @@ Vec3f *render_rend_cast_rays(struct Scene *sc)
         free(args[i]);
     }
 
-    printf("\n");
     return frame;
 }
 
@@ -100,6 +100,8 @@ void render_rend_wait_cthreads(render_cast_rays_args **args)
 
         sleep(1);
     }
+
+    LOG(LOG_NORMAL, "\n");
 }
 
 
@@ -123,26 +125,32 @@ void render_write_to_file(struct Scene *sc, Vec3f *frame, const char *out)
 
 void render_print_progress(struct Scene *sc, size_t rows_rendered)
 {
-    printf("\r%zu rows rendered (%.2f%%)", rows_rendered,
-            ((float)rows_rendered / sc->h) * 100.f);
-    fflush(stdout);
+    if (g_loglevel >= LOG_NORMAL)
+    {
+        printf("\r%zu rows rendered (%.2f%%)", rows_rendered,
+                ((float)rows_rendered / sc->h) * 100.f);
+        fflush(stdout);
+    }
 }
 
 
 void render_print_config(struct Scene *sc)
 {
-    printf("Output image dimensions: %zux%zu\n", sc->w, sc->h);
-    printf("%lu spheres, %lu meshes, %lu lights\n", sc->nspheres, sc->nmeshes, sc->nlights);
+    if (g_loglevel == LOG_VERBOSE)
+    {
+        printf("Output image dimensions: %zux%zu\n", sc->w, sc->h);
+        printf("%lu spheres, %lu meshes, %lu lights\n", sc->nspheres, sc->nmeshes, sc->nlights);
 
-    int rows_per_thread = sc->h / g_nthreads;
-    printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
-    printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
+        int rows_per_thread = sc->h / g_nthreads;
+        printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
+        printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
 
-    printf("Optimizations: ");
-    if (g_optimization == 0) printf("none");
-    if (g_optimization & OPT_BACKFACE_CULLING) printf("backface culling");
-    
-    printf("\n");
+        printf("Optimizations: ");
+        if (g_optimization == 0) printf("none");
+        if (g_optimization & OPT_BACKFACE_CULLING) printf("backface culling");
+        
+        printf("\n");
+    }
 }
 
 
@@ -303,4 +311,5 @@ void render_set_max_bounces(int i) { g_max_bounces = i; }
 void render_enable_antialiasing() { g_antialiasing = true; }
 void render_set_threads(int threads) { g_nthreads = threads; }
 void render_enable_optimizations(Uint32 flag) { g_optimization |= flag; }
+void render_set_loglevel(int level) { g_loglevel = level; }
 

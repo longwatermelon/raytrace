@@ -4,7 +4,6 @@
 #include "vector.h"
 #include <SDL2/SDL.h>
 
-
 enum
 {
     OPT_BACKFACE_CULLING = 1

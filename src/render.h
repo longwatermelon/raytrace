@@ -13,6 +13,8 @@ typedef struct
     size_t *rows_rendered; bool *done;
 } render_cast_rays_args;
 
+enum { LOG_SILENT, LOG_NORMAL, LOG_VERBOSE };
+
 void render_rend(struct Scene *sc, const char *out);
 
 Vec3f *render_rend_cast_rays(struct Scene *sc);
@@ -38,6 +40,7 @@ void render_set_max_bounces(int i);
 void render_enable_antialiasing();
 void render_set_threads(int threads);
 void render_enable_optimizations(Uint32 flag);
+void render_set_loglevel(int level);
 
 #endif
 

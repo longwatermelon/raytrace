@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     if (argc == 1)
     {
-        fprintf(stderr, "Error: no configuration file provided.\n");
+        fprintf(stderr, "ERROR: no configuration file provided.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -22,6 +22,8 @@ int main(int argc, char **argv)
     char type[11] = { 0 };
     fscanf(fp, "%s", type);
     fclose(fp);
+
+    raytrace_loglevel(LOG_VERBOSE);
 
     if (strcmp(type, "image") == 0)
         raytrace_image(argv[1], "out.ppm");
