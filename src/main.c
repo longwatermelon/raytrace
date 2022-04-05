@@ -1,9 +1,7 @@
-#include "render.h"
-#include "video.h"
+#include "raytrace.h"
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-#include <linux/limits.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -26,17 +24,9 @@ int main(int argc, char **argv)
     fclose(fp);
 
     if (strcmp(type, "image") == 0)
-    {
-        struct Scene *scene = scene_alloc(argv[1]);
-        render_rend(scene);
-        scene_free(scene);
-    }
+        raytrace_image(argv[1], "out.ppm");
     else if (strcmp(type, "video") == 0)
-    {
-        struct Video *v = video_alloc(argv[1]);
-        video_create(v);
-        video_free(v);
-    }
+        raytrace_image(argv[1], "out.mp4");
 
     return 0;
 }

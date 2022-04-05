@@ -12,7 +12,7 @@ size_t g_nthreads = 4;
 
 Uint32 g_optimization = 0;
 
-void render_rend(struct Scene *sc)
+void render_rend(struct Scene *sc, const char *out)
 {
     printf("Casting rays\n");
     Vec3f *frame = render_rend_cast_rays(sc);
@@ -27,7 +27,7 @@ void render_rend(struct Scene *sc)
 
     printf("Writing to file\n");
 
-    render_write_to_file(sc, frame, "out.ppm");
+    render_write_to_file(sc, frame, out);
 
     printf("Done\n");
 
