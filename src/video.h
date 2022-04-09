@@ -12,7 +12,7 @@ struct VideoEvent
     void *obj; // original object
     void *delta; // change
 
-    size_t fbegin, fcount; // frame begin and frame number for entire animation
+    size_t fbegin, fend; // frame begin, end
 };
 
 struct VideoEvent *ve_alloc(struct Scene *sc, char *s);

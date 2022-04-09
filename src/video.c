@@ -14,7 +14,7 @@ struct VideoEvent *ve_alloc(struct Scene *sc, char *s)
     struct VideoEvent *ve = malloc(sizeof(struct VideoEvent));
 
     int obj_idx;
-    sscanf(s, "%*s %d|%zu %zu|%d", &ve->type, &ve->fbegin, &ve->fcount, &obj_idx);
+    sscanf(s, "%*s %d|%zu %zu|%d", &ve->type, &ve->fbegin, &ve->fend, &obj_idx);
 
     ve->delta = ve_parse_obj(sc, s, ve->type);
 
@@ -146,7 +146,7 @@ void video_create(struct Video *v)
         {
             struct VideoEvent *evt = v->events[j];
 
-            if (i >= evt->fbegin && i <= evt->fbegin + evt->fcount)
+            if (i >= evt->fbegin && i <= evt->fend)
                 video_apply_delta(evt->obj, evt->delta, evt->type);
         }
 
