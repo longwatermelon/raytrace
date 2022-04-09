@@ -13,7 +13,7 @@ typedef struct
     size_t *rows_rendered; bool *done;
 } render_cast_rays_args;
 
-void render_rend(struct Scene *sc, const char *out);
+Vec3f *render_rend(struct Scene *sc);
 
 Vec3f *render_rend_cast_rays(struct Scene *sc);
 void render_rend_wait_cthreads(render_cast_rays_args **args);

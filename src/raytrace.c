@@ -6,7 +6,10 @@
 void raytrace_image(const char *config, const char *out)
 {
     struct Scene *scene = scene_alloc(config);
-    render_rend(scene, out);
+    Vec3f *frame = render_rend(scene);
+    render_write_to_file(scene, frame, out);
+
+    free(frame);
     scene_free(scene);
 }
 

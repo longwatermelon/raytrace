@@ -150,7 +150,10 @@ void video_create(struct Video *v)
                 video_apply_delta(evt->obj, evt->delta, evt->type);
         }
 
-        render_rend(v->base, "out.ppm");
+        Vec3f *frame = render_rend(v->base);
+        render_write_to_file(v->base, frame, "out.ppm");
+        free(frame);
+
         char cmd[100] = { 0 };
         sprintf(cmd, "ffmpeg -i out.ppm frames/%zu.png &> /dev/null", i);
         system(cmd);

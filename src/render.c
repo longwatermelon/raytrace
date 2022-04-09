@@ -12,7 +12,7 @@ size_t g_nthreads = 4;
 
 Uint32 g_optimization = 0;
 
-void render_rend(struct Scene *sc, const char *out)
+Vec3f *render_rend(struct Scene *sc)
 {
     LOG(LOG_VERBOSE, "Casting rays\n");
     render_print_config(sc);
@@ -27,10 +27,7 @@ void render_rend(struct Scene *sc, const char *out)
         frame = avg;
     }
 
-    LOG(LOG_VERBOSE, "Writing to file\n");
-    render_write_to_file(sc, frame, out);
-
-    free(frame);
+    return frame;
 }
 
 
