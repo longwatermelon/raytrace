@@ -21,14 +21,16 @@ struct Scene
 
     struct Material **mats;
     size_t nmats;
+
+    Vec3f cam;
 };
 
 struct Scene *scene_alloc(const char *fp);
 void scene_free(struct Scene *s);
 
-struct Sphere *scene_parse_sphere(char *s, struct Material **mats);
-struct Mesh *scene_parse_mesh(char *s, struct Material **mats);
-struct Light *scene_parse_light(char *s);
+struct Sphere *scene_parse_sphere(struct Scene *sc, char *s);
+struct Mesh *scene_parse_mesh(struct Scene *sc, char *s);
+struct Light *scene_parse_light(struct Scene *sc, char *s);
 
 #endif
 

@@ -23,10 +23,7 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat)
     m->mat = mat;
 
     if (fp)
-    {
         mesh_read(m, fp);
-        mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, 0.f });
-    }
 
     return m;
 }

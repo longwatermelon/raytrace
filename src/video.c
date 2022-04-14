@@ -53,9 +53,9 @@ void *ve_parse_obj(struct Scene *sc, char *line, int type)
 
     switch (type)
     {
-    case VE_SPHERE: return (void*)scene_parse_sphere(s, sc->mats);
-    case VE_MESH: return (void*)scene_parse_mesh(s, sc->mats);
-    case VE_LIGHT: return (void*)scene_parse_light(s);
+    case VE_SPHERE: return (void*)scene_parse_sphere(sc, s);
+    case VE_MESH: return (void*)scene_parse_mesh(sc, s);
+    case VE_LIGHT: return (void*)scene_parse_light(sc, s);
     }
 
     return 0;
