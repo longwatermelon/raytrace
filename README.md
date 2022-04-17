@@ -28,3 +28,8 @@ make
 
   https://user-images.githubusercontent.com/73869536/161469337-59b1b403-961d-43e5-a5bd-f1fd11295f46.mp4
   </details>
+
+# Todo
+* Volumetric lighting
+* (maybe) UV mapping for textures
+
