@@ -1,20 +1,0 @@
-== Frame 1 (50.00%) ==
-Casting rays
-Output image dimensions: 50x50
-2 spheres, 4 meshes, 2 lights
-4 threads | 12 rows per thread
-Antialiasing on
-Optimizations: backface culling
-0 rows rendered (0.00%)50 rows rendered (100.00%)
-Applying antialiasing
-Writing to file
-== Frame 2 (100.00%) ==
-Casting rays
-Output image dimensions: 50x50
-2 spheres, 4 meshes, 2 lights
-4 threads | 12 rows per thread
-Antialiasing on
-Optimizations: backface culling
-0 rows rendered (0.00%)50 rows rendered (100.00%)
-Applying antialiasing
-Writing to file
