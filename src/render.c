@@ -212,7 +212,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
     // mirror reflection
     Vec3f morig = vec_addv(hit, vec_divf(norm, 1e3f));
 
-    Vec3f mcol = (mat->tex ? tex_color(mat->tex, morig, norm) : mat->col);
+    Vec3f mcol = (mat->tex ? tex_color(mat->tex, morig, norm, mat->col) : mat->col);
     Vec3f hcol = vec_addf(vec_mulf(vec_mulf(mcol, dlight), mat->ref_diffuse), slight * mat->ref_specular);
 
     if (mat->ref_mirror < 1.f && bounce < g_max_bounces)

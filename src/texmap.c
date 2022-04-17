@@ -20,7 +20,7 @@ void tex_free(struct Texmap *tex)
 }
 
 
-Vec3f tex_color(struct Texmap *tex, Vec3f orig, Vec3f dir)
+Vec3f tex_color(struct Texmap *tex, Vec3f orig, Vec3f dir, Vec3f default_col)
 {
     // find intersection point
     Vec3f norm = { 0.f, 0.f, -1.f };
@@ -37,6 +37,6 @@ Vec3f tex_color(struct Texmap *tex, Vec3f orig, Vec3f dir)
     if (ix >= 0 && iy >= 0 && ix < tex->img->w && iy < tex->img->h)
         return image_at(tex->img, ix, iy);
     else
-        return (Vec3f){ 1.f, 0.f, 0.f };
+        return default_col;
 }
 

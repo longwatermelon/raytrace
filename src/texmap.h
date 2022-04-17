@@ -14,7 +14,7 @@ struct Texmap
 struct Texmap *tex_alloc(Vec3f pos, int w, int h, const char *src);
 void tex_free(struct Texmap *tex);
 
-Vec3f tex_color(struct Texmap *tex, Vec3f orig, Vec3f dir);
+Vec3f tex_color(struct Texmap *tex, Vec3f orig, Vec3f dir, Vec3f default_col);
 
 #endif
 
