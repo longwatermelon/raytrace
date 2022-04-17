@@ -2,6 +2,7 @@
 #include "light.h"
 #include "mesh.h"
 #include "render.h"
+#include "texmap.h"
 #include "util.h"
 #include <limits.h>
 
@@ -17,6 +18,8 @@ struct Scene *scene_alloc(const char *fp)
     s->nlights = 0;
     s->meshes = 0;
     s->nmeshes = 0;
+    s->texs = 0;
+    s->ntexs = 0;
 
     s->w = 1000;
     s->h = 1000;
@@ -73,11 +76,24 @@ struct Scene *scene_alloc(const char *fp)
         {
             Vec3f col;
             float rd, rs, rm, se;
-            sscanf(line, "%*s %f %f %f|%f %f %f|%f", &col.x, &col.y, &col.z,
-                    &rd, &rs, &rm, &se);
+            int t_index;
+            sscanf(line, "%*s %f %f %f|%f %f %f|%f|%d", &col.x, &col.y, &col.z,
+                    &rd, &rs, &rm, &se, &t_index);
 
             s->mats = realloc(s->mats, sizeof(struct Material*) * ++s->nmats);
-            s->mats[s->nmats - 1] = mat_alloc(col, se, rd, rs, rm);
+            s->mats[s->nmats - 1] = mat_alloc(col, se, rd, rs, rm, s->texs[t_index]);
+        }
+        else if (strcmp(word, "tex") == 0)
+        {
+            Vec3f pos;
+            int w, h;
+            char src[PATH_MAX];
+
+            sscanf(line, "%*s %f %f %f|%d %d|%s", &pos.x, &pos.y, &pos.z,
+                    &w, &h, src);
+
+            s->texs = realloc(s->texs, sizeof(struct Texmap*) * ++s->ntexs);
+            s->texs[s->ntexs - 1] = tex_alloc(pos, w, h, src);
         }
         else if (strcmp(word, "cam") == 0)
         {

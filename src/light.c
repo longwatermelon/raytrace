@@ -17,7 +17,7 @@ void light_free(struct Light *l)
 }
 
 
-struct Material *mat_alloc(Vec3f col, float specular_exp, float rd, float rs, float rm)
+struct Material *mat_alloc(Vec3f col, float specular_exp, float rd, float rs, float rm, struct Texmap *tex)
 {
     struct Material *m = malloc(sizeof(struct Material));
     m->col = col;
@@ -26,6 +26,8 @@ struct Material *mat_alloc(Vec3f col, float specular_exp, float rd, float rs, fl
     m->ref_diffuse = rd;
     m->ref_specular = rs;
     m->ref_mirror = rm;
+
+    m->tex = tex;
 
     return m;
 }

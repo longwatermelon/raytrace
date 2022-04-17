@@ -3,6 +3,7 @@
 
 #include "sphere.h"
 #include "mesh.h"
+#include "texmap.h"
 #include "util.h"
 
 struct Scene
@@ -21,6 +22,9 @@ struct Scene
 
     struct Material **mats;
     size_t nmats;
+
+    struct Texmap **texs;
+    size_t ntexs;
 
     Vec3f cam;
 };

@@ -6,17 +6,6 @@
 
 int main(int argc, char **argv)
 {
-    struct Image *img = image_alloc("test.png");
-
-    for (int i = 0; i < 10; ++i)
-    {
-        Vec3f col = image_at(img, i, 0);
-        printf("Pixel %d: %f %f %f\n", i, col.x, col.y, col.z);
-    }
-
-    image_free(img);
-
-    return 0;
     if (argc == 1)
     {
         fprintf(stderr, "ERROR: no configuration file provided.\n");

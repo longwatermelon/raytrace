@@ -1,0 +1,16 @@
+image
+dim 1000 1000
+threads 4
+antialias
+optimize backface
+bg 0 0 0
+cam 0 0 0
+
+tex -7 -6 18|12 12|texture.png
+
+material .95 .7 .95|1 .2 1|50|0
+
+sphere 0 0 20|0|4
+
+light 4 -1 5|.8
+light -3 -5 8|.8
