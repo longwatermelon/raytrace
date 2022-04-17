@@ -81,7 +81,7 @@ struct Scene *scene_alloc(const char *fp)
                     &rd, &rs, &rm, &se, &t_index);
 
             s->mats = realloc(s->mats, sizeof(struct Material*) * ++s->nmats);
-            s->mats[s->nmats - 1] = mat_alloc(col, se, rd, rs, rm, s->texs[t_index]);
+            s->mats[s->nmats - 1] = mat_alloc(col, se, rd, rs, rm, (t_index == -1 ? 0 : s->texs[t_index]));
         }
         else if (strcmp(word, "tex") == 0)
         {
