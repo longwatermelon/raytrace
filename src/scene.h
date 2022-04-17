@@ -35,6 +35,7 @@ void scene_free(struct Scene *s);
 struct Sphere *scene_parse_sphere(struct Scene *sc, char *s);
 struct Mesh *scene_parse_mesh(struct Scene *sc, char *s);
 struct Light *scene_parse_light(struct Scene *sc, char *s);
+struct Texmap *scene_parse_tex(struct Scene *sc, char *s);
 
 #endif
 

@@ -23,6 +23,7 @@ struct VideoEvent *ve_alloc(struct Scene *sc, char *s)
     case VE_SPHERE: ve->obj = (void*)sc->spheres[obj_idx]; break;
     case VE_MESH: ve->obj = (void*)sc->meshes[obj_idx]; break;
     case VE_LIGHT: ve->obj = (void*)sc->lights[obj_idx]; break;
+    case VE_TEX: ve->obj = (void*)sc->texs[obj_idx]; break;
     default: ve->obj = 0; break;
     }
 
@@ -39,6 +40,7 @@ void ve_free(struct VideoEvent *ve)
     case VE_SPHERE: sphere_free(ve->delta); break;
     case VE_MESH: mesh_free(ve->delta); break;
     case VE_LIGHT: light_free(ve->delta); break;
+    case VE_TEX: tex_free(ve->delta); break;
     }
 
     free(ve);
@@ -56,6 +58,7 @@ void *ve_parse_obj(struct Scene *sc, char *line, int type)
     case VE_SPHERE: return (void*)scene_parse_sphere(sc, s);
     case VE_MESH: return (void*)scene_parse_mesh(sc, s);
     case VE_LIGHT: return (void*)scene_parse_light(sc, s);
+    case VE_TEX: return (void*)scene_parse_tex(sc, s);
     }
 
     return 0;
@@ -190,6 +193,15 @@ void video_apply_delta(void *obj, void *delta, int type)
 
         l->pos = vec_addv(l->pos, d->pos);
         l->in += d->in;
+    } break;
+    case VE_TEX:
+    {
+        struct Texmap *t = (struct Texmap*)obj;
+        struct Texmap *d = (struct Texmap*)delta;
+
+        t->pos = vec_addv(t->pos, d->pos);
+        t->w += d->w;
+        t->h += d->h;
     } break;
     }
 }

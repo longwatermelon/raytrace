@@ -85,15 +85,12 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "tex") == 0)
         {
-            Vec3f pos;
-            int w, h;
-            char src[PATH_MAX];
-
-            sscanf(line, "%*s %f %f %f|%d %d|%s", &pos.x, &pos.y, &pos.z,
-                    &w, &h, src);
+            char *new = line;
+            while (*new != ' ') ++new;
+            ++new;
 
             s->texs = realloc(s->texs, sizeof(struct Texmap*) * ++s->ntexs);
-            s->texs[s->ntexs - 1] = tex_alloc(pos, w, h, src);
+            s->texs[s->ntexs - 1] = scene_parse_tex(s, new);
         }
         else if (strcmp(word, "cam") == 0)
         {
@@ -224,5 +221,18 @@ struct Light *scene_parse_light(struct Scene *sc, char *s)
 
     struct Light *l = light_alloc(pos, in);
     return l;
+}
+
+
+struct Texmap *scene_parse_tex(struct Scene *sc, char *s)
+{
+    Vec3f pos;
+    int w, h;
+    char src[PATH_MAX];
+
+    sscanf(s, "%f %f %f|%d %d|%s", &pos.x, &pos.y, &pos.z,
+            &w, &h, src);
+
+    return tex_alloc(pos, w, h, src);
 }
 
