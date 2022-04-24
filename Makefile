@@ -2,21 +2,16 @@ CC=gcc
 CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic -O3
 LIBS=-lm -lpthread -lpng
 
-SRC=$(wildcard src/*.c)
-OBJS=$(addprefix obj/, $(SRC:.c=.o))
+core:
+	mkdir -p obj/src/core
+	$(MAKE) -f src/core/Makefile
 
-all:
-	mkdir -p obj/src
-	$(MAKE) raytrace
-
-raytrace: $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
+cli: core
+	mkdir -p obj/src/cli
+	$(MAKE) -f src/cli/Makefile
 
 circle: tools/circle.c
 	$(CC) $< -o $@ -lm
 
-obj/src/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
-
 clean:
-	-rm -rf obj/* raytrace
+	-rm -rf obj/* lib/* raytrace

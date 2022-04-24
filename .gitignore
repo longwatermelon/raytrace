@@ -1,9 +1,10 @@
 .cache
 compile_commands.json
 obj
-raytrace
+lib
 *.png
 *.ppm
 *.jpg
 *.mp4
 circle
+cli
