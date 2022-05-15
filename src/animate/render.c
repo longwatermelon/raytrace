@@ -29,6 +29,7 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
             if (p.z < 0.f)
             {
                 // TODO triangle clipping
+                goto next_tri;
             }
 
             points[j] = rasterize_project_point(p, g_size, g_size);
@@ -41,6 +42,8 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
         SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[1].x, points[1].y);
         SDL_RenderDrawLine(rend, points[1].x, points[1].y, points[2].x, points[2].y);
         SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[2].x, points[2].y);
+
+next_tri:;
     }
 }
 
