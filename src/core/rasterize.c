@@ -16,10 +16,7 @@ Vec3f rasterize_rotate(Vec3f p, Vec3f angle)
         { -sinf(angle.x), 0, cosf(angle.x) }
     };
 
-    p = util_matmul(roty, p);
-    p = util_matmul(rotx, p);
-
-    return p;
+    return util_matmul(rotx, util_matmul(roty, p));
 }
 
 
