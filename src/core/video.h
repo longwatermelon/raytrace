@@ -1,5 +1,5 @@
-#ifndef VIDEO_H
-#define VIDEO_H
+#ifndef CORE_VIDEO_H
+#define CORE_VIDEO_H
 
 #include "scene.h"
 #include <stdlib.h>

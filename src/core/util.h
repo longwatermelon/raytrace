@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef CORE_UTIL_H
+#define CORE_UTIL_H
 
 #include "vector.h"
 #include <SDL2/SDL.h>

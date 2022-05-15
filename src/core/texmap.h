@@ -1,5 +1,5 @@
-#ifndef TEXMAP_H
-#define TEXMAP_H
+#ifndef CORE_TEXMAP_H
+#define CORE_TEXMAP_H
 
 #include "image.h"
 

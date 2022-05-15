@@ -1,5 +1,5 @@
-#ifndef LIGHT_H
-#define LIGHT_H
+#ifndef CORE_LIGHT_H
+#define CORE_LIGHT_H
 
 #include "util.h"
 #include "texmap.h"

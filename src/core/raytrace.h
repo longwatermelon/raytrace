@@ -1,5 +1,5 @@
-#ifndef RAYTRACE_H
-#define RAYTRACE_H
+#ifndef CORE_RAYTRACE_H
+#define CORE_RAYTRACE_H
 
 #include "render.h"
 

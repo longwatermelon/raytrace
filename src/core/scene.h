@@ -1,5 +1,5 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef CORE_SCENE_H
+#define CORE_SCENE_H
 
 #include "sphere.h"
 #include "mesh.h"

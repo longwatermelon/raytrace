@@ -1,5 +1,5 @@
-#ifndef RENDER_H
-#define RENDER_H
+#ifndef CORE_RENDER_H
+#define CORE_RENDER_H
 
 #include "scene.h"
 

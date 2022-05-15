@@ -1,5 +1,5 @@
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef CORE_SPHERE_H
+#define CORE_SPHERE_H
 
 #include "vector.h"
 #include "util.h"

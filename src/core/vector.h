@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef CORE_VECTOR_H
+#define CORE_VECTOR_H
 
 #include <stdbool.h>
 

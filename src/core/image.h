@@ -1,5 +1,5 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef CORE_IMAGE_H
+#define CORE_IMAGE_H
 
 #include "util.h"
 #include <png.h>
