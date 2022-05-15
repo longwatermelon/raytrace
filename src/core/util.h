@@ -13,9 +13,6 @@ enum
     OPT_BACKFACE_CULLING = 1
 };
 
-SDL_Point util_project_point(Vec3f p, int sw, int sh);
-SDL_Point util_center_and_scale(SDL_FPoint p, int sw, int sh);
-
 void util_set_loglevel(int level);
 int util_loglevel();
 

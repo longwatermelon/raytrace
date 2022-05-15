@@ -1,5 +1,6 @@
 #include "mesh.h"
 #include "util.h"
+#include "rasterize.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -176,7 +177,7 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
     for (size_t i = 0; i < m->npts; ++i)
     {
         Vec3f adjusted = vec_addv(m->pts[i], m->pos);
-        SDL_Point p = util_project_point(adjusted, 1000, 1000);
+        SDL_Point p = rasterize_project_point(adjusted, 1000, 1000);
 
         if (p.x < lx)
         {
