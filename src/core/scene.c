@@ -1,4 +1,5 @@
 #include "scene.h"
+#include "camera.h"
 #include "light.h"
 #include "mesh.h"
 #include "render.h"
@@ -25,7 +26,7 @@ struct Scene *scene_alloc(const char *fp)
     s->h = 1000;
     s->bg = (Vec3f){ .6f, .6f, .9f };
 
-    s->cam = (Vec3f){ 0.f, 0.f, 0.f };
+    s->cam = cam_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f });
 
     FILE *f = fopen(fp, "r");
 
@@ -94,7 +95,10 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "cam") == 0)
         {
-            sscanf(line, "%*s %f %f %f", &s->cam.x, &s->cam.y, &s->cam.z);
+            Vec3f pos, angle;
+            sscanf(line, "%*s %f %f %f|%f %f %f", &pos.x, &pos.y, &pos.z,
+                    &angle.x, &angle.y, &angle.z);
+            s->cam = cam_alloc(pos, angle);
         }
         else if (strcmp(word, "threads") == 0)
         {
@@ -161,6 +165,8 @@ void scene_free(struct Scene *s)
 
     for (size_t i = 0; i < s->nmats; ++i)
         mat_free(s->mats[i]);
+
+    cam_free(s->cam);
 
     free(s->lights);
     free(s->mats);

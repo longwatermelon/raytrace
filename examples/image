@@ -4,7 +4,7 @@ threads 4
 antialias
 optimize backface
 bg 0 0 0
-cam 0 0 0
+cam 0 0 0|0 0 0
 
 // meshes
 material .6 .95 .6|.9 .1 1|10|-1
@@ -21,10 +21,10 @@ sphere -3 3 14|5|1
 sphere 2 2 25|6|2
 
 mesh 0 4 0|0|res/floor.obj 1
-mesh -3.8 3 20|1|res/cube.obj 0
-mesh 2 3 17|2|res/icosphere.obj 0
+mesh -3.8 3 20|1|res/cube.obj 1
+mesh 2 3 17|2|res/icosphere.obj 1
 //mesh -1 2.2 23|3|res/donut.obj 0
-mesh -1 3.4 12|4|res/monkey.obj 0
+mesh -1 3.4 12|4|res/monkey.obj 1
 
 light 4 -1 5|.8
 light -3 -5 11|.8

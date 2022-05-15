@@ -4,6 +4,7 @@
 #include "vector.h"
 #include "util.h"
 #include "light.h"
+#include "camera.h"
 #include <stdbool.h>
 #include <sys/types.h>
 #include <SDL2/SDL.h>
@@ -43,6 +44,6 @@ void mesh_read(struct Mesh *m, const char *fp);
 bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, Uint32 opt, float *t, Triangle *tri);
 bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, float *t);
 
-void mesh_find_bounds(struct Mesh *m, Vec3f ro);
+void mesh_find_bounds(struct Mesh *m, struct Camera *cam);
 
 #endif

@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic -O3
 LIBS=-lm -lpthread -lpng
 
-all: animate
+all: cli
 
 core:
 	mkdir -p obj/src/core

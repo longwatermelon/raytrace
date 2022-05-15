@@ -36,7 +36,7 @@ void video_free(struct Video *v);
 void video_load_config(struct Video *v, const char *config);
 
 void video_create(struct Video *v);
-void video_apply_delta(void *obj, void *delta, int type);
+void video_apply_delta(struct Video *v, void *obj, void *delta, int type);
 
 #endif
 

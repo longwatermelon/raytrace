@@ -1,4 +1,5 @@
 #include "render.h"
+#include "rasterize.h"
 #include "texmap.h"
 #include "util.h"
 #include <stdio.h>
@@ -164,7 +165,9 @@ void *render_cast_rays(void *arg)
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam, dir, true, 0);
+            dir = rasterize_rotate(dir, args->sc->cam->angle);
+
+            args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam->pos, dir, true, 0);
         }
 
         ++*args->rows_rendered;

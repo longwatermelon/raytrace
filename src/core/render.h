@@ -2,6 +2,7 @@
 #define CORE_RENDER_H
 
 #include "scene.h"
+#include "camera.h"
 
 #include <stdbool.h>
 #include <sys/types.h>

@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "texmap.h"
 #include "util.h"
+#include "camera.h"
 
 struct Scene
 {
@@ -26,7 +27,7 @@ struct Scene
     struct Texmap **texs;
     size_t ntexs;
 
-    Vec3f cam;
+    struct Camera *cam;
 };
 
 struct Scene *scene_alloc(const char *fp);

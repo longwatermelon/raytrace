@@ -166,7 +166,7 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
 }
 
 
-void mesh_find_bounds(struct Mesh *m, Vec3f ro)
+void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
 {
     Vec3f l, r, t, b;
     float lx = INFINITY;
@@ -176,7 +176,9 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
 
     for (size_t i = 0; i < m->npts; ++i)
     {
-        Vec3f adjusted = vec_addv(m->pts[i], m->pos);
+        Vec3f adjusted = rasterize_rotate(m->pts[i], cam->angle);
+        adjusted = vec_addv(adjusted, m->pos);
+
         SDL_Point p = rasterize_project_point(adjusted, 1000, 1000);
 
         if (p.x < lx)
@@ -204,8 +206,8 @@ void mesh_find_bounds(struct Mesh *m, Vec3f ro)
         }
     }
 
-    m->top_ry = vec_normalize(vec_sub(t, ro)).y;
-    m->bot_ry = vec_normalize(vec_sub(b, ro)).y;
-    m->left_rx = vec_normalize(vec_sub(l, ro)).x;
-    m->right_rx = vec_normalize(vec_sub(r, ro)).x;
+    m->top_ry = vec_normalize(vec_sub(t, cam->pos)).y;
+    m->bot_ry = vec_normalize(vec_sub(b, cam->pos)).y;
+    m->left_rx = vec_normalize(vec_sub(l, cam->pos)).x;
+    m->right_rx = vec_normalize(vec_sub(r, cam->pos)).x;
 }

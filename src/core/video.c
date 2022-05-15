@@ -150,7 +150,7 @@ void video_create(struct Video *v)
             struct VideoEvent *evt = v->events[j];
 
             if (i >= evt->fbegin && i <= evt->fend)
-                video_apply_delta(evt->obj, evt->delta, evt->type);
+                video_apply_delta(v, evt->obj, evt->delta, evt->type);
         }
 
         Vec3f *frame = render_rend(v->base);
@@ -166,7 +166,7 @@ void video_create(struct Video *v)
 }
 
 
-void video_apply_delta(void *obj, void *delta, int type)
+void video_apply_delta(struct Video *v, void *obj, void *delta, int type)
 {
     switch (type)
     {
@@ -184,7 +184,7 @@ void video_apply_delta(void *obj, void *delta, int type)
         struct Mesh *d = (struct Mesh*)delta;
 
         m->pos = vec_addv(m->pos, d->pos);
-        mesh_find_bounds(m, (Vec3f){ 0.f, 0.f, 0.f });
+        mesh_find_bounds(m, v->base->cam);
     } break;
     case VE_LIGHT:
     {
