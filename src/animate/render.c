@@ -1,4 +1,5 @@
 #include "render.h"
+#include "core/vector.h"
 #include <core/rasterize.h>
 
 int g_size = 0;
@@ -8,12 +9,12 @@ void render_scene(struct Scene *sc, SDL_Renderer *rend)
 {
     for (size_t i = 0; i < sc->nmeshes; ++i)
     {
-        render_scene_mesh(sc->meshes[i], rend);
+        render_scene_mesh(sc, sc->meshes[i], rend);
     }
 }
 
 
-void render_scene_mesh(struct Mesh *m, SDL_Renderer *rend)
+void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
 {
     for (size_t i = 0; i < m->ntris; ++i)
     {
@@ -21,7 +22,16 @@ void render_scene_mesh(struct Mesh *m, SDL_Renderer *rend)
 
         for (int j = 0; j < 3; ++j)
         {
-            points[j] = rasterize_project_point(vec_addv(m->pts[m->tris[i].idx[j]], m->pos), g_size, g_size);
+            Vec3f p = m->pts[m->tris[i].idx[j]];
+            p = vec_addv(m->pos, p);
+            p = vec_sub(p, sc->cam);
+
+            if (p.z < 0.f)
+            {
+                // TODO triangle clipping
+            }
+
+            points[j] = rasterize_project_point(p, g_size, g_size);
 
             points[j].x += g_offset.x;
             points[j].y += g_offset.y;
