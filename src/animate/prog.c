@@ -1,7 +1,7 @@
 #include "prog.h"
-#include "core/render.h"
-#include "core/scene.h"
 #include "render.h"
+#include <core/render.h>
+#include <core/scene.h>
 #include <SDL2/SDL.h>
 
 
