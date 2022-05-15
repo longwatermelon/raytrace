@@ -16,4 +16,6 @@ enum
 void util_set_loglevel(int level);
 int util_loglevel();
 
+Vec3f util_matmul(float mat[3][3], Vec3f p);
+
 #endif
