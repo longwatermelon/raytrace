@@ -62,14 +62,39 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         }
     }
 
-    const Uint8 *keystates = SDL_GetKeyboardState(0);
+    struct Camera *c = p->sc->cam;
+    const Uint8 *keys = SDL_GetKeyboardState(0);
 
-    if (keystates[SDL_SCANCODE_W]) p->sc->cam->pos.z += .1f;
-    if (keystates[SDL_SCANCODE_S]) p->sc->cam->pos.z -= .1f;
-    if (keystates[SDL_SCANCODE_A]) p->sc->cam->pos.x -= .1f;
-    if (keystates[SDL_SCANCODE_D]) p->sc->cam->pos.x += .1f;
+    if (keys[SDL_SCANCODE_W])
+    {
+        c->pos.z += .1f * cosf(c->angle.x);
+        c->pos.x += .1f * sinf(c->angle.x);
+    }
 
-    if (keystates[SDL_SCANCODE_SPACE]) p->sc->cam->pos.y -= .1f;
-    if (keystates[SDL_SCANCODE_LSHIFT]) p->sc->cam->pos.y += .1f;
+    if (keys[SDL_SCANCODE_S])
+    {
+        c->pos.z -= .1f * cosf(c->angle.x);
+        c->pos.x -= .1f * sinf(c->angle.x);
+    }
+
+    if (keys[SDL_SCANCODE_A])
+    {
+        c->pos.x += .1f * sinf(-M_PI / 2.f + c->angle.x);
+        c->pos.z += .1f * cosf(-M_PI / 2.f + c->angle.x);
+    }
+
+    if (keys[SDL_SCANCODE_D])
+    {
+        c->pos.x -= .1f * sinf(-M_PI / 2.f + c->angle.x);
+        c->pos.z -= .1f * cosf(-M_PI / 2.f + c->angle.x);
+    }
+
+    if (keys[SDL_SCANCODE_SPACE]) c->pos.y -= .1f;
+    if (keys[SDL_SCANCODE_LSHIFT]) c->pos.y += .1f;
+
+    if (keys[SDL_SCANCODE_UP]) c->angle.y += .05f;
+    if (keys[SDL_SCANCODE_DOWN]) c->angle.y -= .05f;
+    if (keys[SDL_SCANCODE_RIGHT]) c->angle.x += .05f;
+    if (keys[SDL_SCANCODE_LEFT]) c->angle.x -= .05f;
 }
 
