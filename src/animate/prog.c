@@ -60,7 +60,7 @@ void prog_mainloop(struct Prog *p)
         }
 
         Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
-        if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, true, 0, 0, (void*)&p->selected_mesh, 0))
+        if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->selected_mesh, 0))
             p->selected_mesh = 0;
 
         SDL_RenderClear(p->rend);
