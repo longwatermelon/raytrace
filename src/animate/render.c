@@ -9,8 +9,6 @@ void render_scene(struct Scene *sc, struct Mesh *selected, SDL_Renderer *rend)
 {
     for (size_t i = 0; i < sc->nmeshes; ++i)
     {
-        if (sc->meshes[i] == selected)
-            printf("selected\n");
         render_scene_mesh(sc, sc->meshes[i], sc->meshes[i] == selected, rend);
     }
 }
