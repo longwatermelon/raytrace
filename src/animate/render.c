@@ -28,7 +28,7 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
             p = vec_sub(p, sc->cam->pos);
             p = rasterize_rotate_ccw(p, sc->cam->angle);
 
-            if (p.z <= 0.f)
+            if (p.z <= 1.f)
             {
                 render = false;
             }
