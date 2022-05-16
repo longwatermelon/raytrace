@@ -166,8 +166,20 @@ void *render_cast_rays(void *arg)
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
             dir = rasterize_rotate(dir, args->sc->cam->angle);
-
-            args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam->pos, dir, true, 0);
+#if 0
+            bool flag = false;
+            for (size_t i = 0; i < args->sc->nmeshes; ++i)
+            {
+                if ((dir.y > args->sc->meshes[i]->top_ry && dir.y < args->sc->meshes[i]->bot_ry &&
+                dir.x > args->sc->meshes[i]->left_rx && dir.x < args->sc->meshes[i]->right_rx))
+                {
+                    args->frame[y * args->sc->w + x] = (Vec3f){ 255.f, 0.f, 0.f };
+                    flag = true;
+                }
+            }
+            if (!flag)
+#endif
+                args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam->pos, dir, true, 0);
         }
 
         ++*args->rows_rendered;
@@ -247,10 +259,12 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_m
 
     for (size_t i = 0; i < sc->nmeshes; ++i)
     {
+#if 0
         if (optimize_meshes &&
             (dir.y < sc->meshes[i]->top_ry || dir.y > sc->meshes[i]->bot_ry ||
             dir.x < sc->meshes[i]->left_rx || dir.x > sc->meshes[i]->right_rx))
             continue;
+#endif
 
         float dist;
         Triangle tri;

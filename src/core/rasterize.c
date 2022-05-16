@@ -16,7 +16,13 @@ Vec3f rasterize_rotate(Vec3f p, Vec3f angle)
         { -sinf(angle.x), 0, cosf(angle.x) }
     };
 
-    return util_matmul(rotx, util_matmul(roty, p));
+    float rotz[3][3] = {
+        { cosf(angle.z), sinf(angle.z), 0 },
+        { -sinf(angle.z), cosf(angle.z), 0 },
+        { 0, 0, 1 }
+    };
+
+    return util_matmul(rotz, util_matmul(rotx, util_matmul(roty, p)));
 }
 
 
@@ -34,8 +40,8 @@ SDL_Point rasterize_project_point(Vec3f p, int sw, int sh)
 SDL_Point rasterize_center_and_scale(SDL_FPoint p, int sw, int sh)
 {
     return (SDL_Point){
-        (p.x + 1.f) * ((float)sw / 2.f),
-        (p.y + 1.f) * ((float)sh / 2.f)
+        (p.x + .5f) * ((float)sw),
+        (p.y + .5f) * ((float)sh)
     };
 }
 
