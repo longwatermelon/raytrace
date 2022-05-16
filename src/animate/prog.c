@@ -1,5 +1,6 @@
 #include "prog.h"
 #include "render.h"
+#include <SDL2/SDL_mouse.h>
 #include <core/render.h>
 #include <core/scene.h>
 #include <SDL2/SDL.h>
@@ -14,6 +15,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->rend = r;
 
     p->sc = scene_alloc("examples/image");
+    p->focused = false;
 
     return p;
 }
@@ -40,6 +42,20 @@ void prog_mainloop(struct Prog *p)
 
         prog_events(p, &evt);
 
+        if (p->focused)
+        {
+            SDL_Point mouse;
+            SDL_GetMouseState(&mouse.x, &mouse.y);
+
+            mouse.x -= w / 2;
+            mouse.y -= h / 2;
+
+            SDL_WarpMouseInWindow(p->window, w / 2, h / 2);
+
+            p->sc->cam->angle.x += (float)mouse.x / 400.f;
+            p->sc->cam->angle.y -= (float)mouse.y / 400.f;
+        }
+
         SDL_RenderClear(p->rend);
 
         render_scene(p->sc, p->rend);
@@ -52,6 +68,8 @@ void prog_mainloop(struct Prog *p)
 
 void prog_events(struct Prog *p, SDL_Event *evt)
 {
+    struct Camera *c = p->sc->cam;
+
     while (SDL_PollEvent(evt))
     {
         switch (evt->type)
@@ -59,42 +77,54 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         case SDL_QUIT:
             p->running = false;
             break;
+        case SDL_MOUSEBUTTONDOWN:
+        {
+            p->focused = true;
+            SDL_ShowCursor(SDL_FALSE);
+        } break;
+        case SDL_KEYDOWN:
+        {
+            switch (evt->key.keysym.sym)
+            {
+            case SDLK_ESCAPE:
+                p->focused = false;
+                SDL_ShowCursor(SDL_TRUE);
+                break;
+            }
+        } break;
         }
     }
 
-    struct Camera *c = p->sc->cam;
-    const Uint8 *keys = SDL_GetKeyboardState(0);
-
-    if (keys[SDL_SCANCODE_W])
+    if (p->focused)
     {
-        c->pos.z += .1f * cosf(c->angle.x);
-        c->pos.x += .1f * sinf(c->angle.x);
+        const Uint8 *keys = SDL_GetKeyboardState(0);
+
+        if (keys[SDL_SCANCODE_W])
+        {
+            c->pos.z += .1f * cosf(c->angle.x);
+            c->pos.x += .1f * sinf(c->angle.x);
+        }
+
+        if (keys[SDL_SCANCODE_S])
+        {
+            c->pos.z -= .1f * cosf(c->angle.x);
+            c->pos.x -= .1f * sinf(c->angle.x);
+        }
+
+        if (keys[SDL_SCANCODE_A])
+        {
+            c->pos.x += .1f * sinf(-M_PI / 2.f + c->angle.x);
+            c->pos.z += .1f * cosf(-M_PI / 2.f + c->angle.x);
+        }
+
+        if (keys[SDL_SCANCODE_D])
+        {
+            c->pos.x -= .1f * sinf(-M_PI / 2.f + c->angle.x);
+            c->pos.z -= .1f * cosf(-M_PI / 2.f + c->angle.x);
+        }
+
+        if (keys[SDL_SCANCODE_SPACE]) c->pos.y -= .1f;
+        if (keys[SDL_SCANCODE_LSHIFT]) c->pos.y += .1f;
     }
-
-    if (keys[SDL_SCANCODE_S])
-    {
-        c->pos.z -= .1f * cosf(c->angle.x);
-        c->pos.x -= .1f * sinf(c->angle.x);
-    }
-
-    if (keys[SDL_SCANCODE_A])
-    {
-        c->pos.x += .1f * sinf(-M_PI / 2.f + c->angle.x);
-        c->pos.z += .1f * cosf(-M_PI / 2.f + c->angle.x);
-    }
-
-    if (keys[SDL_SCANCODE_D])
-    {
-        c->pos.x -= .1f * sinf(-M_PI / 2.f + c->angle.x);
-        c->pos.z -= .1f * cosf(-M_PI / 2.f + c->angle.x);
-    }
-
-    if (keys[SDL_SCANCODE_SPACE]) c->pos.y -= .1f;
-    if (keys[SDL_SCANCODE_LSHIFT]) c->pos.y += .1f;
-
-    if (keys[SDL_SCANCODE_UP]) c->angle.y += .05f;
-    if (keys[SDL_SCANCODE_DOWN]) c->angle.y -= .05f;
-    if (keys[SDL_SCANCODE_RIGHT]) c->angle.x += .05f;
-    if (keys[SDL_SCANCODE_LEFT]) c->angle.x -= .05f;
 }
 

@@ -13,6 +13,8 @@ struct Prog
     SDL_Renderer *rend;
 
     struct Scene *sc;
+
+    bool focused;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

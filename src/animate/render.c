@@ -19,6 +19,7 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
     for (size_t i = 0; i < m->ntris; ++i)
     {
         SDL_Point points[3];
+        bool render = true;
 
         for (int j = 0; j < 3; ++j)
         {
@@ -27,24 +28,26 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
             p = vec_sub(p, sc->cam->pos);
             p = rasterize_rotate_ccw(p, sc->cam->angle);
 
-            if (p.z < 0.f)
+            if (p.z <= 0.f)
             {
-                // TODO triangle clipping
-                goto next_tri;
+                render = false;
             }
+            else
+            {
+                points[j] = rasterize_project_point(p, g_size, g_size);
 
-            points[j] = rasterize_project_point(p, g_size, g_size);
-
-            points[j].x += g_offset.x;
-            points[j].y += g_offset.y;
+                points[j].x += g_offset.x;
+                points[j].y += g_offset.y;
+            }
         }
 
-        SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
-        SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[1].x, points[1].y);
-        SDL_RenderDrawLine(rend, points[1].x, points[1].y, points[2].x, points[2].y);
-        SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[2].x, points[2].y);
-
-next_tri:;
+        if (render)
+        {
+            SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+            SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[1].x, points[1].y);
+            SDL_RenderDrawLine(rend, points[1].x, points[1].y, points[2].x, points[2].y);
+            SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[2].x, points[2].y);
+        }
     }
 }
 
