@@ -193,10 +193,19 @@ void *render_cast_rays(void *arg)
 Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
 {
     Vec3f hit, norm;
+    void *obj;
+    int obj_type;
+
+    if (!render_scene_cast_ray(sc, o, dir, optimize_meshes, &hit, &norm, &obj, &obj_type))
+        return sc->bg;
+
     struct Material *mat;
 
-    if (!render_scene_cast_ray(sc, o, dir, optimize_meshes, &hit, &norm, &mat))
-        return sc->bg;
+    switch (obj_type)
+    {
+    case OBJ_MESH: mat = ((struct Mesh*)obj)->mat; break;
+    case OBJ_SPHERE: mat = ((struct Sphere*)obj)->mat; break;
+    }
 
     float dlight = 0.f;
     float slight = 0.f;
@@ -207,9 +216,8 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
         Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
         Vec3f sdir = vec_normalize(vec_sub(sc->lights[i]->pos, orig));
         
-        Vec3f shadow_hit, shadow_norm;
-        struct Material *shadow_mat;
-        if (render_scene_cast_ray(sc, orig, sdir, false, &shadow_hit, &shadow_norm, &shadow_mat))
+        Vec3f shadow_hit;
+        if (render_scene_cast_ray(sc, orig, sdir, false, &shadow_hit, 0, 0, 0))
         {
             if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(sc->lights[i]->pos, hit)))
                 continue;
@@ -240,7 +248,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
 }
 
 
-bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, struct Material **mat)
+bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, void **obj, int *obj_type)
 {
     float nearest = INFINITY;
 
@@ -251,9 +259,10 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_m
         if (sphere_ray_intersect(sc->spheres[i], o, dir, &dist) && dist < nearest)
         {
             nearest = dist;
-            *hit = vec_addv(o, vec_mulf(dir, dist));
-            *n = vec_normalize(vec_sub(*hit, sc->spheres[i]->c));
-            *mat = sc->spheres[i]->mat;
+            if (hit) *hit = vec_addv(o, vec_mulf(dir, dist));
+            if (n) *n = vec_normalize(vec_sub(*hit, sc->spheres[i]->c));
+            if (obj) *obj = sc->spheres[i];
+            if (obj_type) *obj_type = OBJ_SPHERE;
         }
     }
 
@@ -270,9 +279,10 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_m
         if (mesh_ray_intersect(sc->meshes[i], o, dir, g_optimization, &dist, &tri) && dist < nearest)
         {
             nearest = dist;
-            *hit = vec_addv(o, vec_mulf(dir, dist));
-            *n = sc->meshes[i]->norms[tri.nidx];
-            *mat = sc->meshes[i]->mat;
+            if (hit) *hit = vec_addv(o, vec_mulf(dir, dist));
+            if (n) *n = sc->meshes[i]->norms[tri.nidx];
+            if (obj) *obj = (void*)sc->meshes[i];
+            if (obj_type) *obj_type = OBJ_MESH;
         }
     }
 

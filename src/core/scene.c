@@ -26,7 +26,7 @@ struct Scene *scene_alloc(const char *fp)
     s->h = 1000;
     s->bg = (Vec3f){ .6f, .6f, .9f };
 
-    s->cam = cam_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f });
+    s->cam = 0;
 
     FILE *f = fopen(fp, "r");
 

@@ -30,7 +30,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
 // hit: intersection point
 // n: normal
 // optimize_meshes: don't calculate meshes that aren't within range when true
-bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, struct Material **mat);
+bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, void **obj, int *obj_type);
 
 Vec3f *render_apply_antialiasing(struct Scene *sc, Vec3f *frame);
 Vec3f render_smoothen(struct Scene *sc, Vec3f *frame, int cx, int cy);
