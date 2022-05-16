@@ -15,6 +15,8 @@ struct Prog
     struct Scene *sc;
 
     bool focused;
+
+    struct Mesh *selected_mesh;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

@@ -5,16 +5,18 @@
 int g_size = 0;
 SDL_Point g_offset = { 0, 0 };
 
-void render_scene(struct Scene *sc, SDL_Renderer *rend)
+void render_scene(struct Scene *sc, struct Mesh *selected, SDL_Renderer *rend)
 {
     for (size_t i = 0; i < sc->nmeshes; ++i)
     {
-        render_scene_mesh(sc, sc->meshes[i], rend);
+        if (sc->meshes[i] == selected)
+            printf("selected\n");
+        render_scene_mesh(sc, sc->meshes[i], sc->meshes[i] == selected, rend);
     }
 }
 
 
-void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
+void render_scene_mesh(struct Scene *sc, struct Mesh *m, bool selected, SDL_Renderer *rend)
 {
     for (size_t i = 0; i < m->ntris; ++i)
     {
@@ -43,7 +45,11 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
 
         if (render)
         {
-            SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+            if (selected)
+                SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+            else
+                SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+
             SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[1].x, points[1].y);
             SDL_RenderDrawLine(rend, points[1].x, points[1].y, points[2].x, points[2].y);
             SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[2].x, points[2].y);

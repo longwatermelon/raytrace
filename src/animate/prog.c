@@ -1,4 +1,5 @@
 #include "prog.h"
+#include "core/rasterize.h"
 #include "render.h"
 #include <SDL2/SDL_mouse.h>
 #include <core/render.h>
@@ -16,6 +17,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->sc = scene_alloc("examples/image");
     p->focused = false;
+    p->selected_mesh = 0;
 
     return p;
 }
@@ -39,6 +41,7 @@ void prog_mainloop(struct Prog *p)
         int w, h;
         SDL_GetWindowSize(p->window, &w, &h);
         render_set_size(w, h);
+        SDL_Point center = { w / 2, h / 2 };
 
         prog_events(p, &evt);
 
@@ -47,18 +50,29 @@ void prog_mainloop(struct Prog *p)
             SDL_Point mouse;
             SDL_GetMouseState(&mouse.x, &mouse.y);
 
-            mouse.x -= w / 2;
-            mouse.y -= h / 2;
+            mouse.x -= center.x;
+            mouse.y -= center.y;
 
-            SDL_WarpMouseInWindow(p->window, w / 2, h / 2);
+            SDL_WarpMouseInWindow(p->window, center.x, center.y);
 
             p->sc->cam->angle.x += (float)mouse.x / 400.f;
             p->sc->cam->angle.y -= (float)mouse.y / 400.f;
         }
 
+        Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
+        if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, true, 0, 0, (void*)&p->selected_mesh, 0))
+        {
+            printf("%f %f %f\n", dir.x, dir.y, dir.z);
+            p->selected_mesh = 0;
+        }
+
         SDL_RenderClear(p->rend);
 
-        render_scene(p->sc, p->rend);
+        render_scene(p->sc, p->selected_mesh, p->rend);
+
+        SDL_SetRenderDrawColor(p->rend, 255, 255, 255, 255);
+        SDL_RenderDrawLine(p->rend, center.x, center.y - 10, center.x, center.y + 10);
+        SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
