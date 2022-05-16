@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic
 LIBS=-lm -lpthread -lpng
 
-all: animate
+all: editor
 
 core:
 	mkdir -p obj/src/core
@@ -12,9 +12,9 @@ cli: core
 	mkdir -p obj/src/cli
 	$(MAKE) -f src/cli/Makefile
 
-animate: core
-	mkdir -p obj/src/animate
-	$(MAKE) -f src/animate/Makefile
+editor: core
+	mkdir -p obj/src/editor
+	$(MAKE) -f src/editor/Makefile
 
 circle: tools/circle.c
 	$(CC) $< -o $@ -lm

@@ -8,4 +8,4 @@ lib
 *.mp4
 circle
 /cli
-/animate
+/editor
