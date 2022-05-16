@@ -177,7 +177,7 @@ void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
     for (size_t i = 0; i < m->npts; ++i)
     {
         Vec3f adjusted = vec_sub(vec_addv(m->pts[i], m->pos), cam->pos);
-        adjusted = rasterize_rotate(adjusted, vec_mulf(cam->angle, -1.f));
+        adjusted = rasterize_rotate_back(adjusted, cam->angle);
 
         SDL_Point p = rasterize_project_point(adjusted, 1000, 1000);
 
@@ -206,8 +206,8 @@ void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
         }
     }
 
-    m->top_ry = vec_normalize(t).y;
-    m->bot_ry = vec_normalize(b).y;
-    m->left_rx = vec_normalize(l).x;
-    m->right_rx = vec_normalize(r).x;
+    m->top_ry = rasterize_rotate(vec_normalize(t), cam->angle).y;
+    m->bot_ry = rasterize_rotate(vec_normalize(b), cam->angle).y;
+    m->left_rx = rasterize_rotate(vec_normalize(l), cam->angle).x;
+    m->right_rx = rasterize_rotate(vec_normalize(r), cam->angle).x;
 }

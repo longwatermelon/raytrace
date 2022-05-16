@@ -259,12 +259,10 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_m
 
     for (size_t i = 0; i < sc->nmeshes; ++i)
     {
-#if 0
         if (optimize_meshes &&
             (dir.y < sc->meshes[i]->top_ry || dir.y > sc->meshes[i]->bot_ry ||
             dir.x < sc->meshes[i]->left_rx || dir.x > sc->meshes[i]->right_rx))
             continue;
-#endif
 
         float dist;
         Triangle tri;
