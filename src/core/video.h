@@ -4,8 +4,6 @@
 #include "scene.h"
 #include <stdlib.h>
 
-enum { VE_SPHERE, VE_MESH, VE_LIGHT, VE_TEX };
-
 struct VideoEvent
 {
     int type; // object type for casting

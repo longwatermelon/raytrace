@@ -20,10 +20,10 @@ struct VideoEvent *ve_alloc(struct Scene *sc, char *s)
 
     switch (ve->type)
     {
-    case VE_SPHERE: ve->obj = (void*)sc->spheres[obj_idx]; break;
-    case VE_MESH: ve->obj = (void*)sc->meshes[obj_idx]; break;
-    case VE_LIGHT: ve->obj = (void*)sc->lights[obj_idx]; break;
-    case VE_TEX: ve->obj = (void*)sc->texs[obj_idx]; break;
+    case OBJ_SPHERE: ve->obj = (void*)sc->spheres[obj_idx]; break;
+    case OBJ_MESH: ve->obj = (void*)sc->meshes[obj_idx]; break;
+    case OBJ_LIGHT: ve->obj = (void*)sc->lights[obj_idx]; break;
+    case OBJ_TEX: ve->obj = (void*)sc->texs[obj_idx]; break;
     default: ve->obj = 0; break;
     }
 
@@ -37,10 +37,10 @@ void ve_free(struct VideoEvent *ve)
 
     switch (ve->type)
     {
-    case VE_SPHERE: sphere_free(ve->delta); break;
-    case VE_MESH: mesh_free(ve->delta); break;
-    case VE_LIGHT: light_free(ve->delta); break;
-    case VE_TEX: tex_free(ve->delta); break;
+    case OBJ_SPHERE: sphere_free(ve->delta); break;
+    case OBJ_MESH: mesh_free(ve->delta); break;
+    case OBJ_LIGHT: light_free(ve->delta); break;
+    case OBJ_TEX: tex_free(ve->delta); break;
     }
 
     free(ve);
@@ -55,10 +55,10 @@ void *ve_parse_obj(struct Scene *sc, char *line, int type)
 
     switch (type)
     {
-    case VE_SPHERE: return (void*)scene_parse_sphere(sc, s);
-    case VE_MESH: return (void*)scene_parse_mesh(sc, s);
-    case VE_LIGHT: return (void*)scene_parse_light(sc, s);
-    case VE_TEX: return (void*)scene_parse_tex(sc, s);
+    case OBJ_SPHERE: return (void*)scene_parse_sphere(sc, s);
+    case OBJ_MESH: return (void*)scene_parse_mesh(sc, s);
+    case OBJ_LIGHT: return (void*)scene_parse_light(sc, s);
+    case OBJ_TEX: return (void*)scene_parse_tex(sc, s);
     }
 
     return 0;
@@ -170,7 +170,7 @@ void video_apply_delta(struct Video *v, void *obj, void *delta, int type)
 {
     switch (type)
     {
-    case VE_SPHERE:
+    case OBJ_SPHERE:
     {
         struct Sphere *sphere = (struct Sphere*)obj;
         struct Sphere *d = (struct Sphere*)delta;
@@ -178,7 +178,7 @@ void video_apply_delta(struct Video *v, void *obj, void *delta, int type)
         sphere->c = vec_addv(sphere->c, d->c);
         sphere->r += d->r;
     } break;
-    case VE_MESH:
+    case OBJ_MESH:
     {
         struct Mesh *m = (struct Mesh*)obj;
         struct Mesh *d = (struct Mesh*)delta;
@@ -186,7 +186,7 @@ void video_apply_delta(struct Video *v, void *obj, void *delta, int type)
         m->pos = vec_addv(m->pos, d->pos);
         mesh_find_bounds(m, v->base->cam);
     } break;
-    case VE_LIGHT:
+    case OBJ_LIGHT:
     {
         struct Light *l = (struct Light*)obj;
         struct Light *d = (struct Light*)delta;
@@ -194,7 +194,7 @@ void video_apply_delta(struct Video *v, void *obj, void *delta, int type)
         l->pos = vec_addv(l->pos, d->pos);
         l->in += d->in;
     } break;
-    case VE_TEX:
+    case OBJ_TEX:
     {
         struct Texmap *t = (struct Texmap*)obj;
         struct Texmap *d = (struct Texmap*)delta;

@@ -13,6 +13,8 @@ enum
     OPT_BACKFACE_CULLING = 1
 };
 
+enum { OBJ_MESH, OBJ_SPHERE, OBJ_LIGHT, OBJ_TEX };
+
 void util_set_loglevel(int level);
 int util_loglevel();
 
