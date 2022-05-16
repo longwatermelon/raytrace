@@ -2,12 +2,12 @@
 #include "util.h"
 
 
-Vec3f rasterize_rotate(Vec3f p, Vec3f angle)
+Vec3f rasterize_rotate_ccw(Vec3f p, Vec3f angle)
 {
     float rotx[3][3] = {
         { 1, 0, 0 },
-        { 0, cosf(angle.y), sinf(angle.y) },
-        { 0, -sinf(angle.y), cosf(angle.y) }
+        { 0, cosf(angle.y), -sinf(angle.y) },
+        { 0, sinf(angle.y), cosf(angle.y) }
     };
 
     float roty[3][3] = {
@@ -17,8 +17,8 @@ Vec3f rasterize_rotate(Vec3f p, Vec3f angle)
     };
 
     float rotz[3][3] = {
-        { cosf(angle.z), sinf(angle.z), 0 },
-        { -sinf(angle.z), cosf(angle.z), 0 },
+        { cosf(angle.z), -sinf(angle.z), 0 },
+        { sinf(angle.z), cosf(angle.z), 0 },
         { 0, 0, 1 }
     };
 
@@ -26,14 +26,14 @@ Vec3f rasterize_rotate(Vec3f p, Vec3f angle)
 }
 
 
-Vec3f rasterize_rotate_back(Vec3f p, Vec3f angle)
+Vec3f rasterize_rotate_cc(Vec3f p, Vec3f angle)
 {
     angle = vec_mulf(angle, -1.f);
 
     float rotx[3][3] = {
         { 1, 0, 0 },
-        { 0, cosf(angle.y), sinf(angle.y) },
-        { 0, -sinf(angle.y), cosf(angle.y) }
+        { 0, cosf(angle.y), -sinf(angle.y) },
+        { 0, sinf(angle.y), cosf(angle.y) }
     };
 
     float roty[3][3] = {
@@ -43,8 +43,8 @@ Vec3f rasterize_rotate_back(Vec3f p, Vec3f angle)
     };
 
     float rotz[3][3] = {
-        { cosf(angle.z), sinf(angle.z), 0 },
-        { -sinf(angle.z), cosf(angle.z), 0 },
+        { cosf(angle.z), -sinf(angle.z), 0 },
+        { sinf(angle.z), cosf(angle.z), 0 },
         { 0, 0, 1 }
     };
 

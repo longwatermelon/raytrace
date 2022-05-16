@@ -4,7 +4,7 @@ threads 4
 antialias
 optimize backface
 bg 0 0 0
-cam -10 -2 0|-.5 -.2 .5
+cam -10 -2 0|.5 -.2 0
 
 // meshes
 material .6 .95 .6|.9 .1 1|10|-1

@@ -25,7 +25,7 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, SDL_Renderer *rend)
             Vec3f p = m->pts[m->tris[i].idx[j]];
             p = vec_addv(m->pos, p);
             p = vec_sub(p, sc->cam->pos);
-            p = rasterize_rotate(p, vec_mulf(sc->cam->angle, -1.f));
+            p = rasterize_rotate_ccw(p, sc->cam->angle);
 
             if (p.z < 0.f)
             {

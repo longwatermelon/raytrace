@@ -165,7 +165,7 @@ void *render_cast_rays(void *arg)
             float py = sinf(va);
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
-            dir = rasterize_rotate(dir, args->sc->cam->angle);
+            dir = rasterize_rotate_cc(dir, args->sc->cam->angle);
 #if 0
             bool flag = false;
             for (size_t i = 0; i < args->sc->nmeshes; ++i)
