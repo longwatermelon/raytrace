@@ -64,12 +64,12 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
     const Uint8 *keystates = SDL_GetKeyboardState(0);
 
-    if (keystates[SDL_SCANCODE_W]) p->sc->cam.z += .1f;
-    if (keystates[SDL_SCANCODE_S]) p->sc->cam.z -= .1f;
-    if (keystates[SDL_SCANCODE_A]) p->sc->cam.x -= .1f;
-    if (keystates[SDL_SCANCODE_D]) p->sc->cam.x += .1f;
+    if (keystates[SDL_SCANCODE_W]) p->sc->cam->pos.z += .1f;
+    if (keystates[SDL_SCANCODE_S]) p->sc->cam->pos.z -= .1f;
+    if (keystates[SDL_SCANCODE_A]) p->sc->cam->pos.x -= .1f;
+    if (keystates[SDL_SCANCODE_D]) p->sc->cam->pos.x += .1f;
 
-    if (keystates[SDL_SCANCODE_SPACE]) p->sc->cam.y -= .1f;
-    if (keystates[SDL_SCANCODE_LSHIFT]) p->sc->cam.y += .1f;
+    if (keystates[SDL_SCANCODE_SPACE]) p->sc->cam->pos.y -= .1f;
+    if (keystates[SDL_SCANCODE_LSHIFT]) p->sc->cam->pos.y += .1f;
 }
 
