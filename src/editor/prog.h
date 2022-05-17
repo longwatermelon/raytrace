@@ -30,5 +30,7 @@ void prog_events(struct Prog *p, SDL_Event *evt);
 
 void prog_render_toolbar(struct Prog *p);
 
+void prog_sample_button(struct Prog *p);
+
 #endif
 

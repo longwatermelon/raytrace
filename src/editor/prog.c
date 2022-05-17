@@ -2,6 +2,7 @@
 #include "core/rasterize.h"
 #include "render.h"
 #include "util.h"
+#include "button.h"
 #include <core/render.h>
 #include <core/scene.h>
 #include <SDL2/SDL_mouse.h>
@@ -38,19 +39,24 @@ void prog_mainloop(struct Prog *p)
 {
     SDL_Event evt;
 
+    SDL_Point ssize = util_ssize(p->window);
+    struct Button *b = button_alloc((SDL_Rect){ ssize.x + 10, 100, 50, 20 }, prog_sample_button);
+
     while (p->running)
     {
         SDL_Point ssize = util_ssize(p->window);
         render_set_size(ssize.x, ssize.y);
         SDL_Point center = { ssize.x / 2, ssize.y / 2 };
 
+        b->rect = (SDL_Rect){ ssize.x + 10, 100, 50, 20 };
+
         prog_events(p, &evt);
+
+        SDL_Point mouse;
+        SDL_GetMouseState(&mouse.x, &mouse.y);
 
         if (p->focused)
         {
-            SDL_Point mouse;
-            SDL_GetMouseState(&mouse.x, &mouse.y);
-
             mouse.x -= center.x;
             mouse.y -= center.y;
 
@@ -73,6 +79,7 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
         prog_render_toolbar(p);
+        button_render(b, p->rend);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
@@ -153,5 +160,11 @@ void prog_render_toolbar(struct Prog *p)
     SDL_SetRenderDrawColor(p->rend, 40, 40, 40, 255);
     SDL_Rect r = { ssize.x, 0, EDITOR_TOOLBAR_WIDTH, ssize.y };
     SDL_RenderFillRect(p->rend, &r);
+}
+
+
+void prog_sample_button(struct Prog *p)
+{
+    printf("hoo hoo\n");
 }
 
