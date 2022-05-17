@@ -43,9 +43,9 @@ void prog_mainloop(struct Prog *p)
 
     while (p->running)
     {
-        SDL_Point wsize = util_ssize(p->window);
-        render_set_size(wsize.x, wsize.y);
-        SDL_Point center = { wsize.x / 2, wsize.y / 2 };
+        SDL_Point ssize = util_ssize(p->window);
+        render_set_size(ssize.x, ssize.y);
+        SDL_Point center = { ssize.x / 2, ssize.y / 2 };
 
         prog_events(p, &evt);
 
@@ -87,7 +87,7 @@ void prog_mainloop(struct Prog *p)
 void prog_events(struct Prog *p, SDL_Event *evt)
 {
     struct Camera *c = p->sc->cam;
-    SDL_Point wsize = util_ssize(p->window);
+    SDL_Point ssize = util_ssize(p->window);
 
     while (SDL_PollEvent(evt))
     {
@@ -98,7 +98,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             break;
         case SDL_MOUSEBUTTONDOWN:
         {
-            if (evt->button.x < wsize.x && evt->button.y < wsize.y)
+            if (evt->button.x < ssize.x && evt->button.y < ssize.y)
             {
                 p->focused = true;
                 SDL_ShowCursor(SDL_FALSE);
