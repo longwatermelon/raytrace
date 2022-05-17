@@ -14,8 +14,7 @@ struct Button
 struct Button *button_alloc(SDL_Rect r, void (*callback)(struct Prog*));
 void button_free(struct Button *b);
 
-void button_render(struct Button *b, SDL_Renderer *rend);
-void button_check_click(struct Button *b, struct Prog *p, int mx, int my);
+void button_render(struct Button *b, SDL_Renderer *rend, SDL_Point mouse);
 
 #endif
 

@@ -79,7 +79,7 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
         prog_render_toolbar(p);
-        button_render(b, p->rend);
+        button_render(b, p->rend, mouse);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
