@@ -1,5 +1,5 @@
-#ifndef ANIMATE_RENDER_H
-#define ANIMATE_RENDER_H
+#ifndef EDITOR_RENDER_H
+#define EDITOR_RENDER_H
 
 #include <core/scene.h>
 #include <SDL2/SDL.h>

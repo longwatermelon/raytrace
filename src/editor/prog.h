@@ -1,9 +1,11 @@
-#ifndef ANIMATE_PROG_H
-#define ANIMATE_PROG_H
+#ifndef EDITOR_PROG_H
+#define EDITOR_PROG_H
 
 #include <core/scene.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+
+enum { MODE_NORMAL, MODE_OBJECT };
 
 struct Prog
 {
@@ -13,6 +15,7 @@ struct Prog
     SDL_Renderer *rend;
 
     struct Scene *sc;
+    int mode;
 
     bool focused;
 
@@ -24,6 +27,8 @@ void prog_free(struct Prog *p);
 
 void prog_mainloop(struct Prog *p);
 void prog_events(struct Prog *p, SDL_Event *evt);
+
+void prog_render_toolbar(struct Prog *p);
 
 #endif
 

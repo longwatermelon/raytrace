@@ -1,9 +1,11 @@
 #include "prog.h"
 #include "core/rasterize.h"
 #include "render.h"
-#include <SDL2/SDL_mouse.h>
+#include "slider.h"
+#include "util.h"
 #include <core/render.h>
 #include <core/scene.h>
+#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL.h>
 
 
@@ -16,6 +18,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->rend = r;
 
     p->sc = scene_alloc("examples/image");
+    p->mode = MODE_NORMAL;
     p->focused = false;
     p->selected_mesh = 0;
 
@@ -36,12 +39,13 @@ void prog_mainloop(struct Prog *p)
 {
     SDL_Event evt;
 
+    struct Slider *s = slider_alloc((SDL_Point){ 100, 100 }, 20, 0, 5, 0);
+
     while (p->running)
     {
-        int w, h;
-        SDL_GetWindowSize(p->window, &w, &h);
-        render_set_size(w, h);
-        SDL_Point center = { w / 2, h / 2 };
+        SDL_Point wsize = util_ssize(p->window);
+        render_set_size(wsize.x, wsize.y);
+        SDL_Point center = { wsize.x / 2, wsize.y / 2 };
 
         prog_events(p, &evt);
 
@@ -71,6 +75,9 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x, center.y - 10, center.x, center.y + 10);
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
+        prog_render_toolbar(p);
+        slider_render(s, p->rend);
+
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
     }
@@ -80,6 +87,7 @@ void prog_mainloop(struct Prog *p)
 void prog_events(struct Prog *p, SDL_Event *evt)
 {
     struct Camera *c = p->sc->cam;
+    SDL_Point wsize = util_ssize(p->window);
 
     while (SDL_PollEvent(evt))
     {
@@ -90,8 +98,11 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             break;
         case SDL_MOUSEBUTTONDOWN:
         {
-            p->focused = true;
-            SDL_ShowCursor(SDL_FALSE);
+            if (evt->button.x < wsize.x && evt->button.y < wsize.y)
+            {
+                p->focused = true;
+                SDL_ShowCursor(SDL_FALSE);
+            }
         } break;
         case SDL_KEYDOWN:
         {
@@ -106,7 +117,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         }
     }
 
-    if (p->focused)
+    if (p->focused && p->mode == MODE_NORMAL)
     {
         const Uint8 *keys = SDL_GetKeyboardState(0);
 
@@ -137,5 +148,14 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         if (keys[SDL_SCANCODE_SPACE]) c->pos.y -= .1f;
         if (keys[SDL_SCANCODE_LSHIFT]) c->pos.y += .1f;
     }
+}
+
+
+void prog_render_toolbar(struct Prog *p)
+{
+    SDL_Point ssize = util_ssize(p->window);
+    SDL_SetRenderDrawColor(p->rend, 50, 50, 50, 255);
+    SDL_Rect r = { ssize.x, 0, EDITOR_TOOLBAR_WIDTH, ssize.y };
+    SDL_RenderFillRect(p->rend, &r);
 }
 
