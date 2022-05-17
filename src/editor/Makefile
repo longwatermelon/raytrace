@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic
 INC=-Isrc
-LIBS=-Llib -lcore -lm -lpthread -lpng -lSDL2
+LIBS=-Llib -lcore -lm -lpthread -lpng -lSDL2 -lSDL2_ttf
 
 SRC=$(wildcard src/editor/*.c)
 OBJS=$(addprefix obj/, $(SRC:.c=.o))

@@ -4,6 +4,7 @@
 #include <core/scene.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 enum { MODE_NORMAL, MODE_OBJECT };
 
@@ -13,6 +14,8 @@ struct Prog
 
     SDL_Window *window;
     SDL_Renderer *rend;
+
+    TTF_Font *font;
 
     struct Scene *sc;
     int mode;

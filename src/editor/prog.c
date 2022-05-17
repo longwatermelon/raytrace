@@ -3,6 +3,7 @@
 #include "render.h"
 #include "util.h"
 #include "button.h"
+#include <SDL2/SDL_ttf.h>
 #include <core/render.h>
 #include <core/scene.h>
 #include <SDL2/SDL_mouse.h>
@@ -16,6 +17,8 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->window = w;
     p->rend = r;
+
+    p->font = TTF_OpenFont("res/font.ttf", 14);
 
     p->sc = scene_alloc("examples/image");
     p->mode = MODE_NORMAL;
@@ -31,6 +34,8 @@ void prog_free(struct Prog *p)
     if (p->sc)
         scene_free(p->sc);
 
+    TTF_CloseFont(p->font);
+
     free(p);
 }
 
@@ -40,7 +45,7 @@ void prog_mainloop(struct Prog *p)
     SDL_Event evt;
 
     SDL_Point ssize = util_ssize(p->window);
-    struct Button *b = button_alloc((SDL_Rect){ ssize.x + 10, 100, 50, 20 }, prog_sample_button);
+    struct Button *b = button_alloc((SDL_Rect){ ssize.x + 10, 100, 50, 20 }, prog_sample_button, "test", p->rend, p->font);
 
     while (p->running)
     {
