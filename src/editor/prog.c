@@ -1,7 +1,6 @@
 #include "prog.h"
 #include "core/rasterize.h"
 #include "render.h"
-#include "slider.h"
 #include "util.h"
 #include <core/render.h>
 #include <core/scene.h>
@@ -39,8 +38,6 @@ void prog_mainloop(struct Prog *p)
 {
     SDL_Event evt;
 
-    struct Slider *s = slider_alloc((SDL_Point){ 100, 100 }, 20, 0, 5, 0);
-
     while (p->running)
     {
         SDL_Point ssize = util_ssize(p->window);
@@ -76,7 +73,6 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
         prog_render_toolbar(p);
-        slider_render(s, p->rend);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
@@ -154,7 +150,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 void prog_render_toolbar(struct Prog *p)
 {
     SDL_Point ssize = util_ssize(p->window);
-    SDL_SetRenderDrawColor(p->rend, 50, 50, 50, 255);
+    SDL_SetRenderDrawColor(p->rend, 40, 40, 40, 255);
     SDL_Rect r = { ssize.x, 0, EDITOR_TOOLBAR_WIDTH, ssize.y };
     SDL_RenderFillRect(p->rend, &r);
 }
