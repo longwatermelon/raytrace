@@ -1,6 +1,7 @@
 #ifndef EDITOR_BUTTON_H
 #define EDITOR_BUTTON_H
 
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 
 struct Prog;
@@ -9,6 +10,8 @@ struct Button
 {
     SDL_Rect rect;
     void (*callback)(struct Prog*);
+
+    bool pushed;
 };
 
 struct Button *button_alloc(SDL_Rect r, void (*callback)(struct Prog*));
