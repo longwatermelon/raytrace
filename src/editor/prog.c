@@ -5,6 +5,8 @@
 #include "button.h"
 #include "slider.h"
 #include "writer.h"
+#include <core/util.h>
+#include <core/raytrace.h>
 #include <core/render.h>
 #include <core/scene.h>
 #include <SDL2/SDL_ttf.h>
@@ -32,6 +34,11 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->status = 0;
     p->last_status = 0;
+
+    p->rendering = false;
+
+    p->render_thread = 0;
+    p->render_thread_args = 0;
 
     return p;
 }
@@ -87,8 +94,36 @@ void prog_mainloop(struct Prog *p)
 
         if (p->status && (float)(clock() - p->last_status) / CLOCKS_PER_SEC > .5f)
         {
-            SDL_DestroyTexture(p->status);
-            p->status = 0;
+            if (p->rendering)
+            {
+                const char *template = "Rendering... [%.2f%%]";
+                char s[100];
+                float progress = render_get_progress() * 100.f;
+                sprintf(s, template, progress);
+
+                SDL_DestroyTexture(p->status);
+
+                if (progress >= 100.f)
+                {
+                    p->rendering = false;
+                    p->status = util_render_text(p->rend, p->font, "[✔] Done rendering [100%]", (SDL_Color){ 0, 255, 0 });
+                    p->last_status = clock();
+
+                    free(p->render_thread_args);
+
+                    p->render_thread = 0;
+                    p->render_thread_args = 0;
+                }
+                else
+                {
+                    p->status = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 0 });
+                }
+            }
+            else
+            {
+                SDL_DestroyTexture(p->status);
+                p->status = 0;
+            }
         }
 
         SDL_RenderClear(p->rend);
@@ -125,6 +160,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
     static SDL_Point slider_mouse = { -1, -1 };
 
     static bool mouse_down = false;
+    static bool ctrl = false;
 
     while (SDL_PollEvent(evt))
     {
@@ -179,10 +215,44 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 p->focused = false;
                 SDL_ShowCursor(SDL_TRUE);
                 break;
+            case SDLK_LCTRL:
+            case SDLK_RCTRL:
+                ctrl = true;
+                break;
             case SDLK_r:
-                writer_image(p->sc, "out");
-                p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
-                p->last_status = clock();
+                if (ctrl)
+                {
+                    render_set_progress(0.f);
+                    writer_image(p->sc, ".rtmp");
+                    p->status = util_render_text(p->rend, p->font, "Rendering...", (SDL_Color){ 255, 255, 0 });
+                    p->rendering = true;
+                    util_set_loglevel(LOG_SILENT);
+
+                    raytrace_args_t *args = malloc(sizeof(raytrace_args_t));
+                    args->out = "out.ppm";
+                    args->config = ".rtmp";
+                    p->render_thread_args = args;
+                    pthread_create(&p->render_thread, 0, raytrace_thr_image, (void*)args);
+                    pthread_detach(p->render_thread);
+                }
+                else
+                {
+                    writer_image(p->sc, "out");
+                    p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
+                    p->last_status = clock();
+                }
+
+                break;
+            }
+        } break;
+
+        case SDL_KEYUP:
+        {
+            switch (evt->key.keysym.sym)
+            {
+            case SDLK_LCTRL:
+            case SDLK_RCTRL:
+                ctrl = false;
                 break;
             }
         } break;

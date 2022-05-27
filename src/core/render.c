@@ -14,8 +14,12 @@ size_t g_nthreads = 4;
 
 Uint32 g_optimization = 0;
 
+float g_progress = 0.f;
+
 Vec3f *render_rend(struct Scene *sc)
 {
+    g_progress = 0.f;
+
     LOG(LOG_VERBOSE, "Casting rays\n");
     render_print_config(sc);
 
@@ -89,6 +93,7 @@ void render_rend_wait_cthreads(render_cast_rays_args **args)
         }
 
         render_print_progress(sc, rows_rendered);
+        g_progress = (float)rows_rendered / sc->h;
 
         if (done)
             break;
@@ -128,6 +133,17 @@ void render_print_progress(struct Scene *sc, size_t rows_rendered)
     }
 }
 
+
+float render_get_progress()
+{
+    return g_progress;
+}
+
+
+void render_set_progress(float p)
+{
+    g_progress = p;
+}
 
 void render_print_config(struct Scene *sc)
 {

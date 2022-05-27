@@ -3,7 +3,9 @@
 
 #include "toolbar.h"
 #include <core/scene.h>
+#include <core/raytrace.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
@@ -29,6 +31,10 @@ struct Prog
 
     SDL_Texture *status;
     clock_t last_status;
+
+    bool rendering;
+    pthread_t render_thread;
+    raytrace_args_t *render_thread_args;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

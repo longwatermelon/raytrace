@@ -9,7 +9,7 @@ void writer_image(struct Scene *sc, const char *fp)
     char *out = calloc(sizeof(char), 1);
 
     const char *begin = "image\n"
-                        "dim 1000 1000\n"
+                        "dim 100 100\n"
                         "threads 4\n"
                         "antialias\n"
                         "optimize backface\n"

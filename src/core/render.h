@@ -24,6 +24,9 @@ void render_write_to_file(struct Scene *sc, Vec3f *frame, const char *out);
 void render_print_progress(struct Scene *sc, size_t rows_rendered);
 void render_print_config(struct Scene *sc);
 
+float render_get_progress();
+void render_set_progress(float p);
+
 void *render_cast_rays(void *args);
 // bounce: number of times ray has bounced
 Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, int bounce);
