@@ -26,6 +26,8 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat)
     if (fp)
         mesh_read(m, fp);
 
+    strcpy(m->name, fp);
+
     return m;
 }
 

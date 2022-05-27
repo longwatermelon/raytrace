@@ -120,9 +120,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
             if (p->focused)
             {
-                Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
-                if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->selected_mesh, 0))
-                    p->selected_mesh = 0;
+                p->selected_mesh = p->hover_mesh;
             }
 
             if (!p->focused && evt->button.x < ssize.x && evt->button.y < ssize.y)

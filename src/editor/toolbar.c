@@ -7,6 +7,10 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 {
     struct Toolbar *t = malloc(sizeof(struct Toolbar));
     t->p = p;
+
+    strcpy(t->obj, "None");
+    t->obj_tex = util_render_text(p->rend, p->font, "None", (SDL_Color){ 255, 255, 255 });
+
     SDL_Point ssize = util_ssize(t->p->window);
 
     for (int i = 0; i < 3; ++i)
@@ -21,6 +25,9 @@ void toolbar_free(struct Toolbar *t)
     for (int i = 0; i < 3; ++i)
         slider_free(t->obj_pos[i]);
 
+    if (t->obj_tex)
+        SDL_DestroyTexture(t->obj_tex);
+
     free(t);
 }
 
@@ -32,6 +39,10 @@ void toolbar_render(struct Toolbar *t)
     SDL_Rect r = { ssize.x, 0, EDITOR_TOOLBAR_WIDTH, ssize.y };
     SDL_RenderFillRect(t->p->rend, &r);
 
+    SDL_Rect obj_r = { ssize.x + 10, 10 };
+    SDL_QueryTexture(t->obj_tex, 0, 0, &obj_r.w, &obj_r.h);
+    SDL_RenderCopy(t->p->rend, t->obj_tex, 0, &obj_r);
+
     for (int i = 0; i < 3; ++i)
         slider_render(t->obj_pos[i], t->p->rend);
 }
@@ -39,6 +50,33 @@ void toolbar_render(struct Toolbar *t)
 
 void toolbar_main(struct Toolbar *t)
 {
+    bool render_obj = false;
+
+    if (t->p->selected_mesh)
+    {
+        if (strcmp(t->obj, t->p->selected_mesh->name) != 0)
+        {
+            sprintf(t->obj, "%s", t->p->selected_mesh->name);
+            render_obj = true;
+        }
+    }
+    else
+    {
+        if (strcmp(t->obj, "None") != 0)
+        {
+            strcpy(t->obj, "None");
+            render_obj = true;
+        }
+    }
+
+    if (render_obj)
+    {
+        if (t->obj_tex)
+            SDL_DestroyTexture(t->obj_tex);
+
+        t->obj_tex = util_render_text(t->p->rend, t->p->font, t->obj, (SDL_Color){ 255, 255, 255 });
+    }
+
     toolbar_update_positions(t);
 
     if (t->p->focused)

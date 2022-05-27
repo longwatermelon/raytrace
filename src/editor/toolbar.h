@@ -3,12 +3,16 @@
 
 #include "button.h"
 #include "slider.h"
+#include <limits.h>
 
 struct Prog;
 
 struct Toolbar
 {
     struct Prog *p;
+
+    char obj[PATH_MAX];
+    SDL_Texture *obj_tex;
 
     struct Slider *obj_pos[3];
 };

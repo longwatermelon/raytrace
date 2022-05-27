@@ -32,6 +32,8 @@ struct Mesh
 
     // optimization
     float left_rx, right_rx, top_ry, bot_ry; // normalized ray x and y components pointing to farthest left, right, top, and bottom points
+
+    char name[PATH_MAX];
 };
 
 struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat);
