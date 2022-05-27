@@ -25,6 +25,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->mode = MODE_NORMAL;
     p->focused = false;
     p->selected_mesh = 0;
+    p->hover_mesh = 0;
 
     p->toolbar = toolbar_alloc(p);
 
@@ -77,15 +78,15 @@ void prog_mainloop(struct Prog *p)
         if (p->focused)
         {
             Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
-            if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->selected_mesh, 0))
-                p->selected_mesh = 0;
+            if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->hover_mesh, 0))
+                p->hover_mesh = 0;
         }
 
         toolbar_main(p->toolbar);
 
         SDL_RenderClear(p->rend);
 
-        render_scene(p->sc, p->selected_mesh, p->rend);
+        render_scene(p);
 
         SDL_SetRenderDrawColor(p->rend, 255, 255, 255, 255);
         SDL_RenderDrawLine(p->rend, center.x, center.y - 10, center.x, center.y + 10);
@@ -117,7 +118,14 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         {
             mouse_down = true;
 
-            if (evt->button.x < ssize.x && evt->button.y < ssize.y)
+            if (p->focused)
+            {
+                Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
+                if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->selected_mesh, 0))
+                    p->selected_mesh = 0;
+            }
+
+            if (!p->focused && evt->button.x < ssize.x && evt->button.y < ssize.y)
             {
                 p->focused = true;
                 SDL_ShowCursor(SDL_FALSE);

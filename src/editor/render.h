@@ -4,8 +4,10 @@
 #include <core/scene.h>
 #include <SDL2/SDL.h>
 
-void render_scene(struct Scene *sc, struct Mesh *selected, SDL_Renderer *rend);
-void render_scene_mesh(struct Scene *sc, struct Mesh *m, bool selected, SDL_Renderer *rend);
+struct Prog;
+
+void render_scene(struct Prog *p);
+void render_scene_mesh(struct Prog *p, struct Mesh *m);
 
 void render_set_size(int w, int h);
 

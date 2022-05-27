@@ -23,7 +23,7 @@ struct Prog
 
     bool focused;
 
-    struct Mesh *selected_mesh;
+    struct Mesh *selected_mesh, *hover_mesh;
 
     struct Toolbar *toolbar;
 };

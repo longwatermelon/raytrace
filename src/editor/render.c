@@ -1,20 +1,21 @@
 #include "render.h"
+#include "prog.h"
 #include <core/vector.h>
 #include <core/rasterize.h>
 
 int g_size = 0;
 SDL_Point g_offset = { 0, 0 };
 
-void render_scene(struct Scene *sc, struct Mesh *selected, SDL_Renderer *rend)
+void render_scene(struct Prog *p)
 {
-    for (size_t i = 0; i < sc->nmeshes; ++i)
+    for (size_t i = 0; i < p->sc->nmeshes; ++i)
     {
-        render_scene_mesh(sc, sc->meshes[i], sc->meshes[i] == selected, rend);
+        render_scene_mesh(p, p->sc->meshes[i]);
     }
 }
 
 
-void render_scene_mesh(struct Scene *sc, struct Mesh *m, bool selected, SDL_Renderer *rend)
+void render_scene_mesh(struct Prog *p, struct Mesh *m)
 {
     for (size_t i = 0; i < m->ntris; ++i)
     {
@@ -23,18 +24,18 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, bool selected, SDL_Rend
 
         for (int j = 0; j < 3; ++j)
         {
-            Vec3f p = m->pts[m->tris[i].idx[j]];
-            p = vec_addv(m->pos, p);
-            p = vec_sub(p, sc->cam->pos);
-            p = rasterize_rotate_ccw(p, sc->cam->angle);
+            Vec3f pt = m->pts[m->tris[i].idx[j]];
+            pt = vec_addv(m->pos, pt);
+            pt = vec_sub(pt, p->sc->cam->pos);
+            pt = rasterize_rotate_ccw(pt, p->sc->cam->angle);
 
-            if (p.z <= .5f)
+            if (pt.z <= .5f)
             {
                 render = false;
             }
             else
             {
-                points[j] = rasterize_project_point(p, g_size, g_size);
+                points[j] = rasterize_project_point(pt, g_size, g_size);
 
                 points[j].x += g_offset.x;
                 points[j].y += g_offset.y;
@@ -43,14 +44,16 @@ void render_scene_mesh(struct Scene *sc, struct Mesh *m, bool selected, SDL_Rend
 
         if (render)
         {
-            if (selected)
-                SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+            if (m == p->selected_mesh)
+                SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255);
+            else if (m == p->hover_mesh)
+                SDL_SetRenderDrawColor(p->rend, 0, 255, 0, 255);
             else
-                SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
+                SDL_SetRenderDrawColor(p->rend, 255, 255, 255, 255);
 
-            SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[1].x, points[1].y);
-            SDL_RenderDrawLine(rend, points[1].x, points[1].y, points[2].x, points[2].y);
-            SDL_RenderDrawLine(rend, points[0].x, points[0].y, points[2].x, points[2].y);
+            SDL_RenderDrawLine(p->rend, points[0].x, points[0].y, points[1].x, points[1].y);
+            SDL_RenderDrawLine(p->rend, points[1].x, points[1].y, points[2].x, points[2].y);
+            SDL_RenderDrawLine(p->rend, points[0].x, points[0].y, points[2].x, points[2].y);
         }
     }
 }
