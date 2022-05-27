@@ -3,9 +3,10 @@
 #include "render.h"
 #include "util.h"
 #include "button.h"
-#include <SDL2/SDL_ttf.h>
+#include "slider.h"
 #include <core/render.h>
 #include <core/scene.h>
+#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL.h>
 
@@ -46,6 +47,7 @@ void prog_mainloop(struct Prog *p)
 
     SDL_Point ssize = util_ssize(p->window);
     struct Button *b = button_alloc((SDL_Rect){ ssize.x + 10, 100, 50, 20 }, prog_sample_button, "test", p->rend, p->font);
+    struct Slider *s = slider_alloc((SDL_Point){ ssize.x + 10, 200 }, 10, 1, p->rend, p->font);
 
     while (p->running)
     {
@@ -53,7 +55,8 @@ void prog_mainloop(struct Prog *p)
         render_set_size(ssize.x, ssize.y);
         SDL_Point center = { ssize.x / 2, ssize.y / 2 };
 
-        b->rect = (SDL_Rect){ ssize.x + 10, 100, 50, 20 };
+        b->rect.x = ssize.x + 10;
+        s->rect.x = ssize.x + 10;
 
         prog_events(p, &evt);
 
@@ -67,8 +70,8 @@ void prog_mainloop(struct Prog *p)
 
             SDL_WarpMouseInWindow(p->window, center.x, center.y);
 
-            p->sc->cam->angle.x += (float)mouse.x / 400.f;
-            p->sc->cam->angle.y -= (float)mouse.y / 400.f;
+            p->sc->cam->angle.x += (float)mouse.x / 200.f;
+            p->sc->cam->angle.y -= (float)mouse.y / 200.f;
         }
 
         Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
@@ -84,6 +87,7 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
         prog_render_toolbar(p);
+        slider_render(s, p->rend);
         button_render(b, p->rend, mouse);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
