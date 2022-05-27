@@ -2,7 +2,7 @@
 #include "util.h"
 
 
-struct Slider *slider_alloc(SDL_Point pos, int upp, float value, SDL_Renderer *rend, TTF_Font *font)
+struct Slider *slider_alloc(SDL_Point pos, float upp, float value, SDL_Renderer *rend, TTF_Font *font)
 {
     struct Slider *s = malloc(sizeof(struct Slider));
     s->rect = (SDL_Rect){ pos.x, pos.y, 200, 20 };
@@ -10,7 +10,7 @@ struct Slider *slider_alloc(SDL_Point pos, int upp, float value, SDL_Renderer *r
     s->upp = upp;
     s->tex = 0;
 
-    slider_redo_tex(s, value, rend, font);
+    slider_redo_tex(s, rend, font);
 
     return s;
 }
@@ -46,17 +46,17 @@ void slider_render(struct Slider *s, SDL_Renderer *rend)
 void slider_slide(struct Slider *s, int pixels, SDL_Renderer *rend, TTF_Font *font)
 {
     s->value += pixels * s->upp;
-    slider_redo_tex(s, s->value, rend, font);
+    slider_redo_tex(s, rend, font);
 }
 
 
-void slider_redo_tex(struct Slider *s, float value, SDL_Renderer *rend, TTF_Font *font)
+void slider_redo_tex(struct Slider *s, SDL_Renderer *rend, TTF_Font *font)
 {
     if (s->tex)
         SDL_DestroyTexture(s->tex);
 
     char tmp[20];
-    sprintf(tmp, "%.2f", value);
+    sprintf(tmp, "%.2f", s->value);
     s->tex = util_render_text(rend, font, tmp, (SDL_Color){ 255, 255, 255 });
 }
 

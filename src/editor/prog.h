@@ -1,6 +1,7 @@
 #ifndef EDITOR_PROG_H
 #define EDITOR_PROG_H
 
+#include "toolbar.h"
 #include <core/scene.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
@@ -23,6 +24,8 @@ struct Prog
     bool focused;
 
     struct Mesh *selected_mesh;
+
+    struct Toolbar *toolbar;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

@@ -26,6 +26,8 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->focused = false;
     p->selected_mesh = 0;
 
+    p->toolbar = toolbar_alloc(w, r, p->font);
+
     return p;
 }
 
@@ -34,6 +36,8 @@ void prog_free(struct Prog *p)
 {
     if (p->sc)
         scene_free(p->sc);
+
+    toolbar_free(p->toolbar);
 
     TTF_CloseFont(p->font);
 
@@ -46,17 +50,13 @@ void prog_mainloop(struct Prog *p)
     SDL_Event evt;
 
     SDL_Point ssize = util_ssize(p->window);
-    struct Button *b = button_alloc((SDL_Rect){ ssize.x + 10, 100, 50, 20 }, prog_sample_button, "test", p->rend, p->font);
-    struct Slider *s = slider_alloc((SDL_Point){ ssize.x + 10, 200 }, 10, 1, p->rend, p->font);
+    (void)ssize;
 
     while (p->running)
     {
         SDL_Point ssize = util_ssize(p->window);
         render_set_size(ssize.x, ssize.y);
         SDL_Point center = { ssize.x / 2, ssize.y / 2 };
-
-        b->rect.x = ssize.x + 10;
-        s->rect.x = ssize.x + 10;
 
         prog_events(p, &evt);
 
@@ -78,6 +78,8 @@ void prog_mainloop(struct Prog *p)
         if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->selected_mesh, 0))
             p->selected_mesh = 0;
 
+        toolbar_main(p->toolbar, p);
+
         SDL_RenderClear(p->rend);
 
         render_scene(p->sc, p->selected_mesh, p->rend);
@@ -86,9 +88,7 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x, center.y - 10, center.x, center.y + 10);
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
-        prog_render_toolbar(p);
-        slider_render(s, p->rend);
-        button_render(b, p->rend, mouse);
+        toolbar_render(p->toolbar, p->rend);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
