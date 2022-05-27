@@ -86,7 +86,7 @@ void prog_mainloop(struct Prog *p)
         if (p->focused)
         {
             Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
-            if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, false, 0, 0, (void*)&p->hover_mesh, 0))
+            if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, (Point){ 0, 0 }, false, 0, 0, (void*)&p->hover_mesh, 0))
                 p->hover_mesh = 0;
         }
 
