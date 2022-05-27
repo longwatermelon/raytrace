@@ -34,8 +34,6 @@ void prog_free(struct Prog *p);
 void prog_mainloop(struct Prog *p);
 void prog_events(struct Prog *p, SDL_Event *evt);
 
-void prog_render_toolbar(struct Prog *p);
-
 void prog_sample_button(struct Prog *p);
 
 #endif

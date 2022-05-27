@@ -162,18 +162,3 @@ void prog_events(struct Prog *p, SDL_Event *evt)
     }
 }
 
-
-void prog_render_toolbar(struct Prog *p)
-{
-    SDL_Point ssize = util_ssize(p->window);
-    SDL_SetRenderDrawColor(p->rend, 40, 40, 40, 255);
-    SDL_Rect r = { ssize.x, 0, EDITOR_TOOLBAR_WIDTH, ssize.y };
-    SDL_RenderFillRect(p->rend, &r);
-}
-
-
-void prog_sample_button(struct Prog *p)
-{
-    printf("hoo hoo\n");
-}
-
