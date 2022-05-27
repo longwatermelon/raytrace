@@ -50,9 +50,6 @@ void prog_mainloop(struct Prog *p)
 {
     SDL_Event evt;
 
-    SDL_Point ssize = util_ssize(p->window);
-    (void)ssize;
-
     while (p->running)
     {
         SDL_Point ssize = util_ssize(p->window);
@@ -105,6 +102,11 @@ void prog_events(struct Prog *p, SDL_Event *evt)
     struct Camera *c = p->sc->cam;
     SDL_Point ssize = util_ssize(p->window);
 
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+
+    static SDL_Point slider_mouse = { -1, -1 };
+
     static bool mouse_down = false;
 
     while (SDL_PollEvent(evt))
@@ -132,11 +134,24 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         case SDL_MOUSEBUTTONUP:
         {
             mouse_down = false;
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+            SDL_WarpMouseInWindow(p->window, slider_mouse.x, slider_mouse.y);
+            slider_mouse = (SDL_Point){ -1, -1 };
+            p->toolbar->selected_slider = 0;
         } break;
         case SDL_MOUSEMOTION:
         {
             if (mouse_down)
-                toolbar_slide_sliders(p->toolbar, evt->motion.xrel);
+            {
+                if (slider_mouse.x == -1 && slider_mouse.y == -1)
+                    SDL_GetMouseState(&slider_mouse.x, &slider_mouse.y);
+
+                if (toolbar_slide_sliders(p->toolbar, evt->motion.xrel, p->toolbar->selected_slider != 0))
+                {
+                    SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
+                    SDL_SetRelativeMouseMode(SDL_TRUE);
+                }
+            }
         } break;
 
         case SDL_KEYDOWN:

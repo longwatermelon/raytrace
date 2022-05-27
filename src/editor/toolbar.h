@@ -15,6 +15,8 @@ struct Toolbar
     SDL_Texture *obj_tex;
 
     struct Slider *obj_pos[3];
+
+    struct Slider *selected_slider;
 };
 
 struct Toolbar *toolbar_alloc(struct Prog *p);
@@ -25,7 +27,7 @@ void toolbar_render(struct Toolbar *t);
 void toolbar_main(struct Toolbar *t);
 void toolbar_update_positions(struct Toolbar *t);
 
-void toolbar_slide_sliders(struct Toolbar *t, int pixels);
+bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy);
 
 #endif
 

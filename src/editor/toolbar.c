@@ -16,6 +16,8 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     for (int i = 0; i < 3; ++i)
         t->obj_pos[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, t->p->rend, t->p->font);
 
+    t->selected_slider = 0;
+
     return t;
 }
 
@@ -114,8 +116,10 @@ void toolbar_update_positions(struct Toolbar *t)
 }
 
 
-void toolbar_slide_sliders(struct Toolbar *t, int pixels)
+bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
 {
+    bool ret = false;
+
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
@@ -123,11 +127,26 @@ void toolbar_slide_sliders(struct Toolbar *t, int pixels)
     {
         for (int i = 0; i < 3; ++i)
         {
-            if (util_point_in_rect(mouse, t->obj_pos[i]->rect))
+            if (ignore_accuracy)
             {
-                slider_slide(t->obj_pos[i], pixels, t->p->rend, t->p->font);
+                if (t->selected_slider)
+                {
+                    slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
+                    ret = true;
+                }
+            }
+            else
+            {
+                if (util_point_in_rect(mouse, t->obj_pos[i]->rect))
+                {
+                    slider_slide(t->obj_pos[i], pixels, t->p->rend, t->p->font);
+                    t->selected_slider = t->obj_pos[i];
+                    ret = true;
+                }
             }
         }
     }
+
+    return ret;
 }
 
