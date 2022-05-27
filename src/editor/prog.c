@@ -26,7 +26,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->focused = false;
     p->selected_mesh = 0;
 
-    p->toolbar = toolbar_alloc(w, r, p->font);
+    p->toolbar = toolbar_alloc(p);
 
     return p;
 }
@@ -81,7 +81,7 @@ void prog_mainloop(struct Prog *p)
                 p->selected_mesh = 0;
         }
 
-        toolbar_main(p->toolbar, p);
+        toolbar_main(p->toolbar);
 
         SDL_RenderClear(p->rend);
 
@@ -91,7 +91,7 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x, center.y - 10, center.x, center.y + 10);
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
-        toolbar_render(p->toolbar, p->rend);
+        toolbar_render(p->toolbar);
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
@@ -130,7 +130,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         case SDL_MOUSEMOTION:
         {
             if (mouse_down)
-                toolbar_slide_sliders(p->toolbar, p, evt->motion.xrel);
+                toolbar_slide_sliders(p->toolbar, evt->motion.xrel);
         } break;
 
         case SDL_KEYDOWN:
