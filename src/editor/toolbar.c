@@ -50,6 +50,17 @@ void toolbar_main(struct Toolbar *t, struct Prog *p)
             t->obj_pos[2]->value = p->selected_mesh->pos.z;
         }
     }
+    else
+    {
+        if (p->selected_mesh)
+        {
+            p->selected_mesh->pos = (Vec3f){
+                t->obj_pos[0]->value,
+                t->obj_pos[1]->value,
+                t->obj_pos[2]->value
+            };
+        }
+    }
 
     for (int i = 0; i < 3; ++i)
         slider_redo_tex(t->obj_pos[i], p->rend, p->font);
@@ -62,5 +73,20 @@ void toolbar_update_positions(struct Toolbar *t)
 
     for (int i = 0; i < 3; ++i)
         t->obj_pos[i]->rect.x = ssize.x + 10;
+}
+
+
+void toolbar_slide_sliders(struct Toolbar *t, struct Prog *p, int pixels)
+{
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        if (util_point_in_rect(mouse, t->obj_pos[i]->rect))
+        {
+            slider_slide(t->obj_pos[i], pixels, p->rend, p->font);
+        }
+    }
 }
 

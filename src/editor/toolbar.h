@@ -21,5 +21,7 @@ void toolbar_render(struct Toolbar *t, SDL_Renderer *rend);
 void toolbar_main(struct Toolbar *t, struct Prog *p);
 void toolbar_update_positions(struct Toolbar *t);
 
+void toolbar_slide_sliders(struct Toolbar *t, struct Prog *p, int pixels);
+
 #endif
 
