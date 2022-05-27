@@ -94,6 +94,19 @@ void writer_write_image(struct Scene *sc, const char *fp)
         free(s);
     }
 
+    for (size_t i = 0; i < sc->nlights; ++i)
+    {
+        struct Light *l = sc->lights[i];
+
+        const char *template = "light %.2f %.2f %.2f|%.2f\n";
+        char *s = calloc(sizeof(char), strlen(template) + 100);
+        sprintf(s, template, EXPAND_VECTOR(l->pos), l->in);
+
+        out = realloc(out, sizeof(char) * (strlen(out) + strlen(s) + 1));
+        strcat(out, s);
+        free(s);
+    }
+
     FILE *f = fopen(fp, "w");
     fputs(out, f);
     fclose(f);
