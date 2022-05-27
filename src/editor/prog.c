@@ -4,6 +4,7 @@
 #include "util.h"
 #include "button.h"
 #include "slider.h"
+#include "writer.h"
 #include <core/render.h>
 #include <core/scene.h>
 #include <SDL2/SDL_ttf.h>
@@ -161,6 +162,9 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             case SDLK_ESCAPE:
                 p->focused = false;
                 SDL_ShowCursor(SDL_TRUE);
+                break;
+            case SDLK_r:
+                writer_write_image(p->sc, "out");
                 break;
             }
         } break;
