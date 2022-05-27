@@ -45,6 +45,31 @@ void writer_write_image(struct Scene *sc, const char *fp)
         free(s);
     }
 
+    for (size_t i = 0; i < sc->nspheres; ++i)
+    {
+        struct Sphere *s = sc->spheres[i];
+
+        int idx = -1;
+
+        for (size_t j = 0; j < sc->nmats; ++j)
+        {
+            if (s->mat == sc->mats[j])
+            {
+                idx = j;
+                break;
+            }
+        }
+
+        const char *template = "sphere %.2f %.2f %.2f|%d|%.2f\n";
+
+        char *str = calloc(sizeof(char), strlen(template) + 100);
+        sprintf(str, template, EXPAND_VECTOR(s->c), idx, s->r);
+
+        out = realloc(out, sizeof(char) * (strlen(out) + strlen(str) + 1));
+        strcat(out, str);
+        free(str);
+    }
+
     FILE *f = fopen(fp, "w");
     fputs(out, f);
     fclose(f);
