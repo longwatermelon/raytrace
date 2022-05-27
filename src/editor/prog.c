@@ -164,7 +164,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 SDL_ShowCursor(SDL_TRUE);
                 break;
             case SDLK_r:
-                writer_write_image(p->sc, "out");
+                writer_image(p->sc, "out");
                 break;
             }
         } break;

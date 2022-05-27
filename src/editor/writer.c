@@ -3,7 +3,7 @@
 #define EXPAND_VECTOR(v) v.x, v.y, v.z
 
 
-void writer_write_image(struct Scene *sc, const char *fp)
+void writer_image(struct Scene *sc, const char *fp)
 {
     char *out = calloc(sizeof(char), 1);
 
@@ -19,6 +19,21 @@ void writer_write_image(struct Scene *sc, const char *fp)
     sprintf(out, begin, EXPAND_VECTOR(sc->bg), EXPAND_VECTOR(sc->cam->pos), EXPAND_VECTOR(sc->cam->angle));
     out = realloc(out, sizeof(char) * (strlen(out) + 1));
 
+    writer_image_mats(sc, &out);
+    writer_image_meshes(sc, &out);
+    writer_image_spheres(sc, &out);
+    writer_image_lights(sc, &out);
+
+    FILE *f = fopen(fp, "w");
+    fputs(out, f);
+    fclose(f);
+
+    free(out);
+}
+
+
+void writer_image_mats(struct Scene *sc, char **out)
+{
     for (size_t i = 0; i < sc->nmats; ++i)
     {
         struct Material *m = sc->mats[i];
@@ -36,15 +51,51 @@ void writer_write_image(struct Scene *sc, const char *fp)
         const char *template = "material %.2f %.2f %.2f|%.2f %.2f %.2f|%.2f|%d\n";
         char *s = calloc(sizeof(char), strlen(template) + 100);
 
-        sprintf(s, template, m->col.x, m->col.y, m->col.z,
+        sprintf(s, template, EXPAND_VECTOR(m->col),
             m->ref_diffuse, m->ref_specular, m->ref_mirror,
             m->specular_exp, idx);
 
-        out = realloc(out, sizeof(char) * (strlen(out) + strlen(s) + 1));
-        strcat(out, s);
+        s = realloc(s, sizeof(char) * (strlen(s) + 1));
+
+        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(s) + 1));
+        strcat(*out, s);
         free(s);
     }
+}
 
+
+void writer_image_meshes(struct Scene *sc, char **out)
+{
+    for (size_t i = 0; i < sc->nmeshes; ++i)
+    {
+        struct Mesh *m = sc->meshes[i];
+
+        int idx = -1;
+
+        for (size_t j = 0; j < sc->nmats; ++j)
+        {
+            if (m->mat == sc->mats[j])
+            {
+                idx = j;
+                break;
+            }
+        }
+
+        const char *template = "mesh %.2f %.2f %.2f|%d|%s %d\n";
+        char *s = calloc(sizeof(char), strlen(template) + 100);
+        sprintf(s, template, EXPAND_VECTOR(m->pos), idx, m->name, !m->bounded);
+
+        s = realloc(s, sizeof(char) * (strlen(s) + 1));
+
+        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(s) + 1));
+        strcat(*out, s);
+        free(s);
+    }
+}
+
+
+void writer_image_spheres(struct Scene *sc, char **out)
+{
     for (size_t i = 0; i < sc->nspheres; ++i)
     {
         struct Sphere *s = sc->spheres[i];
@@ -65,35 +116,17 @@ void writer_write_image(struct Scene *sc, const char *fp)
         char *str = calloc(sizeof(char), strlen(template) + 100);
         sprintf(str, template, EXPAND_VECTOR(s->c), idx, s->r);
 
-        out = realloc(out, sizeof(char) * (strlen(out) + strlen(str) + 1));
-        strcat(out, str);
+        str = realloc(str, sizeof(char) * (strlen(str) + 1));
+
+        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(str) + 1));
+        strcat(*out, str);
         free(str);
     }
+}
 
-    for (size_t i = 0; i < sc->nmeshes; ++i)
-    {
-        struct Mesh *m = sc->meshes[i];
 
-        int idx = -1;
-
-        for (size_t j = 0; j < sc->nmats; ++j)
-        {
-            if (m->mat == sc->mats[j])
-            {
-                idx = j;
-                break;
-            }
-        }
-
-        const char *template = "mesh %.2f %.2f %.2f|%d|%s %d\n";
-        char *s = calloc(sizeof(char), strlen(template) + 100);
-        sprintf(s, template, EXPAND_VECTOR(m->pos), idx, m->name, !m->bounded);
-
-        out = realloc(out, sizeof(char) * (strlen(out) + strlen(s) + 1));
-        strcat(out, s);
-        free(s);
-    }
-
+void writer_image_lights(struct Scene *sc, char **out)
+{
     for (size_t i = 0; i < sc->nlights; ++i)
     {
         struct Light *l = sc->lights[i];
@@ -102,48 +135,11 @@ void writer_write_image(struct Scene *sc, const char *fp)
         char *s = calloc(sizeof(char), strlen(template) + 100);
         sprintf(s, template, EXPAND_VECTOR(l->pos), l->in);
 
-        out = realloc(out, sizeof(char) * (strlen(out) + strlen(s) + 1));
-        strcat(out, s);
+        s = realloc(s, sizeof(char) * (strlen(s) + 1));
+
+        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(s) + 1));
+        strcat(*out, s);
         free(s);
     }
-
-    FILE *f = fopen(fp, "w");
-    fputs(out, f);
-    fclose(f);
-
-    free(out);
-#if 0
-image
-dim 1000 1000
-threads 4
-antialias
-optimize backface
-bg .1 0 .1
-//cam -10 -2 0|.5 -.2 0
-cam 0 0 0|0 0 0
-
-// meshes
-material .6 .95 .6|.9 .1 1|10|-1
-material .7 .95 1|1 .6 .4|70|-1
-material .9 .6 .7|1 2 1|50|-1
-material .6 .7 .9|.9 .05 1|10|-1
-material .95 .7 .95|1 1 1|50|-1
-
-// spheres
-material .8 .8 .9|1 1 .8|70|-1
-material .9 .7 .7|1 1 .6|70|-1
-
-sphere -3 3 14|5|1
-sphere 2 2 25|6|2
-
-//mesh 0 4 0|0|res/floor.obj 1
-mesh -3.8 3 20|1|res/cube.obj 0
-mesh 2 3 17|2|res/icosphere.obj 0
-//mesh -1 2.2 23|3|res/donut.obj 0
-mesh -1 3.4 12|4|res/monkey.obj 0
-
-light 4 -1 5|.8
-light -3 -5 11|.8
-#endif
 }
 
