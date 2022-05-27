@@ -15,6 +15,8 @@ enum
 
 enum { OBJ_MESH, OBJ_SPHERE, OBJ_LIGHT, OBJ_TEX };
 
+typedef struct { int x; int y; } Point;
+
 void util_set_loglevel(int level);
 int util_loglevel();
 

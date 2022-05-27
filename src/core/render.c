@@ -195,7 +195,7 @@ void *render_cast_rays(void *arg)
             }
             if (!flag)
 #endif
-                args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam->pos, dir, true, 0);
+            args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam->pos, dir, (Point){ x, y }, true, 0);
         }
 
         ++*args->rows_rendered;
@@ -206,13 +206,13 @@ void *render_cast_rays(void *arg)
 }
 
 
-Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, int bounce)
+Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool optimize_meshes, int bounce)
 {
     Vec3f hit, norm;
     void *obj;
     int obj_type;
 
-    if (!render_scene_cast_ray(sc, o, dir, optimize_meshes, &hit, &norm, &obj, &obj_type))
+    if (!render_scene_cast_ray(sc, o, dir, pixel, optimize_meshes, &hit, &norm, &obj, &obj_type))
         return sc->bg;
 
     struct Material *mat;
@@ -233,7 +233,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
         Vec3f sdir = vec_normalize(vec_sub(sc->lights[i]->pos, orig));
         
         Vec3f shadow_hit;
-        if (render_scene_cast_ray(sc, orig, sdir, false, &shadow_hit, 0, 0, 0))
+        if (render_scene_cast_ray(sc, orig, sdir, pixel, false, &shadow_hit, 0, 0, 0))
         {
             if (vec_len(vec_sub(shadow_hit, hit)) <= vec_len(vec_sub(sc->lights[i]->pos, hit)))
                 continue;
@@ -256,7 +256,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
 
     if (mat->ref_mirror < 1.f && bounce < g_max_bounces)
     {
-        Vec3f col = render_cast_ray(sc, morig, norm, false, bounce + 1);
+        Vec3f col = render_cast_ray(sc, morig, norm, pixel, false, bounce + 1);
         hcol = vec_addv(vec_mulf(hcol, mat->ref_mirror), vec_mulf(col, 1.f - mat->ref_mirror));
     }
 
@@ -264,7 +264,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes
 }
 
 
-bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_meshes, Vec3f *hit, Vec3f *n, void **obj, int *obj_type)
+bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool optimize_meshes, Vec3f *hit, Vec3f *n, void **obj, int *obj_type)
 {
     float nearest = INFINITY;
 
@@ -285,8 +285,8 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, bool optimize_m
     for (size_t i = 0; i < sc->nmeshes; ++i)
     {
         if (optimize_meshes &&
-            (dir.y < sc->meshes[i]->top_ry || dir.y > sc->meshes[i]->bot_ry ||
-            dir.x < sc->meshes[i]->left_rx || dir.x > sc->meshes[i]->right_rx))
+            (pixel.y < sc->meshes[i]->min.y || pixel.y > sc->meshes[i]->max.y ||
+            pixel.x < sc->meshes[i]->min.x || pixel.x > sc->meshes[i]->max.x))
             continue;
 
         float dist;

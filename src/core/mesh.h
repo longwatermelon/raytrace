@@ -7,7 +7,6 @@
 #include "camera.h"
 #include <stdbool.h>
 #include <sys/types.h>
-#include <SDL2/SDL.h>
 
 typedef struct
 {
@@ -31,7 +30,8 @@ struct Mesh
     struct Material *mat;
 
     // optimization
-    float left_rx, right_rx, top_ry, bot_ry; // normalized ray x and y components pointing to farthest left, right, top, and bottom points
+    // pixels on screen
+    Point min, max;
 
     char name[PATH_MAX];
     bool bounded;

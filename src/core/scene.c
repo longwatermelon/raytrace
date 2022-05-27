@@ -204,10 +204,8 @@ struct Mesh *scene_parse_mesh(struct Scene *sc, char *s)
 
     if (fullscreen_bounds)
     {
-        m->left_rx = -1.f;
-        m->right_rx = 1.f;
-        m->bot_ry = 1.f;
-        m->top_ry = -1.f;
+        m->min = (Point){ INT_MIN, INT_MIN };
+        m->max = (Point){ INT_MAX, INT_MAX };
     }
     else
     {

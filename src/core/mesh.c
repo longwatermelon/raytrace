@@ -173,11 +173,8 @@ void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
 {
     m->bounded = true;
 
-    Vec3f l, r, t, b;
-    float lx = INFINITY;
-    float rx = -INFINITY;
-    float ty = INFINITY;
-    float by = -INFINITY;
+    m->min = (Point){ INT_MIN, INT_MIN };
+    m->max = (Point){ INT_MAX, INT_MAX };
 
     for (size_t i = 0; i < m->npts; ++i)
     {
@@ -186,33 +183,23 @@ void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
 
         SDL_Point p = rasterize_project_point(adjusted, 1000, 1000);
 
-        if (p.x < lx)
-        {
-            lx = p.x;
-            l = adjusted;
-        }
+        if (p.x < m->min.x)
+            m->min.x = p.x;
 
-        if (p.x > rx)
-        {
-            rx = p.x;
-            r = adjusted;
-        }
+        if (p.x > m->max.x)
+            m->max.x = p.x;
 
-        if (p.y < ty)
-        {
-            ty = p.y;
-            t = adjusted;
-        }
+        if (p.y < m->min.y)
+            m->min.y = p.y;
 
-        if (p.y > by)
-        {
-            by = p.y;
-            b = adjusted;
-        }
+        if (p.y > m->max.y)
+            m->max.y = p.y;
     }
 
+#if 0
     m->top_ry = rasterize_rotate_cc(vec_normalize(t), cam->angle).y;
     m->bot_ry = rasterize_rotate_cc(vec_normalize(b), cam->angle).y;
     m->left_rx = rasterize_rotate_cc(vec_normalize(l), cam->angle).x;
     m->right_rx = rasterize_rotate_cc(vec_normalize(r), cam->angle).x;
+#endif
 }
