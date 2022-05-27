@@ -182,19 +182,6 @@ void *render_cast_rays(void *arg)
 
             Vec3f dir = vec_normalize((Vec3f){ px, py, 1 });
             dir = rasterize_rotate_cc(dir, args->sc->cam->angle);
-#if 0
-            bool flag = false;
-            for (size_t i = 0; i < args->sc->nmeshes; ++i)
-            {
-                if ((dir.y > args->sc->meshes[i]->top_ry && dir.y < args->sc->meshes[i]->bot_ry &&
-                dir.x > args->sc->meshes[i]->left_rx && dir.x < args->sc->meshes[i]->right_rx))
-                {
-                    args->frame[y * args->sc->w + x] = (Vec3f){ 255.f, 0.f, 0.f };
-                    flag = true;
-                }
-            }
-            if (!flag)
-#endif
             args->frame[y * args->sc->w + x] = render_cast_ray(args->sc, args->sc->cam->pos, dir, (Point){ x, y }, true, 0);
         }
 
