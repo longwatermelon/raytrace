@@ -31,3 +31,10 @@ SDL_Texture *util_render_text(SDL_Renderer* rend, TTF_Font* font, const char* te
     return tex;
 }
 
+
+void util_strcat(char **dst, char *src)
+{
+    *dst = realloc(*dst, sizeof(char) * (strlen(*dst) + strlen(src) + 1));
+    strcat(*dst, src);
+}
+

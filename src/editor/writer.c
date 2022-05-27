@@ -1,4 +1,5 @@
 #include "writer.h"
+#include "util.h"
 
 #define EXPAND_VECTOR(v) v.x, v.y, v.z
 
@@ -57,8 +58,7 @@ void writer_image_mats(struct Scene *sc, char **out)
 
         s = realloc(s, sizeof(char) * (strlen(s) + 1));
 
-        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(s) + 1));
-        strcat(*out, s);
+        util_strcat(out, s);
         free(s);
     }
 }
@@ -87,8 +87,7 @@ void writer_image_meshes(struct Scene *sc, char **out)
 
         s = realloc(s, sizeof(char) * (strlen(s) + 1));
 
-        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(s) + 1));
-        strcat(*out, s);
+        util_strcat(out, s);
         free(s);
     }
 }
@@ -118,8 +117,7 @@ void writer_image_spheres(struct Scene *sc, char **out)
 
         str = realloc(str, sizeof(char) * (strlen(str) + 1));
 
-        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(str) + 1));
-        strcat(*out, str);
+        util_strcat(out, str);
         free(str);
     }
 }
@@ -137,8 +135,7 @@ void writer_image_lights(struct Scene *sc, char **out)
 
         s = realloc(s, sizeof(char) * (strlen(s) + 1));
 
-        *out = realloc(*out, sizeof(char) * (strlen(*out) + strlen(s) + 1));
-        strcat(*out, s);
+        util_strcat(out, s);
         free(s);
     }
 }
