@@ -5,7 +5,7 @@
 struct Slider *slider_alloc(SDL_Point pos, int upp, float value, SDL_Renderer *rend, TTF_Font *font)
 {
     struct Slider *s = malloc(sizeof(struct Slider));
-    s->rect = (SDL_Rect){ pos.x, pos.y, 200, 30 };
+    s->rect = (SDL_Rect){ pos.x, pos.y, 200, 20 };
     s->value = value;
     s->upp = upp;
     s->tex = 0;
