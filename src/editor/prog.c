@@ -30,6 +30,9 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->toolbar = toolbar_alloc(p);
 
+    p->status = 0;
+    p->last_status = 0;
+
     return p;
 }
 
@@ -82,6 +85,12 @@ void prog_mainloop(struct Prog *p)
 
         toolbar_main(p->toolbar);
 
+        if (p->status && (float)(clock() - p->last_status) / CLOCKS_PER_SEC > .5f)
+        {
+            SDL_DestroyTexture(p->status);
+            p->status = 0;
+        }
+
         SDL_RenderClear(p->rend);
 
         render_scene(p);
@@ -91,6 +100,13 @@ void prog_mainloop(struct Prog *p)
         SDL_RenderDrawLine(p->rend, center.x - 10, center.y, center.x + 10, center.y);
 
         toolbar_render(p->toolbar);
+
+        if (p->status)
+        {
+            SDL_Rect r = { 10, 20 };
+            SDL_QueryTexture(p->status, 0, 0, &r.w, &r.h);
+            SDL_RenderCopy(p->rend, p->status, 0, &r);
+        }
 
         SDL_SetRenderDrawColor(p->rend, p->sc->bg.x * 255.f, p->sc->bg.y * 255.f, p->sc->bg.z * 255.f, 255);
         SDL_RenderPresent(p->rend);
@@ -165,6 +181,8 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 break;
             case SDLK_r:
                 writer_image(p->sc, "out");
+                p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
+                p->last_status = clock();
                 break;
             }
         } break;

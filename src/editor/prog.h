@@ -26,6 +26,9 @@ struct Prog
     struct Mesh *selected_mesh, *hover_mesh;
 
     struct Toolbar *toolbar;
+
+    SDL_Texture *status;
+    clock_t last_status;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

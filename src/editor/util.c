@@ -23,7 +23,7 @@ SDL_Texture *util_render_text(SDL_Renderer* rend, TTF_Font* font, const char* te
     if (!text[0])
         return 0;
 
-    SDL_Surface* surf = TTF_RenderText_Blended(font, text, color);
+    SDL_Surface* surf = TTF_RenderUTF8_Blended(font, text, color);
     SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surf);
 
     SDL_FreeSurface(surf);
