@@ -70,6 +70,30 @@ void writer_write_image(struct Scene *sc, const char *fp)
         free(str);
     }
 
+    for (size_t i = 0; i < sc->nmeshes; ++i)
+    {
+        struct Mesh *m = sc->meshes[i];
+
+        int idx = -1;
+
+        for (size_t j = 0; j < sc->nmats; ++j)
+        {
+            if (m->mat == sc->mats[j])
+            {
+                idx = j;
+                break;
+            }
+        }
+
+        const char *template = "mesh %.2f %.2f %.2f|%d|%s %d\n";
+        char *s = calloc(sizeof(char), strlen(template) + 100);
+        sprintf(s, template, EXPAND_VECTOR(m->pos), idx, m->name, !m->bounded);
+
+        out = realloc(out, sizeof(char) * (strlen(out) + strlen(s) + 1));
+        strcat(out, s);
+        free(s);
+    }
+
     FILE *f = fopen(fp, "w");
     fputs(out, f);
     fclose(f);

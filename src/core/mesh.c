@@ -27,6 +27,7 @@ struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat)
         mesh_read(m, fp);
 
     strcpy(m->name, fp);
+    m->bounded = false;
 
     return m;
 }
@@ -170,6 +171,8 @@ bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, 
 
 void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
 {
+    m->bounded = true;
+
     Vec3f l, r, t, b;
     float lx = INFINITY;
     float rx = -INFINITY;
