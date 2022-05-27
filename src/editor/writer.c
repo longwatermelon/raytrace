@@ -4,20 +4,24 @@
 #define EXPAND_VECTOR(v) v.x, v.y, v.z
 
 
-void writer_image(struct Scene *sc, const char *fp)
+void writer_image(struct Scene *sc, struct Config *c, const char *fp)
 {
     char *out = calloc(sizeof(char), 1);
 
     const char *begin = "image\n"
-                        "dim 1000 1000\n"
-                        "threads 4\n"
+                        "dim %d %d\n"
+                        "threads %d\n"
                         "antialias\n"
                         "optimize backface\n"
                         "bg %.2f %.2f %.2f\n"
                         "cam %.2f %.2f %.2f|%.2f %.2f %.2f\n";
 
     out = realloc(out, sizeof(char) * (strlen(begin) + 100));
-    sprintf(out, begin, EXPAND_VECTOR(sc->bg), EXPAND_VECTOR(sc->cam->pos), EXPAND_VECTOR(sc->cam->angle));
+
+    sprintf(out, begin, c->dim.x, c->dim.y, c->threads,
+        EXPAND_VECTOR(sc->bg), EXPAND_VECTOR(sc->cam->pos),
+        EXPAND_VECTOR(sc->cam->angle));
+
     out = realloc(out, sizeof(char) * (strlen(out) + 1));
 
     writer_image_mats(sc, &out);

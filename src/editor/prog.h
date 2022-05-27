@@ -21,6 +21,8 @@ struct Prog
     TTF_Font *font;
 
     struct Scene *sc;
+    struct Config *config;
+
     int mode;
 
     bool focused;

@@ -25,6 +25,8 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->font = TTF_OpenFont("res/font.ttf", 14);
 
     p->sc = scene_alloc("examples/image");
+    p->config = config_alloc();
+
     p->mode = MODE_NORMAL;
     p->focused = false;
     p->selected_mesh = 0;
@@ -50,6 +52,7 @@ void prog_free(struct Prog *p)
         scene_free(p->sc);
 
     toolbar_free(p->toolbar);
+    config_free(p->config);
 
     TTF_CloseFont(p->font);
 
@@ -223,7 +226,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 if (ctrl)
                 {
                     render_set_progress(0.f);
-                    writer_image(p->sc, ".rtmp");
+                    writer_image(p->sc, p->config, ".rtmp");
                     p->status = util_render_text(p->rend, p->font, "Rendering...", (SDL_Color){ 255, 255, 0 });
                     p->rendering = true;
                     util_set_loglevel(LOG_SILENT);
@@ -237,7 +240,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 }
                 else
                 {
-                    writer_image(p->sc, "out");
+                    writer_image(p->sc, p->config, "out");
                     p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
                     p->last_status = clock();
                 }
