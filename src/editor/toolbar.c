@@ -114,7 +114,7 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->obj_y = 50;
-    t->mat_y = 270;
+    t->mat_y = 210;
     t->threads_y = 500;
 
     t->selected_slider = 0;
