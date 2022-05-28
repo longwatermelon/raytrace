@@ -151,8 +151,10 @@ char *explorer_find(struct Explorer *e)
                                     free(s);
                                 }
 
+                                free(e->nodes);
                                 e->nodes = explorer_read_dir(e, e->dir, &e->nodes_num);
                                 explorer_sort(e);
+                                e->top_y = 0;
                             }
                         }
                         else
@@ -178,7 +180,11 @@ char *explorer_find(struct Explorer *e)
         
             case SDL_MOUSEWHEEL:
             {
-                e->top_y += evt.wheel.y * 20;
+                if ((evt.wheel.y > 0 && e->top_y + evt.wheel.y * 20 <= 0) ||
+                    (evt.wheel.y < 0 && e->nodes_num * 20 + e->top_y >= 450))
+                {
+                    e->top_y += evt.wheel.y * 20;
+                }
             } break;
             }
         }
