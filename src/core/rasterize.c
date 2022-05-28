@@ -4,6 +4,9 @@
 
 Vec3f rasterize_rotate_ccw(Vec3f p, Vec3f angle)
 {
+    if (vec_len(angle) == 0.f)
+        return p;
+
     float rotx[3][3] = {
         { 1, 0, 0 },
         { 0, cosf(angle.y), -sinf(angle.y) },
@@ -28,6 +31,9 @@ Vec3f rasterize_rotate_ccw(Vec3f p, Vec3f angle)
 
 Vec3f rasterize_rotate_cc(Vec3f p, Vec3f angle)
 {
+    if (vec_len(angle) == 0.f)
+        return p;
+
     angle = vec_mulf(angle, -1.f);
 
     float rotx[3][3] = {
