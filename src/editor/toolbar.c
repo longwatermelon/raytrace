@@ -6,7 +6,7 @@
 // button functions
 void decrease_threads(struct Prog *p)
 {
-    if (p->config->threads > 0)
+    if (p->config->threads > 1)
         --p->config->threads;
 
     char s[20] = { 0 };
