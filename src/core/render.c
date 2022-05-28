@@ -202,7 +202,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool op
     if (!render_scene_cast_ray(sc, o, dir, pixel, optimize_meshes, &hit, &norm, &obj, &obj_type))
         return sc->bg;
 
-    struct Material *mat;
+    struct Material *mat = 0;
 
     switch (obj_type)
     {
