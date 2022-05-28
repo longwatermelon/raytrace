@@ -35,6 +35,8 @@ struct Explorer
 
     struct ENode **nodes;
     size_t nodes_num;
+
+    struct ENode *selected;
 };
 
 struct Explorer *explorer_alloc(const char *dir, struct Prog *p);
@@ -42,6 +44,7 @@ void explorer_free(struct Explorer *e);
 
 char *explorer_find(struct Explorer *e);
 void explorer_render_nodes(struct Explorer *e);
+struct ENode *explorer_find_node(struct Explorer *e, SDL_Point mouse);
 
 struct ENode **explorer_read_dir(struct Explorer *e, const char *dir, size_t *num);
 

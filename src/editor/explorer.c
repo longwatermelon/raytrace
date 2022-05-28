@@ -36,6 +36,8 @@ struct Explorer *explorer_alloc(const char *dir, struct Prog *p)
     e->p = p;
     e->font = p->font;
 
+    e->selected = 0;
+
     sprintf(e->dir, "%s", dir);
 
     e->nodes = explorer_read_dir(e, dir, &e->nodes_num);
@@ -93,6 +95,15 @@ char *explorer_find(struct Explorer *e)
                         }
                     }
                 }
+
+                if (mouse.y < 450 && mouse.x < 500)
+                {
+                    e->selected = explorer_find_node(e, mouse);
+                }
+                else
+                {
+                    e->selected = 0;
+                }
             } break;
             case SDL_MOUSEBUTTONUP:
             {
@@ -135,7 +146,32 @@ void explorer_render_nodes(struct Explorer *e)
         SDL_Rect r = { 20, i * 20 };
         SDL_QueryTexture(e->nodes[i]->tex, 0, 0, &r.w, &r.h);
         SDL_RenderCopy(e->rend, e->nodes[i]->tex, 0, &r);
+
+        if (e->selected == e->nodes[i])
+        {
+            r.w = 500;
+            SDL_SetRenderDrawBlendMode(e->rend, SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(e->rend, 255, 255, 255, 100);
+            SDL_RenderFillRect(e->rend, &r);
+            SDL_SetRenderDrawBlendMode(e->rend, SDL_BLENDMODE_NONE);
+        }
     }
+}
+
+
+struct ENode *explorer_find_node(struct Explorer *e, SDL_Point mouse)
+{
+    for (size_t i = 0; i < e->nodes_num; ++i)
+    {
+        int y = i * 20;
+        
+        if (mouse.y > y && mouse.y < y + 20)
+        {
+            return e->nodes[i];
+        }
+    }
+
+    return 0;
 }
 
 
