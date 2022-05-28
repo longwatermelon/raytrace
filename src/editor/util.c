@@ -44,3 +44,15 @@ float util_timediff(struct timespec *t1, struct timespec *t2)
     return (t2->tv_sec - t1->tv_sec) + (t2->tv_nsec - t1->tv_nsec) / 1e9;
 }
 
+
+float util_restrict_angle(float angle)
+{
+    if (angle > 2.f * M_PI)
+        angle -= 2.f * M_PI;
+
+    if (angle < 0.f)
+        angle += 2.f * M_PI;
+
+    return angle;
+}
+

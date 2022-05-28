@@ -18,5 +18,7 @@ void util_strcat(char **dst, char *src);
 
 float util_timediff(struct timespec *t1, struct timespec *t2);
 
+float util_restrict_angle(float angle);
+
 #endif
 

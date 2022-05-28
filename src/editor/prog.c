@@ -223,6 +223,12 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     SDL_SetRelativeMouseMode(SDL_TRUE);
                 }
             }
+
+            p->sc->cam->angle = (Vec3f){
+                util_restrict_angle(p->sc->cam->angle.x),
+                util_restrict_angle(p->sc->cam->angle.y),
+                util_restrict_angle(p->sc->cam->angle.z)
+            };
         } break;
 
         case SDL_KEYDOWN:

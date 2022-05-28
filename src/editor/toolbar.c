@@ -214,6 +214,11 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
                     {
                         slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
                         ret = true;
+
+                        if (i >= 3)
+                        {
+                            t->selected_slider->value = util_restrict_angle(t->selected_slider->value);
+                        }
                     }
                 }
                 else
