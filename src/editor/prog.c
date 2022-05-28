@@ -211,11 +211,11 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         {
             if (mouse_down)
             {
-                if (slider_mouse.x == -1 && slider_mouse.y == -1)
-                    SDL_GetMouseState(&slider_mouse.x, &slider_mouse.y);
-
                 if (toolbar_slide_sliders(p->toolbar, evt->motion.xrel, p->toolbar->selected_slider != 0))
                 {
+                    if (slider_mouse.x == -1 && slider_mouse.y == -1)
+                        SDL_GetMouseState(&slider_mouse.x, &slider_mouse.y);
+
                     SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
                     SDL_SetRelativeMouseMode(SDL_TRUE);
                 }
