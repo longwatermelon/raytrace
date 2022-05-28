@@ -38,6 +38,8 @@ struct Explorer
 
     struct ENode *selected;
     char *selected_path;
+
+    SDL_Texture *folder_tex, *file_tex;
 };
 
 struct Explorer *explorer_alloc(const char *dir, struct Prog *p);

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <dirent.h>
+#include <SDL2/SDL_image.h>
 
 void close_explorer(struct Prog *p)
 {
@@ -49,6 +50,9 @@ struct Explorer *explorer_alloc(const char *dir, struct Prog *p)
 
     sprintf(e->dir, "%s", dir);
 
+    e->folder_tex = IMG_LoadTexture(e->rend, "res/folder.png");
+    e->file_tex = IMG_LoadTexture(e->rend, "res/file.png");
+
     e->nodes = explorer_read_dir(e, dir, &e->nodes_num);
     explorer_sort(e);
 
@@ -68,6 +72,9 @@ void explorer_free(struct Explorer *e)
 
     if (e->selected_path)
         free(e->selected_path);
+
+    SDL_DestroyTexture(e->file_tex);
+    SDL_DestroyTexture(e->folder_tex);
 
     free(e);
 }
@@ -159,7 +166,14 @@ void explorer_render_nodes(struct Explorer *e)
 {
     for (size_t i = 0; i < e->nodes_num; ++i)
     {
-        SDL_Rect r = { 20, i * 20 };
+        SDL_Rect rtex = { 20, i * 20 };
+        TTF_SizeText(e->font, " ", &rtex.w, &rtex.h);
+        rtex.w *= 2;
+
+        SDL_Texture *tex = e->nodes[i]->type == DT_REG ? e->file_tex : e->folder_tex;
+        SDL_RenderCopy(e->rend, tex, 0, &rtex);
+
+        SDL_Rect r = { 50, i * 20 };
         SDL_QueryTexture(e->nodes[i]->tex, 0, 0, &r.w, &r.h);
         SDL_RenderCopy(e->rend, e->nodes[i]->tex, 0, &r);
 
