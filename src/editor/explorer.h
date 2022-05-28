@@ -42,6 +42,8 @@ struct Explorer
     SDL_Texture *folder_tex, *file_tex;
 
     struct timespec last_click;
+
+    int top_y;
 };
 
 struct Explorer *explorer_alloc(const char *dir, struct Prog *p);

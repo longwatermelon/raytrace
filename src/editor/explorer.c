@@ -62,6 +62,8 @@ struct Explorer *explorer_alloc(const char *dir, struct Prog *p)
 
     clock_gettime(CLOCK_MONOTONIC, &e->last_click);
 
+    e->top_y = 0;
+
     return e;
 }
 
@@ -173,6 +175,11 @@ char *explorer_find(struct Explorer *e)
                     pressed = 0;
                 }
             } break;
+        
+            case SDL_MOUSEWHEEL:
+            {
+                e->top_y += evt.wheel.y * 20;
+            } break;
             }
         }
 
@@ -202,14 +209,14 @@ void explorer_render_nodes(struct Explorer *e)
 {
     for (size_t i = 0; i < e->nodes_num; ++i)
     {
-        SDL_Rect rtex = { 20, i * 20 };
+        SDL_Rect rtex = { 20, e->top_y + i * 20 };
         TTF_SizeText(e->font, " ", &rtex.w, &rtex.h);
         rtex.w *= 2;
 
         SDL_Texture *tex = e->nodes[i]->type == DT_REG ? e->file_tex : e->folder_tex;
         SDL_RenderCopy(e->rend, tex, 0, &rtex);
 
-        SDL_Rect r = { 50, i * 20 };
+        SDL_Rect r = { 50, e->top_y + i * 20 };
         SDL_QueryTexture(e->nodes[i]->tex, 0, 0, &r.w, &r.h);
         SDL_RenderCopy(e->rend, e->nodes[i]->tex, 0, &r);
 
@@ -230,7 +237,7 @@ struct ENode *explorer_find_node(struct Explorer *e, SDL_Point mouse)
 {
     for (size_t i = 0; i < e->nodes_num; ++i)
     {
-        int y = i * 20;
+        int y = e->top_y + i * 20;
         
         if (mouse.y > y && mouse.y < y + 20)
         {
