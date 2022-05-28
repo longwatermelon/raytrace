@@ -186,14 +186,25 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 p->focused = true;
                 SDL_ShowCursor(SDL_FALSE);
             }
+
+            toolbar_buttons_pressed(p->toolbar, mouse);
         } break;
         case SDL_MOUSEBUTTONUP:
         {
-            mouse_down = false;
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-            SDL_WarpMouseInWindow(p->window, slider_mouse.x, slider_mouse.y);
-            slider_mouse = (SDL_Point){ -1, -1 };
-            p->toolbar->selected_slider = 0;
+            if (p->toolbar->selected_slider)
+            {
+                mouse_down = false;
+                SDL_SetRelativeMouseMode(SDL_FALSE);
+                SDL_WarpMouseInWindow(p->window, slider_mouse.x, slider_mouse.y);
+                slider_mouse = (SDL_Point){ -1, -1 };
+                p->toolbar->selected_slider = 0;
+            }
+
+            if (p->toolbar->pressed_button)
+            {
+                p->toolbar->pressed_button->pushed = false;
+                p->toolbar->pressed_button = 0;
+            }
         } break;
         case SDL_MOUSEMOTION:
         {

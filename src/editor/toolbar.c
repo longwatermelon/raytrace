@@ -1,7 +1,30 @@
 #include "toolbar.h"
 #include "util.h"
 #include "prog.h"
+#include "config.h"
 
+// button functions
+void decrease_threads(struct Prog *p)
+{
+    if (p->config->threads > 0)
+        --p->config->threads;
+
+    char s[20] = { 0 };
+    sprintf(s, "%d", p->config->threads);
+
+    SDL_DestroyTexture(p->toolbar->threads_num);
+    p->toolbar->threads_num = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
+}
+
+void increase_threads(struct Prog *p)
+{
+    ++p->config->threads;
+    char s[20] = { 0 };
+    sprintf(s, "%d", p->config->threads);
+
+    SDL_DestroyTexture(p->toolbar->threads_num);
+    p->toolbar->threads_num = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
+}
 
 struct Toolbar *toolbar_alloc(struct Prog *p)
 {
@@ -17,6 +40,15 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
         t->obj_pos[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, t->p->rend, t->p->font);
 
     t->selected_slider = 0;
+    t->pressed_button = 0;
+
+    t->nbuttons = 2;
+    t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
+
+    t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });
+    t->threads_num = util_render_text(p->rend, p->font, "4", (SDL_Color){ 255, 255, 255 });
+    t->buttons[0] = button_alloc((SDL_Rect){ 10, 200, 20, 20 }, decrease_threads, "-", p->rend, p->font);
+    t->buttons[1] = button_alloc((SDL_Rect){ 90, 200, 20, 20 }, increase_threads, "+", p->rend, p->font);
 
     return t;
 }
@@ -29,6 +61,14 @@ void toolbar_free(struct Toolbar *t)
 
     if (t->obj_tex)
         SDL_DestroyTexture(t->obj_tex);
+
+    for (size_t i = 0; i < t->nbuttons; ++i)
+        button_free(t->buttons[i]);
+
+    free(t->buttons);
+
+    SDL_DestroyTexture(t->threads_text);
+    SDL_DestroyTexture(t->threads_num);
 
     free(t);
 }
@@ -47,6 +87,25 @@ void toolbar_render(struct Toolbar *t)
 
     for (int i = 0; i < 3; ++i)
         slider_render(t->obj_pos[i], t->p->rend);
+
+    SDL_Point mouse;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+
+    for (size_t i = 0; i < t->nbuttons; ++i)
+    {
+        t->buttons[i]->rect.x += ssize.x;
+        button_render(t->buttons[i], t->p->rend, mouse);
+        t->buttons[i]->rect.x -= ssize.x;
+    }
+
+    r = (SDL_Rect){ ssize.x + 10, 170 };
+    SDL_QueryTexture(t->threads_text, 0, 0, &r.w, &r.h);
+    SDL_RenderCopy(t->p->rend, t->threads_text, 0, &r);
+
+    SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
+    r.x = ssize.x + 55;
+    r.y = 202;
+    SDL_RenderCopy(t->p->rend, t->threads_num, 0, &r);
 }
 
 
@@ -148,5 +207,28 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
     }
 
     return ret;
+}
+
+
+void toolbar_buttons_pressed(struct Toolbar *t, SDL_Point mouse)
+{
+    if (t->pressed_button)
+        return;
+
+    SDL_Point ssize = util_ssize(t->p->window);
+
+    for (size_t i = 0; i < t->nbuttons; ++i)
+    {
+        t->buttons[i]->rect.x += ssize.x;
+
+        if (util_point_in_rect(mouse, t->buttons[i]->rect))
+        {
+            t->pressed_button = t->buttons[i];
+            t->buttons[i]->pushed = true;
+            t->buttons[i]->callback(t->p);
+        }
+
+        t->buttons[i]->rect.x -= ssize.x;
+    }
 }
 
