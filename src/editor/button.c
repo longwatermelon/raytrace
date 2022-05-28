@@ -34,11 +34,11 @@ void button_free(struct Button *b)
 void button_render(struct Button *b, SDL_Renderer *rend, SDL_Point mouse)
 {
     if (b->pushed)
-        SDL_SetRenderDrawColor(rend, 30, 30, 30, 255);
-    else if (util_point_in_rect(mouse, b->rect))
-        SDL_SetRenderDrawColor(rend, 80, 80, 80, 255);
-    else
         SDL_SetRenderDrawColor(rend, 50, 50, 50, 255);
+    else if (util_point_in_rect(mouse, b->rect))
+        SDL_SetRenderDrawColor(rend, 120, 120, 120, 255);
+    else
+        SDL_SetRenderDrawColor(rend, 80, 80, 80, 255);
 
     SDL_RenderFillRect(rend, &b->rect);
 

@@ -2,6 +2,7 @@
 #define EDITOR_PROG_H
 
 #include "toolbar.h"
+#include "explorer.h"
 #include <core/scene.h>
 #include <core/raytrace.h>
 #include <stdbool.h>
@@ -37,6 +38,8 @@ struct Prog
     bool rendering;
     pthread_t render_thread;
     raytrace_args_t *render_thread_args;
+
+    struct Explorer *explorer;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

@@ -42,6 +42,8 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->render_thread = 0;
     p->render_thread_args = 0;
 
+    p->explorer = 0;
+
     return p;
 }
 
@@ -50,6 +52,9 @@ void prog_free(struct Prog *p)
 {
     if (p->sc)
         scene_free(p->sc);
+
+    if (p->explorer)
+        explorer_free(p->explorer);
 
     toolbar_free(p->toolbar);
     config_free(p->config);
@@ -170,11 +175,14 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
     while (SDL_PollEvent(evt))
     {
-        switch (evt->type)
+        if (evt->type == SDL_WINDOWEVENT && evt->window.event == SDL_WINDOWEVENT_CLOSE)
         {
-        case SDL_QUIT:
             p->running = false;
             break;
+        }
+
+        switch (evt->type)
+        {
         case SDL_MOUSEBUTTONDOWN:
         {
             mouse_down = true;
@@ -244,6 +252,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 ctrl = true;
                 break;
             case SDLK_r:
+            {
                 if (ctrl)
                 {
                     render_set_progress(0.f);
@@ -265,8 +274,15 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
                     clock_gettime(CLOCK_MONOTONIC, &p->last_status);
                 }
-
-                break;
+            } break;
+            case SDLK_f:
+            {
+                p->explorer = explorer_alloc(".", p);
+                char *path = explorer_find(p->explorer);
+                (void)path;
+                explorer_free(p->explorer);
+                p->explorer = 0;
+            } break;
             }
         } break;
 
