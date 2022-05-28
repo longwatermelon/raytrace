@@ -32,7 +32,7 @@ struct Prog
     struct Toolbar *toolbar;
 
     SDL_Texture *status;
-    clock_t last_status;
+    struct timespec last_status;
 
     bool rendering;
     pthread_t render_thread;

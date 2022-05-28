@@ -35,7 +35,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->toolbar = toolbar_alloc(p);
 
     p->status = 0;
-    p->last_status = 0;
+    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
 
     p->rendering = false;
 
@@ -95,7 +95,10 @@ void prog_mainloop(struct Prog *p)
 
         toolbar_main(p->toolbar);
 
-        if (p->status && (float)(clock() - p->last_status) / CLOCKS_PER_SEC > .5f)
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+
+        if (p->status && util_timediff(&p->last_status, &now) >= 1.f)
         {
             if (p->rendering)
             {
@@ -110,7 +113,7 @@ void prog_mainloop(struct Prog *p)
                 {
                     p->rendering = false;
                     p->status = util_render_text(p->rend, p->font, "[✔] Done rendering [100%]", (SDL_Color){ 0, 255, 0 });
-                    p->last_status = clock();
+                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
 
                     free(p->render_thread_args);
 
@@ -254,7 +257,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 {
                     writer_image(p->sc, p->config, "out");
                     p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
-                    p->last_status = clock();
+                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
                 }
 
                 break;

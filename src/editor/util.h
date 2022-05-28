@@ -16,5 +16,7 @@ SDL_Texture *util_render_text(SDL_Renderer* rend, TTF_Font* font, const char* te
 
 void util_strcat(char **dst, char *src);
 
+float util_timediff(struct timespec *t1, struct timespec *t2);
+
 #endif
 
