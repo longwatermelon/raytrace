@@ -36,7 +36,6 @@ void modify_mat_idx(struct Prog *p, int num)
         {
             idx += num;
             p->selected_mesh->mat = p->sc->mats[idx];
-            printf("here %d\n", idx);
             SDL_DestroyTexture(p->toolbar->obj_mat_idx);
             char s[20] = { 0 };
             sprintf(s, "%d", idx);
@@ -55,6 +54,53 @@ void increase_mat_idx(struct Prog *p)
     modify_mat_idx(p, 1);
 }
 
+void update_edit_mat_info(struct Toolbar *t)
+{
+    struct Slider **arr = t->mat_props;
+    struct Material *m = t->p->sc->mats[t->mat_idx_edited];
+
+    arr[0]->value = m->col.x;
+    arr[1]->value = m->col.y;
+    arr[2]->value = m->col.z;
+
+    arr[3]->value = m->ref_diffuse;
+    arr[4]->value = m->ref_specular;
+    arr[5]->value = m->ref_mirror;
+
+    arr[6]->value = m->specular_exp;
+
+    for (int i = 0; i < 7; ++i)
+        slider_redo_tex(arr[i], t->p->rend, t->p->font);
+}
+
+void modify_edit_mat_idx(struct Prog *p, int num)
+{
+    int idx = p->toolbar->mat_idx_edited;
+
+    if (idx + num >= 0 && idx + num < p->sc->nmats)
+    {
+        idx += num;
+        p->toolbar->mat_idx_edited = idx;
+
+        SDL_DestroyTexture(p->toolbar->mat_idx);
+        char s[20] = { 0 };
+        sprintf(s, "%d", idx);
+        p->toolbar->mat_idx = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
+
+        update_edit_mat_info(p->toolbar);
+    }
+}
+
+void decrease_edit_mat_idx(struct Prog *p)
+{
+    modify_edit_mat_idx(p, -1);
+}
+
+void increase_edit_mat_idx(struct Prog *p)
+{
+    modify_edit_mat_idx(p, 1);
+}
+
 struct Toolbar *toolbar_alloc(struct Prog *p)
 {
     struct Toolbar *t = malloc(sizeof(struct Toolbar));
@@ -64,12 +110,17 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->obj_tex = util_render_text(p->rend, p->font, "None", (SDL_Color){ 255, 255, 255 });
 
     SDL_Point ssize = util_ssize(t->p->window);
-    t->nbuttons = 4;
+    t->nbuttons = 6;
     t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->obj_y = 50;
-    t->threads_y = 400;
+    t->mat_y = 270;
+    t->threads_y = 500;
 
+    t->selected_slider = 0;
+    t->pressed_button = 0;
+
+    // OBJECT
     char *labels[6] = { "x: ", "y: ", "z: ", "yaw: ", "pitch: ", "roll: " };
     for (int i = 0; i < 3; ++i)
         t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10, t->obj_y + i * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
@@ -82,9 +133,26 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->buttons[2] = button_alloc((SDL_Rect){ 10, t->obj_y + 120, 20, 20 }, decrease_mat_idx, "-", p->rend, p->font);
     t->buttons[3] = button_alloc((SDL_Rect){ 90, t->obj_y + 120, 20, 20 }, increase_mat_idx, "+", p->rend, p->font);
 
-    t->selected_slider = 0;
-    t->pressed_button = 0;
+    // MATERIAL
+    t->mat_tex = util_render_text(p->rend, p->font, "Material editor", (SDL_Color){ 255, 255, 255 });
+    t->mat_idx = util_render_text(p->rend, p->font, "0", (SDL_Color){ 255, 255, 255 });
+    t->mat_idx_edited = 0;
 
+    char *mlabels[7] = { "r: ", "g: ", "b: ", "diff: ", "spec: ", "mirr: ", "exp: " };
+    for (int i = 0; i < 3; ++i)
+        t->mat_props[i] = slider_alloc((SDL_Point){ ssize.x + 10, 60 + t->mat_y + i * 30 }, .01f, 0.f, mlabels[i], t->p->rend, t->p->font);
+
+    for (int i = 3; i < 6; ++i)
+        t->mat_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 120, 60 + t->mat_y + (i - 3) * 30 }, .01f, 0.f, mlabels[i], t->p->rend, t->p->font);
+
+    t->mat_props[6] = slider_alloc((SDL_Point){ ssize.x + 10 + 60, 60 + t->mat_y + 90 }, .01f, 0.f, mlabels[6], t->p->rend, t->p->font);
+
+    t->buttons[4] = button_alloc((SDL_Rect){ 10, t->mat_y + 25, 20, 20 }, decrease_edit_mat_idx, "-", p->rend, p->font);
+    t->buttons[5] = button_alloc((SDL_Rect){ 90, t->mat_y + 25, 20, 20 }, increase_edit_mat_idx, "+", p->rend, p->font);
+
+    update_edit_mat_info(t);
+
+    // THREADS
     t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });
     t->threads_num = util_render_text(p->rend, p->font, "4", (SDL_Color){ 255, 255, 255 });
     t->buttons[0] = button_alloc((SDL_Rect){ 10, t->threads_y, 20, 20 }, decrease_threads, "-", p->rend, p->font);
@@ -99,6 +167,9 @@ void toolbar_free(struct Toolbar *t)
     for (int i = 0; i < 6; ++i)
         slider_free(t->obj_props[i]);
 
+    for (int i = 0; i < 7; ++i)
+        slider_free(t->mat_props[i]);
+
     if (t->obj_tex)
         SDL_DestroyTexture(t->obj_tex);
 
@@ -106,6 +177,9 @@ void toolbar_free(struct Toolbar *t)
         button_free(t->buttons[i]);
 
     free(t->buttons);
+
+    SDL_DestroyTexture(t->mat_tex);
+    SDL_DestroyTexture(t->mat_idx);
 
     SDL_DestroyTexture(t->obj_mat_text);
     SDL_DestroyTexture(t->obj_mat_idx);
@@ -141,6 +215,20 @@ void toolbar_render(struct Toolbar *t)
     r.y = t->buttons[2]->rect.y + 2;
     SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
     SDL_RenderCopy(t->p->rend, t->obj_mat_idx, 0, &r);
+
+    // MATERIAL
+    r.x = ssize.x + 10;
+    r.y = t->mat_y;
+    SDL_QueryTexture(t->mat_tex, 0, 0, &r.w, &r.h);
+    SDL_RenderCopy(t->p->rend, t->mat_tex, 0, &r);
+
+    r.x = ssize.x + 55;
+    r.y = t->buttons[4]->rect.y + 2;
+    SDL_QueryTexture(t->mat_idx, 0, 0, &r.w, &r.h);
+    SDL_RenderCopy(t->p->rend, t->mat_idx, 0, &r);
+
+    for (int i = 0; i < 7; ++i)
+        slider_render(t->mat_props[i], t->p->rend);
 
     // BUTTONS
     SDL_Point mouse;
@@ -235,6 +323,18 @@ void toolbar_main(struct Toolbar *t)
         }
     }
 
+    struct Slider **ms = t->mat_props;
+    struct Material *mt = t->p->sc->mats[t->mat_idx_edited];
+
+    mt->col = (Vec3f){
+        ms[0]->value, ms[1]->value, ms[2]->value
+    };
+
+    mt->ref_diffuse = ms[3]->value;
+    mt->ref_specular = ms[4]->value;
+    mt->ref_mirror = ms[5]->value;
+    mt->specular_exp = ms[6]->value;
+
     for (int i = 0; i < 6; ++i)
         slider_redo_tex(t->obj_props[i], t->p->rend, t->p->font);
 }
@@ -245,14 +345,22 @@ void toolbar_update_positions(struct Toolbar *t)
     SDL_Point ssize = util_ssize(t->p->window);
 
     for (int i = 0; i < 3; ++i)
+    {
         t->obj_props[i]->rect.x = ssize.x + 10;
+        t->mat_props[i]->rect.x = ssize.x + 10;
+    }
 
     for (int i = 3; i < 6; ++i)
+    {
         t->obj_props[i]->rect.x = ssize.x + 10 + 120;
+        t->mat_props[i]->rect.x = ssize.x + 10 + 120;
+    }
+
+    t->mat_props[6]->rect.x = ssize.x + 10 + 60;
 }
 
 
-bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
+bool toolbar_slide_sliders(struct Toolbar *t, int pixels)
 {
     bool ret = false;
 
@@ -261,36 +369,60 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
 
     if (t->p->selected_mesh)
     {
-        if (t->p->selected_mesh)
+        for (int i = 0; i < 6; ++i)
         {
-            for (int i = 0; i < 6; ++i)
+            if (t->selected_slider)
             {
-                if (ignore_accuracy)
+                if (t->selected_slider == t->obj_props[i])
                 {
-                    if (t->selected_slider)
-                    {
-                        slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
-                        ret = true;
+                    slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
+                    ret = true;
 
-                        for (int j = 3; j < 6; ++j)
-                        {
-                            if (t->obj_props[j] == t->selected_slider)
-                            {
-                                t->selected_slider->value = util_restrict_angle(t->selected_slider->value);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (util_point_in_rect(mouse, t->obj_props[i]->rect))
-                    {
-                        slider_slide(t->obj_props[i], pixels, t->p->rend, t->p->font);
-                        t->selected_slider = t->obj_props[i];
-                        ret = true;
-                    }
+                    if (i >= 3)
+                        t->selected_slider->value = util_restrict_angle(t->selected_slider->value);
                 }
             }
+            else
+            {
+                if (util_point_in_rect(mouse, t->obj_props[i]->rect))
+                {
+                    slider_slide(t->obj_props[i], pixels, t->p->rend, t->p->font);
+                    t->selected_slider = t->obj_props[i];
+                    ret = true;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < 7; ++i)
+    {
+        if (t->selected_slider)
+        {
+            if (t->selected_slider == t->mat_props[i])
+            {
+                slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
+                ret = true;
+            }
+        }
+        else
+        {
+            if (util_point_in_rect(mouse, t->mat_props[i]->rect))
+            {
+                slider_slide(t->mat_props[i], pixels, t->p->rend, t->p->font);
+                t->selected_slider = t->mat_props[i];
+                ret = true;
+            }
+        }
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        float prev = t->mat_props[i]->value;
+        t->mat_props[i]->value = fmax(0.f, fmin(t->mat_props[i]->value, 1.f));
+
+        if (prev != t->mat_props[i]->value)
+        {
+            slider_redo_tex(t->mat_props[i], t->p->rend, t->p->font);
         }
     }
 

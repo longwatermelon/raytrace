@@ -222,7 +222,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         {
             if (mouse_down)
             {
-                if (toolbar_slide_sliders(p->toolbar, evt->motion.xrel, p->toolbar->selected_slider != 0))
+                if (toolbar_slide_sliders(p->toolbar, evt->motion.xrel))
                 {
                     if (slider_mouse.x == -1 && slider_mouse.y == -1)
                         SDL_GetMouseState(&slider_mouse.x, &slider_mouse.y);

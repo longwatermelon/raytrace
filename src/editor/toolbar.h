@@ -20,10 +20,17 @@ struct Toolbar
     struct Button **buttons;
     size_t nbuttons;
 
-    // Object position sliders
+    // Object modifiers
     int obj_y;
     struct Slider *obj_props[6];
     SDL_Texture *obj_mat_text, *obj_mat_idx;
+
+    // Material modifiers
+    int mat_y;
+    SDL_Texture *mat_tex;
+    SDL_Texture *mat_idx;
+    int mat_idx_edited;
+    struct Slider *mat_props[7];
 
     // Thread number customization
     int threads_y;
@@ -38,7 +45,7 @@ void toolbar_render(struct Toolbar *t);
 void toolbar_main(struct Toolbar *t);
 void toolbar_update_positions(struct Toolbar *t);
 
-bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy);
+bool toolbar_slide_sliders(struct Toolbar *t, int pixels);
 
 void toolbar_buttons_pressed(struct Toolbar *t, SDL_Point mouse);
 
