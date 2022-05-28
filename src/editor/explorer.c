@@ -11,6 +11,15 @@ void close_explorer(struct Prog *p)
     p->explorer->running = false;
 }
 
+void select_node(struct Prog *p)
+{
+    if (p->explorer->selected)
+    {
+        p->explorer->selected_path = strdup(p->explorer->selected->path);
+        p->explorer->running = false;
+    }
+}
+
 struct ENode *enode_alloc(const char *path, unsigned char type)
 {
     struct ENode *en = malloc(sizeof(struct ENode));
@@ -56,18 +65,21 @@ void explorer_free(struct Explorer *e)
 
     free(e->nodes);
 
+    if (e->selected_path)
+        free(e->selected_path);
+
     free(e);
 }
 
 
 char *explorer_find(struct Explorer *e)
 {
-    char *path = 0;
-
+    e->selected_path = 0;
     SDL_Event evt;
 
     struct Button *buttons[] = {
-        button_alloc((SDL_Rect){ 500, 550, 150, 20 }, close_explorer, "Close", e->rend, e->font)
+        button_alloc((SDL_Rect){ 450, 550, 150, 20 }, close_explorer, "Close", e->rend, e->font),
+        button_alloc((SDL_Rect){ 620, 550, 150, 20 }, select_node, "Select file", e->rend, e->font)
     };
     size_t nbuttons = sizeof(buttons) / sizeof(buttons[0]);
 
@@ -96,13 +108,16 @@ char *explorer_find(struct Explorer *e)
                     }
                 }
 
-                if (mouse.y < 450 && mouse.x < 500)
+                if (!pressed)
                 {
-                    e->selected = explorer_find_node(e, mouse);
-                }
-                else
-                {
-                    e->selected = 0;
+                    if (mouse.y < 450 && mouse.x < 500)
+                    {
+                        e->selected = explorer_find_node(e, mouse);
+                    }
+                    else
+                    {
+                        e->selected = 0;
+                    }
                 }
             } break;
             case SDL_MOUSEBUTTONUP:
@@ -135,7 +150,7 @@ char *explorer_find(struct Explorer *e)
     for (size_t i = 0; i < nbuttons; ++i)
         button_free(buttons[i]);
 
-    return path;
+    return e->selected_path;
 }
 
 

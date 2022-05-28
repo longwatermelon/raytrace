@@ -37,6 +37,7 @@ struct Explorer
     size_t nodes_num;
 
     struct ENode *selected;
+    char *selected_path;
 };
 
 struct Explorer *explorer_alloc(const char *dir, struct Prog *p);
