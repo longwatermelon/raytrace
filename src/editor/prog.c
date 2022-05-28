@@ -279,10 +279,14 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             {
                 p->explorer = explorer_alloc(".", p);
                 char *path = explorer_find(p->explorer);
-                printf("%s\n", path);
 
-                p->sc->meshes = realloc(p->sc->meshes, sizeof(struct Mesh*) * ++p->sc->nmeshes);
-                p->sc->meshes[p->sc->nmeshes - 1] = mesh_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f }, path, p->sc->mats[0]);
+                if (path)
+                {
+                    printf("%s\n", path);
+
+                    p->sc->meshes = realloc(p->sc->meshes, sizeof(struct Mesh*) * ++p->sc->nmeshes);
+                    p->sc->meshes[p->sc->nmeshes - 1] = mesh_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f }, path, p->sc->mats[0]);
+                }
 
                 explorer_free(p->explorer);
                 p->explorer = 0;

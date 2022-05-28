@@ -49,5 +49,8 @@ struct ENode *explorer_find_node(struct Explorer *e, SDL_Point mouse);
 
 struct ENode **explorer_read_dir(struct Explorer *e, const char *dir, size_t *num);
 
+void explorer_sort(struct Explorer *e);
+void explorer_sort_alpha(struct ENode **nodes, size_t len);
+
 #endif
 

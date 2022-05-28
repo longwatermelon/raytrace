@@ -50,6 +50,7 @@ struct Explorer *explorer_alloc(const char *dir, struct Prog *p)
     sprintf(e->dir, "%s", dir);
 
     e->nodes = explorer_read_dir(e, dir, &e->nodes_num);
+    explorer_sort(e);
 
     return e;
 }
@@ -215,5 +216,57 @@ struct ENode **explorer_read_dir(struct Explorer *e, const char *dir, size_t *nu
 
     closedir(d);
     return nodes;
+}
+
+
+void explorer_sort(struct Explorer *e)
+{
+    struct ENode **dirs = 0;
+    size_t ndirs = 0;
+
+    struct ENode **files = 0;
+    size_t nfiles = 0;
+
+    for (size_t i = 0; i < e->nodes_num; ++i)
+    {
+        if (e->nodes[i]->type == DT_DIR)
+        {
+            dirs = realloc(dirs, sizeof(struct ENode*) * ++ndirs);
+            dirs[ndirs - 1] = e->nodes[i];
+        }
+        else if (e->nodes[i]->type == DT_REG)
+        {
+            files = realloc(files, sizeof(struct ENode*) * ++nfiles);
+            files[nfiles - 1] = e->nodes[i];
+        }
+    }
+
+    explorer_sort_alpha(dirs, ndirs);
+    explorer_sort_alpha(files, nfiles);
+
+    struct ENode **nodes = malloc(sizeof(struct ENode*) * (ndirs + nfiles));
+
+    memcpy(nodes, dirs, ndirs * sizeof(struct ENode*));
+    memcpy(&nodes[ndirs], files, nfiles * sizeof(struct ENode*));
+
+    free(e->nodes);
+    e->nodes = nodes;
+}
+
+
+void explorer_sort_alpha(struct ENode **nodes, size_t len)
+{
+    for (size_t i = 0; i < len; ++i)
+    {
+        for (int j = i + 1; j < len; ++j)
+        {
+            if (strcmp(nodes[i]->path, nodes[j]->path) > 0)
+            {
+                struct ENode *tmp = nodes[i];
+                nodes[i] = nodes[j];
+                nodes[j] = tmp;
+            }
+        }
+    }
 }
 
