@@ -36,12 +36,15 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     SDL_Point ssize = util_ssize(t->p->window);
 
+    t->obj_y = 50;
+    t->threads_y = 200;
+
     char *labels[6] = { "x: ", "y: ", "z: ", "yaw: ", "pitch: ", "roll: " };
     for (int i = 0; i < 3; ++i)
-        t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
+        t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10, t->obj_y + i * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
 
     for (int i = 3; i < 6; ++i)
-        t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 100 + 20, 50 + (i - 3) * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
+        t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 100 + 20, t->obj_y + (i - 3) * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
 
     t->selected_slider = 0;
     t->pressed_button = 0;
@@ -51,8 +54,8 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });
     t->threads_num = util_render_text(p->rend, p->font, "4", (SDL_Color){ 255, 255, 255 });
-    t->buttons[0] = button_alloc((SDL_Rect){ 10, 200, 20, 20 }, decrease_threads, "-", p->rend, p->font);
-    t->buttons[1] = button_alloc((SDL_Rect){ 90, 200, 20, 20 }, increase_threads, "+", p->rend, p->font);
+    t->buttons[0] = button_alloc((SDL_Rect){ 10, t->threads_y, 20, 20 }, decrease_threads, "-", p->rend, p->font);
+    t->buttons[1] = button_alloc((SDL_Rect){ 90, t->threads_y, 20, 20 }, increase_threads, "+", p->rend, p->font);
 
     return t;
 }
@@ -102,13 +105,13 @@ void toolbar_render(struct Toolbar *t)
         t->buttons[i]->rect.x -= ssize.x;
     }
 
-    r = (SDL_Rect){ ssize.x + 10, 170 };
+    r = (SDL_Rect){ ssize.x + 10, t->threads_y - 30 };
     SDL_QueryTexture(t->threads_text, 0, 0, &r.w, &r.h);
     SDL_RenderCopy(t->p->rend, t->threads_text, 0, &r);
 
     SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
     r.x = ssize.x + 55;
-    r.y = 202;
+    r.y = t->threads_y + 2;
     SDL_RenderCopy(t->p->rend, t->threads_num, 0, &r);
 }
 
