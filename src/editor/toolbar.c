@@ -26,6 +26,35 @@ void increase_threads(struct Prog *p)
     p->toolbar->threads_num = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
 }
 
+void modify_mat_idx(struct Prog *p, int num)
+{
+    if (p->selected_mesh)
+    {
+        int idx = scene_mat_idx(p->sc, p->selected_mesh->mat);
+
+        if (idx + num >= 0 && idx + num < p->sc->nmats)
+        {
+            idx += num;
+            p->selected_mesh->mat = p->sc->mats[idx];
+            printf("here %d\n", idx);
+            SDL_DestroyTexture(p->toolbar->obj_mat_idx);
+            char s[20] = { 0 };
+            sprintf(s, "%d", idx);
+            p->toolbar->obj_mat_idx = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
+        }
+    }
+}
+
+void decrease_mat_idx(struct Prog *p)
+{
+    modify_mat_idx(p, -1);
+}
+
+void increase_mat_idx(struct Prog *p)
+{
+    modify_mat_idx(p, 1);
+}
+
 struct Toolbar *toolbar_alloc(struct Prog *p)
 {
     struct Toolbar *t = malloc(sizeof(struct Toolbar));
@@ -35,9 +64,11 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->obj_tex = util_render_text(p->rend, p->font, "None", (SDL_Color){ 255, 255, 255 });
 
     SDL_Point ssize = util_ssize(t->p->window);
+    t->nbuttons = 4;
+    t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->obj_y = 50;
-    t->threads_y = 200;
+    t->threads_y = 400;
 
     char *labels[6] = { "x: ", "y: ", "z: ", "yaw: ", "pitch: ", "roll: " };
     for (int i = 0; i < 3; ++i)
@@ -46,11 +77,13 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     for (int i = 3; i < 6; ++i)
         t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 100 + 20, t->obj_y + (i - 3) * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
 
+    t->obj_mat_text = util_render_text(p->rend, p->font, "Object material", (SDL_Color){ 255, 255, 255 });
+    t->obj_mat_idx = util_render_text(p->rend, p->font, "0", (SDL_Color){ 255, 255, 255 });
+    t->buttons[2] = button_alloc((SDL_Rect){ 10, t->obj_y + 120, 20, 20 }, decrease_mat_idx, "-", p->rend, p->font);
+    t->buttons[3] = button_alloc((SDL_Rect){ 90, t->obj_y + 120, 20, 20 }, increase_mat_idx, "+", p->rend, p->font);
+
     t->selected_slider = 0;
     t->pressed_button = 0;
-
-    t->nbuttons = 2;
-    t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });
     t->threads_num = util_render_text(p->rend, p->font, "4", (SDL_Color){ 255, 255, 255 });
@@ -74,6 +107,9 @@ void toolbar_free(struct Toolbar *t)
 
     free(t->buttons);
 
+    SDL_DestroyTexture(t->obj_mat_text);
+    SDL_DestroyTexture(t->obj_mat_idx);
+
     SDL_DestroyTexture(t->threads_text);
     SDL_DestroyTexture(t->threads_num);
 
@@ -88,6 +124,7 @@ void toolbar_render(struct Toolbar *t)
     SDL_Rect r = { ssize.x, 0, EDITOR_TOOLBAR_WIDTH, ssize.y };
     SDL_RenderFillRect(t->p->rend, &r);
 
+    // OBJECT
     SDL_Rect obj_r = { ssize.x + 10, 10 };
     SDL_QueryTexture(t->obj_tex, 0, 0, &obj_r.w, &obj_r.h);
     SDL_RenderCopy(t->p->rend, t->obj_tex, 0, &obj_r);
@@ -95,6 +132,17 @@ void toolbar_render(struct Toolbar *t)
     for (int i = 0; i < 6; ++i)
         slider_render(t->obj_props[i], t->p->rend);
 
+    r.x = ssize.x + 10;
+    r.y = t->obj_y + 90;
+    SDL_QueryTexture(t->obj_mat_text, 0, 0, &r.w, &r.h);
+    SDL_RenderCopy(t->p->rend, t->obj_mat_text, 0, &r);
+
+    r.x = ssize.x + 55;
+    r.y = t->buttons[2]->rect.y + 2;
+    SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
+    SDL_RenderCopy(t->p->rend, t->obj_mat_idx, 0, &r);
+
+    // BUTTONS
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
@@ -105,6 +153,7 @@ void toolbar_render(struct Toolbar *t)
         t->buttons[i]->rect.x -= ssize.x;
     }
 
+    // THREADS
     r = (SDL_Rect){ ssize.x + 10, t->threads_y - 30 };
     SDL_QueryTexture(t->threads_text, 0, 0, &r.w, &r.h);
     SDL_RenderCopy(t->p->rend, t->threads_text, 0, &r);
@@ -161,6 +210,11 @@ void toolbar_main(struct Toolbar *t)
             arr[3]->value = m->rot.x;
             arr[4]->value = m->rot.y;
             arr[5]->value = m->rot.z;
+
+            SDL_DestroyTexture(t->obj_mat_idx);
+            char s[20] = { 0 };
+            sprintf(s, "%zu", scene_mat_idx(t->p->sc, t->p->selected_mesh->mat));
+            t->obj_mat_idx = util_render_text(t->p->rend, t->p->font, s, (SDL_Color){ 255, 255, 255 });
         }
     }
     else

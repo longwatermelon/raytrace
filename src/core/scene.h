@@ -38,5 +38,7 @@ struct Mesh *scene_parse_mesh(struct Scene *sc, char *s);
 struct Light *scene_parse_light(struct Scene *sc, char *s);
 struct Texmap *scene_parse_tex(struct Scene *sc, char *s);
 
+size_t scene_mat_idx(struct Scene *sc, struct Material *mat);
+
 #endif
 

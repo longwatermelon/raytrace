@@ -23,6 +23,7 @@ struct Toolbar
     // Object position sliders
     int obj_y;
     struct Slider *obj_props[6];
+    SDL_Texture *obj_mat_text, *obj_mat_idx;
 
     // Thread number customization
     int threads_y;

@@ -241,3 +241,17 @@ struct Texmap *scene_parse_tex(struct Scene *sc, char *s)
     return tex_alloc(pos, w, h, src);
 }
 
+
+size_t scene_mat_idx(struct Scene *sc, struct Material *mat)
+{
+    for (size_t i = 0; i < sc->nmats; ++i)
+    {
+        if (sc->mats[i] == mat)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
