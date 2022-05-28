@@ -218,7 +218,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool op
         // shadow
         Vec3f orig = vec_addv(hit, vec_divf(norm, 1e3f));
         Vec3f sdir = vec_normalize(vec_sub(sc->lights[i]->pos, orig));
-        
+
         Vec3f shadow_hit;
         if (render_scene_cast_ray(sc, orig, sdir, pixel, false, &shadow_hit, 0, 0, 0))
         {
