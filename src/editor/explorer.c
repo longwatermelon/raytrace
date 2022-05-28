@@ -179,6 +179,7 @@ void explorer_render_nodes(struct Explorer *e)
 
         if (e->selected == e->nodes[i])
         {
+            r.x = 20;
             r.w = 500;
             SDL_SetRenderDrawBlendMode(e->rend, SDL_BLENDMODE_BLEND);
             SDL_SetRenderDrawColor(e->rend, 255, 255, 255, 100);
