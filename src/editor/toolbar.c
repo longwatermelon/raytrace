@@ -36,8 +36,9 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     SDL_Point ssize = util_ssize(t->p->window);
 
+    char *labels[3] = { "x: ", "y: ", "z: " };
     for (int i = 0; i < 3; ++i)
-        t->obj_pos[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, t->p->rend, t->p->font);
+        t->obj_pos[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
 
     t->selected_slider = 0;
     t->pressed_button = 0;
@@ -184,23 +185,26 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
 
     if (t->p->selected_mesh)
     {
-        for (int i = 0; i < 3; ++i)
+        if (t->p->selected_mesh)
         {
-            if (ignore_accuracy)
+            for (int i = 0; i < 3; ++i)
             {
-                if (t->selected_slider)
+                if (ignore_accuracy)
                 {
-                    slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
-                    ret = true;
+                    if (t->selected_slider)
+                    {
+                        slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
+                        ret = true;
+                    }
                 }
-            }
-            else
-            {
-                if (util_point_in_rect(mouse, t->obj_pos[i]->rect))
+                else
                 {
-                    slider_slide(t->obj_pos[i], pixels, t->p->rend, t->p->font);
-                    t->selected_slider = t->obj_pos[i];
-                    ret = true;
+                    if (util_point_in_rect(mouse, t->obj_pos[i]->rect))
+                    {
+                        slider_slide(t->obj_pos[i], pixels, t->p->rend, t->p->font);
+                        t->selected_slider = t->obj_pos[i];
+                        ret = true;
+                    }
                 }
             }
         }

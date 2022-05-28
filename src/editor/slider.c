@@ -2,13 +2,15 @@
 #include "util.h"
 
 
-struct Slider *slider_alloc(SDL_Point pos, float upp, float value, SDL_Renderer *rend, TTF_Font *font)
+struct Slider *slider_alloc(SDL_Point pos, float upp, float value, const char *label, SDL_Renderer *rend, TTF_Font *font)
 {
     struct Slider *s = malloc(sizeof(struct Slider));
     s->rect = (SDL_Rect){ pos.x, pos.y, 200, 20 };
     s->value = value;
     s->upp = upp;
     s->tex = 0;
+
+    s->label = strdup(label);
 
     slider_redo_tex(s, rend, font);
 
@@ -20,6 +22,9 @@ void slider_free(struct Slider *s)
 {
     if (s->tex)
         SDL_DestroyTexture(s->tex);
+
+    if (s->label)
+        free(s->label);
 
     free(s);
 }
@@ -55,8 +60,8 @@ void slider_redo_tex(struct Slider *s, SDL_Renderer *rend, TTF_Font *font)
     if (s->tex)
         SDL_DestroyTexture(s->tex);
 
-    char tmp[20];
-    sprintf(tmp, "%.2f", s->value);
+    char tmp[100];
+    sprintf(tmp, "%s%.2f", s->label, s->value);
     s->tex = util_render_text(rend, font, tmp, (SDL_Color){ 255, 255, 255 });
 }
 

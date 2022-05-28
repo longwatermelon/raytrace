@@ -191,9 +191,10 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         } break;
         case SDL_MOUSEBUTTONUP:
         {
+            mouse_down = false;
+
             if (p->toolbar->selected_slider)
             {
-                mouse_down = false;
                 SDL_SetRelativeMouseMode(SDL_FALSE);
                 SDL_WarpMouseInWindow(p->window, slider_mouse.x, slider_mouse.y);
                 slider_mouse = (SDL_Point){ -1, -1 };
