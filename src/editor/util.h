@@ -20,5 +20,7 @@ float util_timediff(struct timespec *t1, struct timespec *t2);
 
 float util_restrict_angle(float angle);
 
+char *util_parent(const char *file);
+
 #endif
 

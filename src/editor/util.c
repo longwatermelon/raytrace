@@ -56,3 +56,19 @@ float util_restrict_angle(float angle)
     return angle;
 }
 
+
+char *util_parent(const char *file)
+{
+    for (int i = strlen(file) - 1; i >= 0; --i)
+    {
+        if (file[i] == '/')
+        {
+            char *parent = malloc(sizeof(char) * (i + 1));
+            snprintf(parent, i + 1, "%s", file);
+            return parent;
+        }
+    }
+
+    return 0;
+}
+

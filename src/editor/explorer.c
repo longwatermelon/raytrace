@@ -16,7 +16,9 @@ void select_node(struct Prog *p)
 {
     if (p->explorer->selected)
     {
-        p->explorer->selected_path = strdup(p->explorer->selected->path);
+        char *s = calloc(sizeof(char), strlen(p->explorer->dir) + strlen(p->explorer->selected->path) + 2);
+        sprintf(s, "%s/%s", p->explorer->dir, p->explorer->selected->path);
+        p->explorer->selected_path = s;
         p->explorer->running = false;
     }
 }
@@ -48,13 +50,17 @@ struct Explorer *explorer_alloc(const char *dir, struct Prog *p)
 
     e->selected = 0;
 
-    sprintf(e->dir, "%s", dir);
+    char buf[PATH_MAX];
+    char *full = realpath(dir, buf);
+    strcpy(e->dir, full);
 
     e->folder_tex = IMG_LoadTexture(e->rend, "res/folder.png");
     e->file_tex = IMG_LoadTexture(e->rend, "res/file.png");
 
     e->nodes = explorer_read_dir(e, dir, &e->nodes_num);
     explorer_sort(e);
+
+    clock_gettime(CLOCK_MONOTONIC, &e->last_click);
 
     return e;
 }
@@ -121,6 +127,36 @@ char *explorer_find(struct Explorer *e)
                     if (mouse.y < 450 && mouse.x < 500)
                     {
                         e->selected = explorer_find_node(e, mouse);
+
+                        struct timespec now;
+                        clock_gettime(CLOCK_MONOTONIC, &now);
+
+                        if (util_timediff(&e->last_click, &now) < .5f && e->selected)
+                        {
+                            if (e->selected->type == DT_DIR)
+                            {
+                                if (strcmp(e->selected->path, "..") == 0)
+                                {
+                                    char *parent = util_parent(e->dir);
+                                    strcpy(e->dir, parent);
+                                    free(parent);
+                                }
+                                else
+                                {
+                                    char *s = calloc(sizeof(char), strlen(e->dir) + strlen(e->selected->path) + 2);
+                                    sprintf(s, "%s/%s", e->dir, e->selected->path);
+                                    strcpy(e->dir, s);
+                                    free(s);
+                                }
+
+                                e->nodes = explorer_read_dir(e, e->dir, &e->nodes_num);
+                                explorer_sort(e);
+                            }
+                        }
+                        else
+                        {
+                            clock_gettime(CLOCK_MONOTONIC, &e->last_click);
+                        }
                     }
                     else
                     {
@@ -223,10 +259,16 @@ struct ENode **explorer_read_dir(struct Explorer *e, const char *dir, size_t *nu
 
     while ((de = readdir(d)) != 0)
     {
-        nodes = realloc(nodes, sizeof(struct ENode*) * ++*num);
+        if (strcmp(de->d_name, ".") == 0)
+            continue;
 
-        nodes[*num - 1] = enode_alloc(de->d_name, de->d_type);
-        nodes[*num - 1]->tex = util_render_text(e->rend, e->font, de->d_name, (SDL_Color){ 255, 255, 255 });
+        if (de->d_type == DT_REG || de->d_type == DT_DIR)
+        {
+            nodes = realloc(nodes, sizeof(struct ENode*) * ++*num);
+
+            nodes[*num - 1] = enode_alloc(de->d_name, de->d_type);
+            nodes[*num - 1]->tex = util_render_text(e->rend, e->font, de->d_name, (SDL_Color){ 255, 255, 255 });
+        }
     }
 
     closedir(d);
