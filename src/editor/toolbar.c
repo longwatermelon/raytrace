@@ -36,9 +36,12 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     SDL_Point ssize = util_ssize(t->p->window);
 
-    char *labels[3] = { "x: ", "y: ", "z: " };
+    char *labels[6] = { "x: ", "y: ", "z: ", "yaw: ", "pitch: ", "roll: " };
     for (int i = 0; i < 3; ++i)
-        t->obj_pos[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
+        t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10, 50 + i * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
+
+    for (int i = 3; i < 6; ++i)
+        t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 100 + 20, 50 + (i - 3) * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
 
     t->selected_slider = 0;
     t->pressed_button = 0;
@@ -57,8 +60,8 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
 void toolbar_free(struct Toolbar *t)
 {
-    for (int i = 0; i < 3; ++i)
-        slider_free(t->obj_pos[i]);
+    for (int i = 0; i < 6; ++i)
+        slider_free(t->obj_props[i]);
 
     if (t->obj_tex)
         SDL_DestroyTexture(t->obj_tex);
@@ -86,8 +89,8 @@ void toolbar_render(struct Toolbar *t)
     SDL_QueryTexture(t->obj_tex, 0, 0, &obj_r.w, &obj_r.h);
     SDL_RenderCopy(t->p->rend, t->obj_tex, 0, &obj_r);
 
-    for (int i = 0; i < 3; ++i)
-        slider_render(t->obj_pos[i], t->p->rend);
+    for (int i = 0; i < 6; ++i)
+        slider_render(t->obj_props[i], t->p->rend);
 
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
@@ -141,29 +144,42 @@ void toolbar_main(struct Toolbar *t)
 
     toolbar_update_positions(t);
 
+    struct Slider **arr = t->obj_props;
+    struct Mesh *m = t->p->selected_mesh;
+
     if (t->p->focused)
     {
         if (t->p->selected_mesh)
         {
-            t->obj_pos[0]->value = t->p->selected_mesh->pos.x;
-            t->obj_pos[1]->value = t->p->selected_mesh->pos.y;
-            t->obj_pos[2]->value = t->p->selected_mesh->pos.z;
+            arr[0]->value = m->pos.x;
+            arr[1]->value = m->pos.y;
+            arr[2]->value = m->pos.z;
+
+            arr[3]->value = m->rot.x;
+            arr[4]->value = m->rot.y;
+            arr[5]->value = m->rot.z;
         }
     }
     else
     {
         if (t->p->selected_mesh)
         {
-            t->p->selected_mesh->pos = (Vec3f){
-                t->obj_pos[0]->value,
-                t->obj_pos[1]->value,
-                t->obj_pos[2]->value
+            m->pos = (Vec3f){
+                arr[0]->value,
+                arr[1]->value,
+                arr[2]->value
+            };
+
+            m->rot = (Vec3f){
+                arr[3]->value,
+                arr[4]->value,
+                arr[5]->value
             };
         }
     }
 
-    for (int i = 0; i < 3; ++i)
-        slider_redo_tex(t->obj_pos[i], t->p->rend, t->p->font);
+    for (int i = 0; i < 6; ++i)
+        slider_redo_tex(t->obj_props[i], t->p->rend, t->p->font);
 }
 
 
@@ -172,7 +188,10 @@ void toolbar_update_positions(struct Toolbar *t)
     SDL_Point ssize = util_ssize(t->p->window);
 
     for (int i = 0; i < 3; ++i)
-        t->obj_pos[i]->rect.x = ssize.x + 10;
+        t->obj_props[i]->rect.x = ssize.x + 10;
+
+    for (int i = 3; i < 6; ++i)
+        t->obj_props[i]->rect.x = ssize.x + 10 + 120;
 }
 
 
@@ -187,7 +206,7 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
     {
         if (t->p->selected_mesh)
         {
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 if (ignore_accuracy)
                 {
@@ -199,10 +218,10 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels, bool ignore_accuracy)
                 }
                 else
                 {
-                    if (util_point_in_rect(mouse, t->obj_pos[i]->rect))
+                    if (util_point_in_rect(mouse, t->obj_props[i]->rect))
                     {
-                        slider_slide(t->obj_pos[i], pixels, t->p->rend, t->p->font);
-                        t->selected_slider = t->obj_pos[i];
+                        slider_slide(t->obj_props[i], pixels, t->p->rend, t->p->font);
+                        t->selected_slider = t->obj_props[i];
                         ret = true;
                     }
                 }

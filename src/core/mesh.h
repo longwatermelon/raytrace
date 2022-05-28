@@ -16,7 +16,7 @@ typedef struct
 
 struct Mesh
 {
-    Vec3f pos;
+    Vec3f pos, rot;
 
     Vec3f *pts;
     size_t npts;
@@ -37,7 +37,7 @@ struct Mesh
     bool bounded;
 };
 
-struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat);
+struct Mesh *mesh_alloc(Vec3f pos, Vec3f rot, const char *fp, struct Material *mat);
 void mesh_free(struct Mesh *m);
 
 void mesh_read(struct Mesh *m, const char *fp);

@@ -283,7 +283,7 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bo
         {
             nearest = dist;
             if (hit) *hit = vec_addv(o, vec_mulf(dir, dist));
-            if (n) *n = sc->meshes[i]->norms[tri.nidx];
+            if (n) *n = rasterize_rotate_cc(sc->meshes[i]->norms[tri.nidx], sc->meshes[i]->rot);
             if (obj) *obj = (void*)sc->meshes[i];
             if (obj_type) *obj_type = OBJ_MESH;
         }

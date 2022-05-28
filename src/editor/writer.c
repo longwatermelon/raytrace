@@ -85,9 +85,9 @@ void writer_image_meshes(struct Scene *sc, char **out)
             }
         }
 
-        const char *template = "mesh %.2f %.2f %.2f|%d|%s %d\n";
+        const char *template = "mesh %.2f %.2f %.2f|%.2f %.2f %.2f|%d|%s %d\n";
         char *s = calloc(sizeof(char), strlen(template) + 100);
-        sprintf(s, template, EXPAND_VECTOR(m->pos), idx, m->name, !m->bounded);
+        sprintf(s, template, EXPAND_VECTOR(m->pos), EXPAND_VECTOR(m->rot), idx, m->name, !m->bounded);
 
         s = realloc(s, sizeof(char) * (strlen(s) + 1));
 

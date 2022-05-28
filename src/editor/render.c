@@ -24,7 +24,7 @@ void render_scene_mesh(struct Prog *p, struct Mesh *m)
 
         for (int j = 0; j < 3; ++j)
         {
-            Vec3f pt = m->pts[m->tris[i].idx[j]];
+            Vec3f pt = rasterize_rotate_cc(m->pts[m->tris[i].idx[j]], m->rot);
             pt = vec_addv(m->pos, pt);
             pt = vec_sub(pt, p->sc->cam->pos);
             pt = rasterize_rotate_ccw(pt, p->sc->cam->angle);

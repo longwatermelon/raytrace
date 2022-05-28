@@ -7,10 +7,11 @@
 #include <string.h>
 
 
-struct Mesh *mesh_alloc(Vec3f pos, const char *fp, struct Material *mat)
+struct Mesh *mesh_alloc(Vec3f pos, Vec3f rot, const char *fp, struct Material *mat)
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
     m->pos = pos;
+    m->rot = rot;
 
     m->pts = 0;
     m->npts = 0;
@@ -117,7 +118,7 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, Uint32 opt, float 
 
     for (size_t i = 0; i < m->ntris; ++i)
     {
-        if (opt & OPT_BACKFACE_CULLING && vec_dot(rdir, m->norms[m->tris[i].nidx]) > 0.f)
+        if (opt & OPT_BACKFACE_CULLING && vec_dot(rdir, rasterize_rotate_cc(m->norms[m->tris[i].nidx], m->rot)) > 0.f)
             continue;
 
         if (mesh_ray_tri_intersect(m, m->tris[i], ro, rdir, &nearest))
@@ -137,16 +138,16 @@ bool mesh_ray_intersect(struct Mesh *m, Vec3f ro, Vec3f rdir, Uint32 opt, float 
 bool mesh_ray_tri_intersect(struct Mesh *m, Triangle tri, Vec3f ro, Vec3f rdir, float *t)
 {
     // find intersection point
-    Vec3f a = m->pts[tri.idx[0]];
+    Vec3f a = rasterize_rotate_cc(m->pts[tri.idx[0]], m->rot);
     a = vec_addv(a, m->pos);
 
-    Vec3f b = m->pts[tri.idx[1]];
+    Vec3f b = rasterize_rotate_cc(m->pts[tri.idx[1]], m->rot);
     b = vec_addv(b, m->pos);
 
-    Vec3f c = m->pts[tri.idx[2]];
+    Vec3f c = rasterize_rotate_cc(m->pts[tri.idx[2]], m->rot);
     c = vec_addv(c, m->pos);
 
-    Vec3f norm = m->norms[tri.nidx];
+    Vec3f norm = rasterize_rotate_cc(m->norms[tri.nidx], m->rot);
     *t = (vec_dot(a, norm) - vec_dot(ro, norm)) / vec_dot(rdir, norm);
 
     // check if inside triangle
@@ -178,7 +179,7 @@ void mesh_find_bounds(struct Mesh *m, struct Camera *cam)
 
     for (size_t i = 0; i < m->npts; ++i)
     {
-        Vec3f adjusted = vec_sub(vec_addv(m->pts[i], m->pos), cam->pos);
+        Vec3f adjusted = vec_sub(vec_addv(rasterize_rotate_cc(m->pts[i], m->rot), m->pos), cam->pos);
         adjusted = rasterize_rotate_ccw(adjusted, cam->angle);
 
         SDL_Point p = rasterize_project_point(adjusted, 1000, 1000);

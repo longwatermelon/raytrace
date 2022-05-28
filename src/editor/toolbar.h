@@ -21,7 +21,7 @@ struct Toolbar
     size_t nbuttons;
 
     // Object position sliders
-    struct Slider *obj_pos[3];
+    struct Slider *obj_props[6];
 
     // Thread number customization
     SDL_Texture *threads_text, *threads_num;

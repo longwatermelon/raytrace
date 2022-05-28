@@ -192,15 +192,16 @@ struct Sphere *scene_parse_sphere(struct Scene *sc, char *s)
 
 struct Mesh *scene_parse_mesh(struct Scene *sc, char *s)
 {
-    Vec3f pos;
+    Vec3f pos, rot;
     char fp[PATH_MAX];
     int fullscreen_bounds;
     int mat_idx;
 
-    sscanf(s, "%f %f %f|%d|%s %d", &pos.x, &pos.y, &pos.z,
+    sscanf(s, "%f %f %f|%f %f %f|%d|%s %d", &pos.x, &pos.y, &pos.z,
+            &rot.x, &rot.y, &rot.z,
             &mat_idx, fp, &fullscreen_bounds);
 
-    struct Mesh *m = mesh_alloc(pos, fp, sc->mats[mat_idx]);
+    struct Mesh *m = mesh_alloc(pos, rot, fp, sc->mats[mat_idx]);
 
     if (fullscreen_bounds)
     {
