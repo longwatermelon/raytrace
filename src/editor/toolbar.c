@@ -106,6 +106,12 @@ void increase_edit_mat_idx(struct Prog *p)
     modify_edit_mat_idx(p, 1);
 }
 
+void add_mat(struct Prog *p)
+{
+    p->sc->mats = realloc(p->sc->mats, sizeof(struct Material*) * ++p->sc->nmats);
+    p->sc->mats[p->sc->nmats - 1] = mat_alloc((Vec3f){ 0.f, 0.f, 0.f }, 0.f, 0.f, 0.f, 0.f, 0);
+}
+
 struct Toolbar *toolbar_alloc(struct Prog *p)
 {
     struct Toolbar *t = malloc(sizeof(struct Toolbar));
@@ -115,7 +121,7 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->obj_tex = util_render_text(p->rend, p->font, "None", (SDL_Color){ 255, 255, 255 });
 
     SDL_Point ssize = util_ssize(t->p->window);
-    t->nbuttons = 6;
+    t->nbuttons = 7;
     t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->obj_y = 50;
@@ -159,6 +165,8 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     t->mat_preview = scene_alloc("res/mat_preview");
     t->mat_preview->spheres[0]->mat = t->p->sc->mats[0];
+    
+    t->buttons[6] = button_alloc((SDL_Rect){ t->mat_props[3]->rect.x - ssize.x + 20, t->mat_props[3]->rect.y - 115, 60, 20 }, add_mat, "New mat", p->rend, p->font);
 
     // THREADS
     t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });

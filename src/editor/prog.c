@@ -304,6 +304,26 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 explorer_free(p->explorer);
                 p->explorer = 0;
             } break;
+            case SDLK_x:
+            {
+                if (p->selected_mesh)
+                {
+                    int idx = -1;
+
+                    for (size_t i = 0; i < p->sc->nmeshes; ++i)
+                    {
+                        if (p->selected_mesh == p->sc->meshes[i])
+                        {
+                            idx = i;
+                            break;
+                        }
+                    }
+
+                    mesh_free(p->selected_mesh);
+                    p->selected_mesh = 0;
+                    memmove(p->sc->meshes + idx, p->sc->meshes + idx + 1, (--p->sc->nmeshes - idx) * sizeof(struct Mesh*));
+                }
+            } break;
             }
         } break;
 
