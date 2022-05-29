@@ -239,25 +239,28 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
                 p->selected_light = 0;
 
-                if (p->selected_type == OBJ_MESH)
+                if (p->selected_mesh)
                 {
-                    for (size_t i = 0; i < p->sc->nmats; ++i)
+                    if (p->selected_type == OBJ_MESH)
                     {
-                        if (p->sc->mats[i] == p->selected_mesh->mat)
+                        for (size_t i = 0; i < p->sc->nmats; ++i)
                         {
-                            toolbar_set_edited_mat(p, i);
-                            break;
+                            if (p->sc->mats[i] == p->selected_mesh->mat)
+                            {
+                                toolbar_set_edited_mat(p, i);
+                                break;
+                            }
                         }
                     }
-                }
-                else if (p->selected_type == OBJ_LIGHT)
-                {
-                    for (size_t i = 0; i < p->nlights; ++i)
+                    else if (p->selected_type == OBJ_LIGHT)
                     {
-                        if (p->lights[i] == p->selected_mesh)
+                        for (size_t i = 0; i < p->nlights; ++i)
                         {
-                            p->selected_light = p->sc->lights[i];
-                            break;
+                            if (p->lights[i] == p->selected_mesh)
+                            {
+                                p->selected_light = p->sc->lights[i];
+                                break;
+                            }
                         }
                     }
                 }
