@@ -7,8 +7,6 @@
 
 #define CLAMP(x, min, max) fmin(max, fmax(x, min))
 
-void modify_edit_mat_idx(struct Prog *p, int num);
-
 // button functions
 void decrease_threads(struct Prog *p)
 {
@@ -538,5 +536,11 @@ void toolbar_buttons_pressed(struct Toolbar *t, SDL_Point mouse)
 
         t->buttons[i]->rect.x -= ssize.x;
     }
+}
+
+
+void toolbar_set_edited_mat(struct Prog *p, int idx)
+{
+    modify_edit_mat_idx(p, idx - p->toolbar->mat_idx_edited);
 }
 

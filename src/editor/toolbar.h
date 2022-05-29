@@ -6,7 +6,6 @@
 #include <limits.h>
 
 struct Prog;
-void modify_edit_mat_idx(struct Prog *p, int num);
 
 struct Toolbar
 {
@@ -54,6 +53,8 @@ void toolbar_update_positions(struct Toolbar *t);
 bool toolbar_slide_sliders(struct Toolbar *t, int pixels);
 
 void toolbar_buttons_pressed(struct Toolbar *t, SDL_Point mouse);
+
+void toolbar_set_edited_mat(struct Prog *p, int idx);
 
 #endif
 

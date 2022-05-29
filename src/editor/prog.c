@@ -245,7 +245,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     {
                         if (p->sc->mats[i] == p->selected_mesh->mat)
                         {
-                            modify_edit_mat_idx(p, i - p->toolbar->mat_idx_edited);
+                            toolbar_set_edited_mat(p, i);
                             break;
                         }
                     }
