@@ -15,6 +15,7 @@ size_t g_nthreads = 4;
 Uint32 g_optimization = 0;
 
 float g_progress = 0.f;
+int g_sleep_time = 1;
 
 Vec3f *render_rend(struct Scene *sc)
 {
@@ -98,7 +99,7 @@ void render_rend_wait_cthreads(render_cast_rays_args **args)
         if (done)
             break;
 
-        sleep(1);
+        sleep(g_sleep_time);
     }
 
     LOG(LOG_NORMAL, "\n");
@@ -334,4 +335,4 @@ void render_set_max_bounces(int i) { g_max_bounces = i; }
 void render_enable_antialiasing() { g_antialiasing = true; }
 void render_set_threads(int threads) { g_nthreads = threads; }
 void render_enable_optimizations(Uint32 flag) { g_optimization |= flag; }
-
+void render_set_sleep(int time) { g_sleep_time = time; }

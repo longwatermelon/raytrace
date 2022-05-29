@@ -1,0 +1,14 @@
+image
+dim 72 72
+threads 4
+antialias
+optimize backface
+bg .4 1 1
+cam 0 0 0|0 0 0
+
+material 0 0 0|0 0 0|0|-1
+
+sphere 0 0 3|0|1
+
+light 4 -1 0|.8
+light -3 -5 0|.8

@@ -43,6 +43,7 @@ void render_set_max_bounces(int i);
 void render_enable_antialiasing();
 void render_set_threads(int threads);
 void render_enable_optimizations(Uint32 flag);
+void render_set_sleep(int time);
 
 #endif
 

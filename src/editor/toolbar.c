@@ -2,6 +2,9 @@
 #include "util.h"
 #include "prog.h"
 #include "config.h"
+#include <core/render.h>
+
+#define CLAMP(x, min, max) fmin(max, fmax(x, min))
 
 // button functions
 void decrease_threads(struct Prog *p)
@@ -88,6 +91,8 @@ void modify_edit_mat_idx(struct Prog *p, int num)
         p->toolbar->mat_idx = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
 
         update_edit_mat_info(p->toolbar);
+
+        p->toolbar->mat_preview->spheres[0]->mat = p->sc->mats[p->toolbar->mat_idx_edited];
     }
 }
 
@@ -145,12 +150,15 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     for (int i = 3; i < 6; ++i)
         t->mat_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 120, 60 + t->mat_y + (i - 3) * 30 }, .01f, 0.f, mlabels[i], t->p->rend, t->p->font);
 
-    t->mat_props[6] = slider_alloc((SDL_Point){ ssize.x + 10 + 60, 60 + t->mat_y + 90 }, .01f, 0.f, mlabels[6], t->p->rend, t->p->font);
+    t->mat_props[6] = slider_alloc((SDL_Point){ ssize.x + 10 + 60, 60 + t->mat_y + 90 }, .4f, 0.f, mlabels[6], t->p->rend, t->p->font);
 
     t->buttons[4] = button_alloc((SDL_Rect){ 10, t->mat_y + 25, 20, 20 }, decrease_edit_mat_idx, "-", p->rend, p->font);
     t->buttons[5] = button_alloc((SDL_Rect){ 90, t->mat_y + 25, 20, 20 }, increase_edit_mat_idx, "+", p->rend, p->font);
 
     update_edit_mat_info(t);
+
+    t->mat_preview = scene_alloc("res/mat_preview");
+    t->mat_preview->spheres[0]->mat = t->p->sc->mats[0];
 
     // THREADS
     t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });
@@ -186,6 +194,8 @@ void toolbar_free(struct Toolbar *t)
 
     SDL_DestroyTexture(t->threads_text);
     SDL_DestroyTexture(t->threads_num);
+
+    scene_free(t->mat_preview);
 
     free(t);
 }
@@ -229,6 +239,27 @@ void toolbar_render(struct Toolbar *t)
 
     for (int i = 0; i < 7; ++i)
         slider_render(t->mat_props[i], t->p->rend);
+
+    render_set_sleep(0);
+    util_set_loglevel(LOG_SILENT);
+    Vec3f *frame = render_rend(t->mat_preview);
+    render_set_sleep(1);
+
+    for (int y = 0; y < 72; ++y)
+    {
+        for (int x = 0; x < 72; ++x)
+        {
+            Vec3f pix = frame[y * 72 + x];
+            pix.x = CLAMP(pix.x, 0.f, 1.f);
+            pix.y = CLAMP(pix.y, 0.f, 1.f);
+            pix.z = CLAMP(pix.z, 0.f, 1.f);
+
+            SDL_SetRenderDrawColor(t->p->rend, pix.x * 255.f, pix.y * 255.f, pix.z * 255.f, 255);
+            SDL_RenderDrawPoint(t->p->rend, t->mat_props[3]->rect.x + 20 + x, t->mat_props[3]->rect.y - 80 + y);
+        }
+    }
+
+    free(frame);
 
     // BUTTONS
     SDL_Point mouse;

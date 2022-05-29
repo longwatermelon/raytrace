@@ -32,6 +32,8 @@ struct Toolbar
     int mat_idx_edited;
     struct Slider *mat_props[7];
 
+    struct Scene *mat_preview;
+
     // Thread number customization
     int threads_y;
     SDL_Texture *threads_text, *threads_num;
