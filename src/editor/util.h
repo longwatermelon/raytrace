@@ -7,6 +7,8 @@
 
 #define EDITOR_TOOLBAR_WIDTH 250
 
+#define RM_ELEM(arr, i, len, type) { memmove(arr + i, arr + i + 1, (--len - i) * sizeof(type)); }
+
 // get size of scene preview
 SDL_Point util_ssize(SDL_Window *w);
 

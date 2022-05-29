@@ -378,7 +378,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                         {
                             if (p->selected_mesh == p->sc->meshes[i])
                             {
-                                memmove(p->sc->meshes + i, p->sc->meshes + i + 1, (--p->sc->nmeshes - i) * sizeof(struct Mesh*));
+                                RM_ELEM(p->sc->meshes, i, p->sc->nmeshes, struct Mesh*);
                                 break;
                             }
                         }
@@ -390,8 +390,8 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                             if (p->selected_light == p->sc->lights[i])
                             {
                                 light_free(p->sc->lights[i]);
-                                memmove(p->sc->lights + i, p->sc->lights + i + 1, (--p->sc->nlights - i) * sizeof(struct Light*));
-                                memmove(p->lights + i, p->lights + i + 1, (--p->nlights - i) * sizeof(struct Mesh*));
+                                RM_ELEM(p->sc->lights, i, p->sc->nlights, struct Light*);
+                                RM_ELEM(p->lights, i, p->nlights, struct Mesh*);
                                 break;
                             }
                         }
