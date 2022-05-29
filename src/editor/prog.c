@@ -343,6 +343,8 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
                     p->status = util_render_text(p->rend, p->font, s, (SDL_Color){ 0, 255, 0 });
                     clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+
+                    free(s);
                 }
             } break;
 

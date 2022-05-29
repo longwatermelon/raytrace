@@ -70,8 +70,8 @@ struct Explorer *explorer_alloc(const char *dir, struct Prog *p)
 
 void explorer_free(struct Explorer *e)
 {
-    SDL_DestroyRenderer(e->rend);
-    SDL_DestroyWindow(e->win);
+    SDL_DestroyTexture(e->file_tex);
+    SDL_DestroyTexture(e->folder_tex);
 
     for (size_t i = 0; i < e->nodes_num; ++i)
         enode_free(e->nodes[i]);
@@ -81,8 +81,8 @@ void explorer_free(struct Explorer *e)
     if (e->selected_path)
         free(e->selected_path);
 
-    SDL_DestroyTexture(e->file_tex);
-    SDL_DestroyTexture(e->folder_tex);
+    SDL_DestroyRenderer(e->rend);
+    SDL_DestroyWindow(e->win);
 
     free(e);
 }
