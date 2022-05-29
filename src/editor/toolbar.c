@@ -240,26 +240,29 @@ void toolbar_render(struct Toolbar *t)
     for (int i = 0; i < 7; ++i)
         slider_render(t->mat_props[i], t->p->rend);
 
-    render_set_sleep(0);
-    util_set_loglevel(LOG_SILENT);
-    Vec3f *frame = render_rend(t->mat_preview);
-    render_set_sleep(1);
-
-    for (int y = 0; y < 72; ++y)
+    if (!t->p->rendering)
     {
-        for (int x = 0; x < 72; ++x)
+        render_set_sleep(0);
+        util_set_loglevel(LOG_SILENT);
+        Vec3f *frame = render_rend(t->mat_preview);
+        render_set_sleep(1);
+
+        for (int y = 0; y < 72; ++y)
         {
-            Vec3f pix = frame[y * 72 + x];
-            pix.x = CLAMP(pix.x, 0.f, 1.f);
-            pix.y = CLAMP(pix.y, 0.f, 1.f);
-            pix.z = CLAMP(pix.z, 0.f, 1.f);
+            for (int x = 0; x < 72; ++x)
+            {
+                Vec3f pix = frame[y * 72 + x];
+                pix.x = CLAMP(pix.x, 0.f, 1.f);
+                pix.y = CLAMP(pix.y, 0.f, 1.f);
+                pix.z = CLAMP(pix.z, 0.f, 1.f);
 
-            SDL_SetRenderDrawColor(t->p->rend, pix.x * 255.f, pix.y * 255.f, pix.z * 255.f, 255);
-            SDL_RenderDrawPoint(t->p->rend, t->mat_props[3]->rect.x + 20 + x, t->mat_props[3]->rect.y - 80 + y);
+                SDL_SetRenderDrawColor(t->p->rend, pix.x * 255.f, pix.y * 255.f, pix.z * 255.f, 255);
+                SDL_RenderDrawPoint(t->p->rend, t->mat_props[3]->rect.x + 20 + x, t->mat_props[3]->rect.y - 80 + y);
+            }
         }
-    }
 
-    free(frame);
+        free(frame);
+    }
 
     // BUTTONS
     SDL_Point mouse;
@@ -446,10 +449,14 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels)
         }
     }
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 7; ++i)
     {
         float prev = t->mat_props[i]->value;
-        t->mat_props[i]->value = fmax(0.f, fmin(t->mat_props[i]->value, 1.f));
+
+        if (i < 3 || i == 5)
+            t->mat_props[i]->value = fmin(t->mat_props[i]->value, 1.f);
+
+        t->mat_props[i]->value = fmax(0.f, t->mat_props[i]->value);
 
         if (prev != t->mat_props[i]->value)
         {

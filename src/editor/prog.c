@@ -291,15 +291,6 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 explorer_free(p->explorer);
                 p->explorer = 0;
             } break;
-#if 0
-            case SDLK_p:
-            {
-                render_set_sleep(0);
-                Vec3f *frame = render_rend(p->toolbar->mat_preview);
-                render_write_to_file(p->toolbar->mat_preview, frame, "out.ppm");
-                free(frame);
-            } break;
-#endif
             }
         } break;
 
