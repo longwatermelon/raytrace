@@ -239,7 +239,18 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
                 p->selected_light = 0;
 
-                if (p->selected_type == OBJ_LIGHT)
+                if (p->selected_type == OBJ_MESH)
+                {
+                    for (size_t i = 0; i < p->sc->nmats; ++i)
+                    {
+                        if (p->sc->mats[i] == p->selected_mesh->mat)
+                        {
+                            modify_edit_mat_idx(p, i - p->toolbar->mat_idx_edited);
+                            break;
+                        }
+                    }
+                }
+                else if (p->selected_type == OBJ_LIGHT)
                 {
                     for (size_t i = 0; i < p->nlights; ++i)
                     {

@@ -7,6 +7,8 @@
 
 #define CLAMP(x, min, max) fmin(max, fmax(x, min))
 
+void modify_edit_mat_idx(struct Prog *p, int num);
+
 // button functions
 void decrease_threads(struct Prog *p)
 {
@@ -429,6 +431,8 @@ void toolbar_main(struct Toolbar *t)
 void toolbar_update_positions(struct Toolbar *t)
 {
     SDL_Point ssize = util_ssize(t->p->window);
+
+    t->light_in->rect.x = ssize.x + 1000;
 
     for (int i = 0; i < 3; ++i)
         t->obj_props[i]->rect.x = ssize.x + 10;

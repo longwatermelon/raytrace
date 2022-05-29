@@ -6,6 +6,7 @@
 #include <limits.h>
 
 struct Prog;
+void modify_edit_mat_idx(struct Prog *p, int num);
 
 struct Toolbar
 {
