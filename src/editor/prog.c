@@ -331,14 +331,6 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     pthread_create(&p->render_thread, 0, raytrace_thr_sc_image, (void*)args);
                     pthread_detach(p->render_thread);
                 }
-                else
-                {
-#if 0
-                    writer_image(p->sc, p->config, "out");
-                    p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
-                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
-#endif
-                }
             } break;
             case SDLK_s:
             {
