@@ -24,7 +24,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->font = TTF_OpenFont("res/font.ttf", 14);
 
-    p->sc = scene_alloc("examples/image");
+    p->sc = scene_alloc("res/base");
     p->config = config_alloc();
 
     p->mode = MODE_NORMAL;
@@ -294,6 +294,11 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 {
                     p->sc->meshes = realloc(p->sc->meshes, sizeof(struct Mesh*) * ++p->sc->nmeshes);
                     p->sc->meshes[p->sc->nmeshes - 1] = mesh_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f }, path, p->sc->mats[0]);
+                    
+                    struct Mesh *m = p->sc->meshes[p->sc->nmeshes - 1];
+                    m->min = (Point){ INT_MIN, INT_MIN };
+                    m->max = (Point){ INT_MAX, INT_MAX };
+                    m->bounded = true;
                 }
 
                 explorer_free(p->explorer);

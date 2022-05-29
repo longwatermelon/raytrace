@@ -1,0 +1,12 @@
+image
+dim 1000 1000
+threads 4
+antialias
+optimize backface
+bg 0 0 0
+cam 0 0 0|0 0 0
+
+material 0 0 0|0 0 0|0|-1
+
+light 4 -1 0|.8
+light -3 -5 0|.8
