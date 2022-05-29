@@ -343,7 +343,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 if (path)
                 {
                     p->sc->meshes = realloc(p->sc->meshes, sizeof(struct Mesh*) * ++p->sc->nmeshes);
-                    p->sc->meshes[p->sc->nmeshes - 1] = mesh_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f }, path, p->sc->mats[0]);
+                    p->sc->meshes[p->sc->nmeshes - 1] = mesh_alloc(vec_addv(p->sc->cam->pos, rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle)), (Vec3f){ 0.f, 0.f, 0.f }, path, p->sc->mats[0]);
                     
                     struct Mesh *m = p->sc->meshes[p->sc->nmeshes - 1];
                     m->min = (Point){ INT_MIN, INT_MIN };

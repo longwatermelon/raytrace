@@ -2,6 +2,7 @@
 #include "util.h"
 #include "prog.h"
 #include "config.h"
+#include <core/rasterize.h>
 #include <core/render.h>
 
 #define CLAMP(x, min, max) fmin(max, fmax(x, min))
@@ -109,7 +110,17 @@ void increase_edit_mat_idx(struct Prog *p)
 void add_mat(struct Prog *p)
 {
     p->sc->mats = realloc(p->sc->mats, sizeof(struct Material*) * ++p->sc->nmats);
-    p->sc->mats[p->sc->nmats - 1] = mat_alloc((Vec3f){ 0.f, 0.f, 0.f }, 0.f, 0.f, 0.f, 0.f, 0);
+    p->sc->mats[p->sc->nmats - 1] = mat_alloc((Vec3f){ 0.f, 0.f, 0.f }, 0.f, 0.f, 0.f, 1.f, 0);
+}
+
+void add_light(struct Prog *p)
+{
+    p->sc->lights = realloc(p->sc->lights, sizeof(struct Light*) * ++p->sc->nlights);
+    p->sc->lights[p->sc->nlights - 1] = light_alloc(vec_addv(p->sc->cam->pos, rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle)), 0.f);
+
+    p->lights = realloc(p->lights, sizeof(struct Mesh*) * ++p->nlights);
+    p->lights[p->nlights - 1] = mesh_alloc(p->sc->lights[p->sc->nlights - 1]->pos, (Vec3f){ 0.f, 0.f, 0.f }, "res/light.obj", 0);
+    p->lights[p->nlights - 1]->col = (SDL_Color){ 239, 255, 166 };
 }
 
 struct Toolbar *toolbar_alloc(struct Prog *p)
@@ -121,7 +132,7 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->obj_tex = util_render_text(p->rend, p->font, "None", (SDL_Color){ 255, 255, 255 });
 
     SDL_Point ssize = util_ssize(t->p->window);
-    t->nbuttons = 7;
+    t->nbuttons = 8;
     t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->obj_y = 50;
@@ -146,6 +157,7 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     // LIGHT
     t->light_in = slider_alloc((SDL_Point){ t->obj_props[0]->rect.x + 100, t->obj_props[0]->rect.y }, .01f, 0.f, "in: ", p->rend, p->font);
+    t->buttons[7] = button_alloc((SDL_Rect){ 10, 400, 90, 20 }, add_light, "New light", t->p->rend, t->p->font);
 
     // MATERIAL
     t->mat_tex = util_render_text(p->rend, p->font, "Material editor", (SDL_Color){ 255, 255, 255 });
@@ -238,7 +250,15 @@ void toolbar_render(struct Toolbar *t)
 
     r.x = ssize.x + 55;
     r.y = t->buttons[2]->rect.y + 2;
-    SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
+
+    if (t->p->selected_type == OBJ_LIGHT)
+    {
+        SDL_DestroyTexture(t->obj_mat_idx);
+        t->obj_mat_idx = util_render_text(t->p->rend, t->p->font, "NaN", (SDL_Color){ 255, 255, 255 });
+        r.x = ssize.x + 45;
+    }
+
+    SDL_QueryTexture(t->obj_mat_idx, 0, 0, &r.w, &r.h);
     SDL_RenderCopy(t->p->rend, t->obj_mat_idx, 0, &r);
 
     // LIGHT
