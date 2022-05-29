@@ -372,20 +372,33 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             {
                 if (p->selected_mesh)
                 {
-                    int idx = -1;
-
-                    for (size_t i = 0; i < p->sc->nmeshes; ++i)
+                    if (p->selected_type == OBJ_MESH)
                     {
-                        if (p->selected_mesh == p->sc->meshes[i])
+                        for (size_t i = 0; i < p->sc->nmeshes; ++i)
                         {
-                            idx = i;
-                            break;
+                            if (p->selected_mesh == p->sc->meshes[i])
+                            {
+                                memmove(p->sc->meshes + i, p->sc->meshes + i + 1, (--p->sc->nmeshes - i) * sizeof(struct Mesh*));
+                                break;
+                            }
+                        }
+                    }
+                    else if (p->selected_type == OBJ_LIGHT)
+                    {
+                        for (size_t i = 0; i < p->sc->nlights; ++i)
+                        {
+                            if (p->selected_light == p->sc->lights[i])
+                            {
+                                light_free(p->sc->lights[i]);
+                                memmove(p->sc->lights + i, p->sc->lights + i + 1, (--p->sc->nlights - i) * sizeof(struct Light*));
+                                memmove(p->lights + i, p->lights + i + 1, (--p->nlights - i) * sizeof(struct Mesh*));
+                                break;
+                            }
                         }
                     }
 
                     mesh_free(p->selected_mesh);
                     p->selected_mesh = 0;
-                    memmove(p->sc->meshes + idx, p->sc->meshes + idx + 1, (--p->sc->nmeshes - idx) * sizeof(struct Mesh*));
                 }
             } break;
             }
