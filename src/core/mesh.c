@@ -30,6 +30,8 @@ struct Mesh *mesh_alloc(Vec3f pos, Vec3f rot, const char *fp, struct Material *m
     strcpy(m->name, fp);
     m->bounded = false;
 
+    m->col = (SDL_Color){ 255, 255, 255 };
+
     return m;
 }
 

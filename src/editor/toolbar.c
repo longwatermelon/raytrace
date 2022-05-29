@@ -144,6 +144,9 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->buttons[2] = button_alloc((SDL_Rect){ 10, t->obj_y + 120, 20, 20 }, decrease_mat_idx, "-", p->rend, p->font);
     t->buttons[3] = button_alloc((SDL_Rect){ 90, t->obj_y + 120, 20, 20 }, increase_mat_idx, "+", p->rend, p->font);
 
+    // LIGHT
+    t->light_in = slider_alloc((SDL_Point){ t->obj_props[0]->rect.x + 100, t->obj_props[0]->rect.y }, .01f, 0.f, "in: ", p->rend, p->font);
+
     // MATERIAL
     t->mat_tex = util_render_text(p->rend, p->font, "Material editor", (SDL_Color){ 255, 255, 255 });
     t->mat_idx = util_render_text(p->rend, p->font, "0", (SDL_Color){ 255, 255, 255 });
@@ -186,6 +189,8 @@ void toolbar_free(struct Toolbar *t)
     for (int i = 0; i < 7; ++i)
         slider_free(t->mat_props[i]);
 
+    slider_free(t->light_in);
+
     if (t->obj_tex)
         SDL_DestroyTexture(t->obj_tex);
 
@@ -222,7 +227,9 @@ void toolbar_render(struct Toolbar *t)
     SDL_RenderCopy(t->p->rend, t->obj_tex, 0, &obj_r);
 
     for (int i = 0; i < 6; ++i)
+    {
         slider_render(t->obj_props[i], t->p->rend);
+    }
 
     r.x = ssize.x + 10;
     r.y = t->obj_y + 90;
@@ -233,6 +240,9 @@ void toolbar_render(struct Toolbar *t)
     r.y = t->buttons[2]->rect.y + 2;
     SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
     SDL_RenderCopy(t->p->rend, t->obj_mat_idx, 0, &r);
+
+    // LIGHT
+    slider_render(t->light_in, t->p->rend);
 
     // MATERIAL
     r.x = ssize.x + 10;
@@ -334,9 +344,16 @@ void toolbar_main(struct Toolbar *t)
             arr[1]->value = m->pos.y;
             arr[2]->value = m->pos.z;
 
-            arr[3]->value = m->rot.x;
-            arr[4]->value = m->rot.y;
-            arr[5]->value = m->rot.z;
+            if (t->p->selected_type == OBJ_MESH)
+            {
+                arr[3]->value = m->rot.x;
+                arr[4]->value = m->rot.y;
+                arr[5]->value = m->rot.z;
+            }
+            else if (t->p->selected_type == OBJ_LIGHT)
+            {
+                t->light_in->value = t->p->selected_light->in;
+            }
 
             SDL_DestroyTexture(t->obj_mat_idx);
             char s[20] = { 0 };
@@ -354,11 +371,19 @@ void toolbar_main(struct Toolbar *t)
                 arr[2]->value
             };
 
-            m->rot = (Vec3f){
-                arr[3]->value,
-                arr[4]->value,
-                arr[5]->value
-            };
+            if (t->p->selected_type == OBJ_MESH)
+            {
+                m->rot = (Vec3f){
+                    arr[3]->value,
+                    arr[4]->value,
+                    arr[5]->value
+                };
+            }
+            else if (t->p->selected_type == OBJ_LIGHT)
+            {
+                t->p->selected_light->pos = m->pos;
+                t->p->selected_light->in = t->light_in->value;
+            }
         }
     }
 
@@ -376,6 +401,8 @@ void toolbar_main(struct Toolbar *t)
 
     for (int i = 0; i < 6; ++i)
         slider_redo_tex(t->obj_props[i], t->p->rend, t->p->font);
+
+    slider_redo_tex(t->light_in, t->p->rend, t->p->font);
 }
 
 
@@ -384,16 +411,26 @@ void toolbar_update_positions(struct Toolbar *t)
     SDL_Point ssize = util_ssize(t->p->window);
 
     for (int i = 0; i < 3; ++i)
-    {
         t->obj_props[i]->rect.x = ssize.x + 10;
-        t->mat_props[i]->rect.x = ssize.x + 10;
+
+    if (t->p->selected_type == OBJ_MESH)
+    {
+        for (int i = 3; i < 6; ++i)
+            t->obj_props[i]->rect.x = ssize.x + 10 + 120;
+    }
+    else if (t->p->selected_type == OBJ_LIGHT)
+    {
+        for (int i = 3; i < 6; ++i)
+            t->obj_props[i]->rect.x = ssize.x + 1000;
+
+        t->light_in->rect.x = ssize.x + 10 + 120;
     }
 
+    for (int i = 0; i < 3; ++i)
+        t->mat_props[i]->rect.x = ssize.x + 10;
+
     for (int i = 3; i < 6; ++i)
-    {
-        t->obj_props[i]->rect.x = ssize.x + 10 + 120;
         t->mat_props[i]->rect.x = ssize.x + 10 + 120;
-    }
 
     t->mat_props[6]->rect.x = ssize.x + 10 + 60;
 }
@@ -401,56 +438,40 @@ void toolbar_update_positions(struct Toolbar *t)
 
 bool toolbar_slide_sliders(struct Toolbar *t, int pixels)
 {
-    bool ret = false;
-
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
-    if (t->p->selected_mesh)
+    if (t->selected_slider)
     {
-        for (int i = 0; i < 6; ++i)
+        slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
+    }
+    else
+    {
+        if (t->p->selected_mesh)
         {
-            if (t->selected_slider)
+            for (int i = 0; i < 6; ++i)
             {
                 if (t->selected_slider == t->obj_props[i])
-                {
-                    slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
-                    ret = true;
-
                     if (i >= 3)
                         t->selected_slider->value = util_restrict_angle(t->selected_slider->value);
-                }
-            }
-            else
-            {
-                if (util_point_in_rect(mouse, t->obj_props[i]->rect))
-                {
-                    slider_slide(t->obj_props[i], pixels, t->p->rend, t->p->font);
-                    t->selected_slider = t->obj_props[i];
-                    ret = true;
-                }
-            }
-        }
-    }
 
-    for (int i = 0; i < 7; ++i)
-    {
-        if (t->selected_slider)
-        {
-            if (t->selected_slider == t->mat_props[i])
-            {
-                slider_slide(t->selected_slider, pixels, t->p->rend, t->p->font);
-                ret = true;
+                if (util_point_in_rect(mouse, t->obj_props[i]->rect))
+                    t->selected_slider = t->obj_props[i];
             }
         }
-        else
+
+        for (int i = 0; i < 7; ++i)
         {
             if (util_point_in_rect(mouse, t->mat_props[i]->rect))
             {
                 slider_slide(t->mat_props[i], pixels, t->p->rend, t->p->font);
                 t->selected_slider = t->mat_props[i];
-                ret = true;
             }
+        }
+
+        if (util_point_in_rect(mouse, t->light_in->rect))
+        {
+            t->selected_slider = t->light_in;
         }
     }
 
@@ -469,7 +490,7 @@ bool toolbar_slide_sliders(struct Toolbar *t, int pixels)
         }
     }
 
-    return ret;
+    return t->selected_slider != 0;
 }
 
 

@@ -40,6 +40,13 @@ struct Prog
     raytrace_sc_args_t *render_thread_args;
 
     struct Explorer *explorer;
+
+    struct Mesh **lights;
+    size_t nlights;
+
+    int selected_type, hover_type;
+
+    struct Light *selected_light;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);
@@ -51,6 +58,8 @@ void prog_events(struct Prog *p, SDL_Event *evt);
 void prog_sample_button(struct Prog *p);
 
 void prog_set_focus(struct Prog *p, bool focus);
+
+struct Mesh *prog_cast_ray(struct Prog *p);
 
 #endif
 

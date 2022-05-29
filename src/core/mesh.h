@@ -35,6 +35,8 @@ struct Mesh
 
     char name[PATH_MAX];
     bool bounded;
+
+    SDL_Color col;
 };
 
 struct Mesh *mesh_alloc(Vec3f pos, Vec3f rot, const char *fp, struct Material *mat);

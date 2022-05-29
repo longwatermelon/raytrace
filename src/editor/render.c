@@ -12,6 +12,11 @@ void render_scene(struct Prog *p)
     {
         render_scene_mesh(p, p->sc->meshes[i]);
     }
+
+    for (size_t i = 0; i < p->nlights; ++i)
+    {
+        render_scene_mesh(p, p->lights[i]);
+    }
 }
 
 
@@ -49,7 +54,7 @@ void render_scene_mesh(struct Prog *p, struct Mesh *m)
             else if (m == p->hover_mesh)
                 SDL_SetRenderDrawColor(p->rend, 0, 255, 0, 255);
             else
-                SDL_SetRenderDrawColor(p->rend, 255, 255, 255, 255);
+                SDL_SetRenderDrawColor(p->rend, m->col.r, m->col.g, m->col.b, 255);
 
             SDL_RenderDrawLine(p->rend, points[0].x, points[0].y, points[1].x, points[1].y);
             SDL_RenderDrawLine(p->rend, points[1].x, points[1].y, points[2].x, points[2].y);

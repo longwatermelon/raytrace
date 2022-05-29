@@ -4,9 +4,11 @@ threads 4
 antialias
 optimize backface
 bg 0 0 0
-cam 0 0 0|0 0 0
+cam 3.04 -4.8 -5|5.81 5.69 0
 
-material 0 0 0|0 0 0|0|-1
+material 0 0 0|0 0 1|0|-1
+
+mesh 0 0 0|0 0 0|0|res/cube.obj 0
 
 light 4 -1 0|.8
 light -3 -5 0|.8

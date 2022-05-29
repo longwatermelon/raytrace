@@ -44,6 +44,20 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->explorer = 0;
 
+    p->lights = malloc(sizeof(struct Mesh*) * p->sc->nlights);
+    p->nlights = p->sc->nlights;
+
+    for (size_t i = 0; i < p->sc->nlights; ++i)
+    {
+        p->lights[i] = mesh_alloc(p->sc->lights[i]->pos, (Vec3f){ 0.f, 0.f, 0.f }, "res/light.obj", 0);
+        p->lights[i]->col = (SDL_Color){ 239, 255, 166 };
+    }
+
+    p->selected_type = OBJ_MESH;
+    p->hover_type = OBJ_MESH;
+
+    p->selected_light = 0;
+
     return p;
 }
 
@@ -55,6 +69,11 @@ void prog_free(struct Prog *p)
 
     if (p->explorer)
         explorer_free(p->explorer);
+
+    for (size_t i = 0; i < p->nlights; ++i)
+        mesh_free(p->lights[i]);
+
+    free(p->lights);
 
     toolbar_free(p->toolbar);
     config_free(p->config);
@@ -95,9 +114,25 @@ void prog_mainloop(struct Prog *p)
 
             if (p->focused)
             {
-                Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
-                if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, (Point){ 0, 0 }, false, 0, 0, (void*)&p->hover_mesh, 0))
-                    p->hover_mesh = 0;
+                p->hover_mesh = prog_cast_ray(p);
+                p->hover_type = OBJ_MESH;
+
+                struct Mesh **tmp = p->sc->meshes;
+                size_t ntmp = p->sc->nmeshes;
+
+                p->sc->meshes = p->lights;
+                p->sc->nmeshes = p->nlights;
+
+                struct Mesh *m = prog_cast_ray(p);
+
+                if (m)
+                {
+                    p->hover_mesh = m;
+                    p->hover_type = OBJ_LIGHT;
+                }
+
+                p->sc->meshes = tmp;
+                p->sc->nmeshes = ntmp;
             }
 
             toolbar_main(p->toolbar);
@@ -200,6 +235,21 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             if (p->focused)
             {
                 p->selected_mesh = p->hover_mesh;
+                p->selected_type = p->hover_type;
+
+                p->selected_light = 0;
+
+                if (p->selected_type == OBJ_LIGHT)
+                {
+                    for (size_t i = 0; i < p->nlights; ++i)
+                    {
+                        if (p->lights[i] == p->selected_mesh)
+                        {
+                            p->selected_light = p->sc->lights[i];
+                            break;
+                        }
+                    }
+                }
             }
 
             if (!p->focused && evt->button.x < ssize.x && evt->button.y < ssize.y)
@@ -378,5 +428,17 @@ void prog_set_focus(struct Prog *p, bool focus)
 {
     p->focused = focus;
     SDL_ShowCursor(focus ? SDL_FALSE : SDL_TRUE);
+}
+
+
+struct Mesh *prog_cast_ray(struct Prog *p)
+{
+    struct Mesh *m = 0;
+
+    Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
+    if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, (Point){ 0, 0 }, false, 0, 0, (void*)&m, 0))
+        m = 0;
+
+    return m;
 }
 

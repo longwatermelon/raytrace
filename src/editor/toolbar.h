@@ -25,6 +25,9 @@ struct Toolbar
     struct Slider *obj_props[6];
     SDL_Texture *obj_mat_text, *obj_mat_idx;
 
+    // Light modifiers
+    struct Slider *light_in;
+
     // Material modifiers
     int mat_y;
     SDL_Texture *mat_tex;
