@@ -109,21 +109,28 @@ void prog_mainloop(struct Prog *p)
             {
                 const char *template = "Rendering... [%.2f%%]";
                 char s[100];
-                float progress = render_get_progress() * 100.f;
+                float progress = p->sc->progress * 100.f;
                 sprintf(s, template, progress);
 
                 SDL_DestroyTexture(p->status);
 
                 if (progress >= 100.f)
                 {
-                    p->rendering = false;
-                    p->status = util_render_text(p->rend, p->font, "[✔] Done rendering [100%]", (SDL_Color){ 0, 255, 0 });
-                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+                    if (!p->render_thread_args->done)
+                    {
+                        p->status = util_render_text(p->rend, p->font, "Finishing up...", (SDL_Color){ 255, 255, 0 });
+                    }
+                    else
+                    {
+                        p->rendering = false;
+                        p->status = util_render_text(p->rend, p->font, "[✔] Done rendering", (SDL_Color){ 0, 255, 0 });
+                        clock_gettime(CLOCK_MONOTONIC, &p->last_status);
 
-                    free(p->render_thread_args);
+                        free(p->render_thread_args);
 
-                    p->render_thread = 0;
-                    p->render_thread_args = 0;
+                        p->render_thread = 0;
+                        p->render_thread_args = 0;
+                    }
                 }
                 else
                 {
@@ -255,17 +262,17 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             {
                 if (ctrl)
                 {
-                    render_set_progress(0.f);
+                    p->sc->progress = 0.f;
                     writer_image(p->sc, p->config, ".rtmp");
                     p->status = util_render_text(p->rend, p->font, "Rendering...", (SDL_Color){ 255, 255, 0 });
                     p->rendering = true;
-                    util_set_loglevel(LOG_SILENT);
 
-                    raytrace_args_t *args = malloc(sizeof(raytrace_args_t));
+                    raytrace_sc_args_t *args = malloc(sizeof(raytrace_sc_args_t));
                     args->out = "out.ppm";
-                    args->config = ".rtmp";
+                    args->sc = p->sc;
+                    args->done = false;
                     p->render_thread_args = args;
-                    pthread_create(&p->render_thread, 0, raytrace_thr_image, (void*)args);
+                    pthread_create(&p->render_thread, 0, raytrace_thr_sc_image, (void*)args);
                     pthread_detach(p->render_thread);
                 }
                 else
@@ -282,8 +289,6 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
                 if (path)
                 {
-                    printf("%s\n", path);
-
                     p->sc->meshes = realloc(p->sc->meshes, sizeof(struct Mesh*) * ++p->sc->nmeshes);
                     p->sc->meshes[p->sc->nmeshes - 1] = mesh_alloc((Vec3f){ 0.f, 0.f, 0.f }, (Vec3f){ 0.f, 0.f, 0.f }, path, p->sc->mats[0]);
                 }

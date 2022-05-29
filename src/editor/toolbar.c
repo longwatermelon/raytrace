@@ -240,29 +240,26 @@ void toolbar_render(struct Toolbar *t)
     for (int i = 0; i < 7; ++i)
         slider_render(t->mat_props[i], t->p->rend);
 
-    if (!t->p->rendering)
+    t->mat_preview->sleep_time = 0;
+    util_set_loglevel(LOG_SILENT);
+    Vec3f *frame = render_rend(t->mat_preview);
+    t->mat_preview->sleep_time = 1;
+
+    for (int y = 0; y < 72; ++y)
     {
-        render_set_sleep(0);
-        util_set_loglevel(LOG_SILENT);
-        Vec3f *frame = render_rend(t->mat_preview);
-        render_set_sleep(1);
-
-        for (int y = 0; y < 72; ++y)
+        for (int x = 0; x < 72; ++x)
         {
-            for (int x = 0; x < 72; ++x)
-            {
-                Vec3f pix = frame[y * 72 + x];
-                pix.x = CLAMP(pix.x, 0.f, 1.f);
-                pix.y = CLAMP(pix.y, 0.f, 1.f);
-                pix.z = CLAMP(pix.z, 0.f, 1.f);
+            Vec3f pix = frame[y * 72 + x];
+            pix.x = CLAMP(pix.x, 0.f, 1.f);
+            pix.y = CLAMP(pix.y, 0.f, 1.f);
+            pix.z = CLAMP(pix.z, 0.f, 1.f);
 
-                SDL_SetRenderDrawColor(t->p->rend, pix.x * 255.f, pix.y * 255.f, pix.z * 255.f, 255);
-                SDL_RenderDrawPoint(t->p->rend, t->mat_props[3]->rect.x + 20 + x, t->mat_props[3]->rect.y - 80 + y);
-            }
+            SDL_SetRenderDrawColor(t->p->rend, pix.x * 255.f, pix.y * 255.f, pix.z * 255.f, 255);
+            SDL_RenderDrawPoint(t->p->rend, t->mat_props[3]->rect.x + 20 + x, t->mat_props[3]->rect.y - 80 + y);
         }
-
-        free(frame);
     }
+
+    free(frame);
 
     // BUTTONS
     SDL_Point mouse;

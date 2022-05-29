@@ -37,7 +37,7 @@ struct Prog
 
     bool rendering;
     pthread_t render_thread;
-    raytrace_args_t *render_thread_args;
+    raytrace_sc_args_t *render_thread_args;
 
     struct Explorer *explorer;
 };

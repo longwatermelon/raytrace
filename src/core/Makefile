@@ -2,7 +2,7 @@ SRC=$(wildcard src/core/*.c)
 OBJS=$(addprefix obj/, $(SRC:.c=.o))
 
 CC=gcc
-CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic -O3
+CFLAGS=-std=gnu17 -ggdb -Wall -Werror -pedantic
 LIBS=-lm -lpthread -lpng
 AR=ar
 ARFLAGS=rc

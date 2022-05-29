@@ -7,26 +7,17 @@
 #include <pthread.h>
 #include <unistd.h>
 
-int g_max_bounces = 3;
-
-bool g_antialiasing = false;
-size_t g_nthreads = 4;
-
-Uint32 g_optimization = 0;
-
-float g_progress = 0.f;
-int g_sleep_time = 1;
 
 Vec3f *render_rend(struct Scene *sc)
 {
-    g_progress = 0.f;
+    sc->progress = 0.f;
 
     LOG(LOG_VERBOSE, "Casting rays\n");
     render_print_config(sc);
 
     Vec3f *frame = render_rend_cast_rays(sc);
 
-    if (g_antialiasing)
+    if (sc->antialiasing)
     {
         LOG(LOG_VERBOSE, "Applying antialiasing\n");
         Vec3f *avg = render_apply_antialiasing(sc, frame);
@@ -42,13 +33,13 @@ Vec3f *render_rend_cast_rays(struct Scene *sc)
 {
     Vec3f *frame = malloc(sizeof(Vec3f) * (sc->w * sc->h));
 
-    pthread_t threads[g_nthreads];
-    render_cast_rays_args *args[g_nthreads];
+    pthread_t threads[sc->threads];
+    render_cast_rays_args *args[sc->threads];
 
-    size_t rows_rendered[g_nthreads];
-    bool threads_done[g_nthreads];
+    size_t rows_rendered[sc->threads];
+    bool threads_done[sc->threads];
 
-    for (int i = 0; i < g_nthreads; ++i)
+    for (int i = 0; i < sc->threads; ++i)
     {
         rows_rendered[i] = 0;
         threads_done[i] = false;
@@ -57,7 +48,7 @@ Vec3f *render_rend_cast_rays(struct Scene *sc)
         args[i]->sc = sc;
         args[i]->frame = frame;
         args[i]->y = i;
-        args[i]->step = g_nthreads;
+        args[i]->step = sc->threads;
         args[i]->rows_rendered = &rows_rendered[i];
         args[i]->done = &threads_done[i];
 
@@ -66,7 +57,7 @@ Vec3f *render_rend_cast_rays(struct Scene *sc)
 
     render_rend_wait_cthreads(args);
 
-    for (size_t i = 0; i < g_nthreads; ++i)
+    for (size_t i = 0; i < sc->threads; ++i)
     {
         pthread_join(threads[i], 0);
         free(args[i]);
@@ -85,7 +76,7 @@ void render_rend_wait_cthreads(render_cast_rays_args **args)
         bool done = true;
         size_t rows_rendered = 0;
 
-        for (size_t i = 0; i < g_nthreads; ++i)
+        for (size_t i = 0; i < sc->threads; ++i)
         {
             if (!*args[i]->done)
                 done = false;
@@ -94,12 +85,12 @@ void render_rend_wait_cthreads(render_cast_rays_args **args)
         }
 
         render_print_progress(sc, rows_rendered);
-        g_progress = (float)rows_rendered / sc->h;
+        sc->progress = (float)rows_rendered / sc->h;
 
         if (done)
             break;
 
-        sleep(g_sleep_time);
+        sleep(sc->sleep_time);
     }
 
     LOG(LOG_NORMAL, "\n");
@@ -135,17 +126,6 @@ void render_print_progress(struct Scene *sc, size_t rows_rendered)
 }
 
 
-float render_get_progress()
-{
-    return g_progress;
-}
-
-
-void render_set_progress(float p)
-{
-    g_progress = p;
-}
-
 void render_print_config(struct Scene *sc)
 {
     if (util_loglevel() == LOG_VERBOSE)
@@ -153,13 +133,13 @@ void render_print_config(struct Scene *sc)
         printf("Output image dimensions: %zux%zu\n", sc->w, sc->h);
         printf("%lu spheres, %lu meshes, %lu lights\n", sc->nspheres, sc->nmeshes, sc->nlights);
 
-        int rows_per_thread = sc->h / g_nthreads;
-        printf("%ld threads | %d rows per thread\n", g_nthreads, rows_per_thread);
-        printf("Antialiasing %s\n", g_antialiasing ? "on" : "off");
+        int rows_per_thread = sc->h / sc->threads;
+        printf("%d threads | %d rows per thread\n", sc->threads, rows_per_thread);
+        printf("Antialiasing %s\n", sc->antialiasing ? "on" : "off");
 
         printf("Optimizations: ");
-        if (g_optimization == 0) printf("none");
-        if (g_optimization & OPT_BACKFACE_CULLING) printf("backface culling");
+        if (sc->opt == 0) printf("none");
+        if (sc->opt & OPT_BACKFACE_CULLING) printf("backface culling");
         
         printf("\n");
     }
@@ -242,7 +222,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool op
     Vec3f mcol = (mat->tex ? tex_color(mat->tex, morig, norm, mat->col) : mat->col);
     Vec3f hcol = vec_addf(vec_mulf(vec_mulf(mcol, dlight), mat->ref_diffuse), slight * mat->ref_specular);
 
-    if (mat->ref_mirror < 1.f && bounce < g_max_bounces)
+    if (mat->ref_mirror < 1.f && bounce < sc->max_bounces)
     {
         Vec3f col = render_cast_ray(sc, morig, norm, pixel, false, bounce + 1);
         hcol = vec_addv(vec_mulf(hcol, mat->ref_mirror), vec_mulf(col, 1.f - mat->ref_mirror));
@@ -280,7 +260,7 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bo
         float dist;
         Triangle tri;
 
-        if (mesh_ray_intersect(sc->meshes[i], o, dir, g_optimization, &dist, &tri) && dist < nearest)
+        if (mesh_ray_intersect(sc->meshes[i], o, dir, sc->opt, &dist, &tri) && dist < nearest)
         {
             nearest = dist;
             if (hit) *hit = vec_addv(o, vec_mulf(dir, dist));
@@ -331,8 +311,3 @@ Vec3f render_smoothen(struct Scene *sc, Vec3f *frame, int cx, int cy)
     return avg;
 }
 
-void render_set_max_bounces(int i) { g_max_bounces = i; }
-void render_enable_antialiasing() { g_antialiasing = true; }
-void render_set_threads(int threads) { g_nthreads = threads; }
-void render_enable_optimizations(Uint32 flag) { g_optimization |= flag; }
-void render_set_sleep(int time) { g_sleep_time = time; }

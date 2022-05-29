@@ -28,6 +28,16 @@ struct Scene
     size_t ntexs;
 
     struct Camera *cam;
+
+    int max_bounces;
+
+    bool antialiasing;
+    int threads;
+
+    Uint32 opt;
+
+    float progress;
+    int sleep_time;
 };
 
 struct Scene *scene_alloc(const char *fp);

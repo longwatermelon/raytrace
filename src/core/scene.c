@@ -28,6 +28,16 @@ struct Scene *scene_alloc(const char *fp)
 
     s->cam = 0;
 
+    s->max_bounces = 3;
+
+    s->antialiasing = false;
+    s->threads = 4;
+
+    s->opt = 0;
+
+    s->progress = 0.f;
+    s->sleep_time = 1;
+
     FILE *f = fopen(fp, "r");
 
     char *line = 0;
@@ -102,9 +112,7 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "threads") == 0)
         {
-            int threads;
-            sscanf(line, "%*s %d", &threads);
-            render_set_threads(threads);
+            sscanf(line, "%*s %d", &s->threads);
         }
         else if (strcmp(word, "bg") == 0)
         {
@@ -112,14 +120,14 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "antialias") == 0)
         {
-            render_enable_antialiasing();
+            s->antialiasing = true;
         }
         else if (strcmp(word, "optimize") == 0)
         {
             char next[11] = { 0 };
             sscanf(line, "%*s %10s", next);
 
-            if (strcmp(next, "backface") == 0) render_enable_optimizations(OPT_BACKFACE_CULLING);
+            if (strcmp(next, "backface") == 0) s->opt |= OPT_BACKFACE_CULLING;
             else
             {
                 printf("** WARNING **: Unrecognized optimization '%s'; skipping.\n", next);
@@ -127,9 +135,7 @@ struct Scene *scene_alloc(const char *fp)
         }
         else if (strcmp(word, "bounces") == 0)
         {
-            int b;
-            sscanf(line, "%*s %d", &b);
-            render_set_max_bounces(b);
+            sscanf(line, "%*s %d", &s->max_bounces);
         }
         else if (strncmp(word, "//", 2) == 0)
         {

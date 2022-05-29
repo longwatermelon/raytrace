@@ -25,9 +25,6 @@ void render_write_to_file(struct Scene *sc, Vec3f *frame, const char *out);
 void render_print_progress(struct Scene *sc, size_t rows_rendered);
 void render_print_config(struct Scene *sc);
 
-float render_get_progress();
-void render_set_progress(float p);
-
 void *render_cast_rays(void *args);
 // bounce: number of times ray has bounced
 Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool optimize_meshes, int bounce);
@@ -38,12 +35,6 @@ bool render_scene_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bo
 
 Vec3f *render_apply_antialiasing(struct Scene *sc, Vec3f *frame);
 Vec3f render_smoothen(struct Scene *sc, Vec3f *frame, int cx, int cy);
-
-void render_set_max_bounces(int i);
-void render_enable_antialiasing();
-void render_set_threads(int threads);
-void render_enable_optimizations(Uint32 flag);
-void render_set_sleep(int time);
 
 #endif
 

@@ -38,3 +38,15 @@ void *raytrace_thr_video(void *arg)
     pthread_exit(0);
 }
 
+
+void *raytrace_thr_sc_image(void *arg)
+{
+    raytrace_sc_args_t *args = (raytrace_sc_args_t*)arg;
+    Vec3f *frame = render_rend(args->sc);
+    render_write_to_file(args->sc, frame, args->out);
+
+    free(frame);
+    args->done = true;
+    pthread_exit(0);
+}
+

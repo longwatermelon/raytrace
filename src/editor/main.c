@@ -1,9 +1,12 @@
 #include "prog.h"
+#include <core/util.h>
 #include <SDL2/SDL_image.h>
 
 
 int main(int argc, char **argv)
 {
+    util_loglevel(LOG_SILENT);
+
     SDL_Init(SDL_INIT_VIDEO);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
