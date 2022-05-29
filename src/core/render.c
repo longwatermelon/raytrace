@@ -207,13 +207,16 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool op
                 continue;
         }
 
+        float dist = vec_len(vec_sub(sc->lights[i]->pos, hit));
+        float b = sc->lights[i]->in / (.02f * dist * dist);
+
         // diffuse
         Vec3f l = vec_normalize(vec_sub(sc->lights[i]->pos, hit));
-        dlight += sc->lights[i]->in * fmax(0.f, vec_dot(l, norm));
+        dlight += b * fmax(0.f, vec_dot(l, norm));
 
         // specular
         Vec3f r = vec_sub(l, vec_mulf(vec_mulf(norm, 2.f), vec_dot(l, norm)));
-        slight += powf(fmax(0.f, vec_dot(r, vec_normalize(hit))), mat->specular_exp);
+        slight += b * powf(fmax(0.f, vec_dot(r, vec_normalize(hit))), mat->specular_exp);
     }
 
     // mirror reflection
