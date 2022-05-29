@@ -38,6 +38,8 @@ struct Scene
 
     float progress;
     int sleep_time;
+
+    char path[PATH_MAX];
 };
 
 struct Scene *scene_alloc(const char *fp);

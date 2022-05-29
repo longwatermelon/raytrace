@@ -38,6 +38,8 @@ struct Scene *scene_alloc(const char *fp)
     s->progress = 0.f;
     s->sleep_time = 1;
 
+    strcpy(s->path, fp);
+
     FILE *f = fopen(fp, "r");
 
     char *line = 0;

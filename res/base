@@ -3,12 +3,9 @@ dim 1000 1000
 threads 4
 antialias
 optimize backface
-bg 0 0 0
-cam 3.04 -4.8 -5|5.81 5.69 0
-
-material 0 0 0|0 0 1|0|-1
-
-mesh 0 0 0|0 0 0|0|res/cube.obj 0
-
-light 4 -1 0|.8
-light -3 -5 0|.8
+bg 0.00 0.00 0.00
+cam 5.65 -4.80 -5.79|5.49 5.77 0.00
+material 0.00 0.00 0.00|0.00 0.00 1.00|0.00|-1
+mesh 0.00 0.00 0.00|0.00 0.00 0.00|0|res/cube.obj 0
+light 4.00 -1.00 0.00|0.80
+light -3.00 -5.00 0.00|0.80

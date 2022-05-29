@@ -333,8 +333,23 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 }
                 else
                 {
+#if 0
                     writer_image(p->sc, p->config, "out");
                     p->status = util_render_text(p->rend, p->font, "[✔] Saved scene", (SDL_Color){ 0, 255, 0 });
+                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+#endif
+                }
+            } break;
+            case SDLK_s:
+            {
+                if (!p->focused && ctrl)
+                {
+                    writer_image(p->sc, p->config, p->sc->path);
+                    char *s = calloc(sizeof(char), (strlen(p->sc->path) + 100));
+                    sprintf(s, "[✔] Saved scene to '%s'", p->sc->path);
+                    s = realloc(s, sizeof(char) * (strlen(s) + 1));
+
+                    p->status = util_render_text(p->rend, p->font, s, (SDL_Color){ 0, 255, 0 });
                     clock_gettime(CLOCK_MONOTONIC, &p->last_status);
                 }
             } break;
