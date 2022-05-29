@@ -24,15 +24,10 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->font = TTF_OpenFont("res/font.ttf", 14);
 
-    p->sc = scene_alloc("res/base");
     p->config = config_alloc();
 
     p->mode = MODE_NORMAL;
     p->focused = false;
-    p->selected_mesh = 0;
-    p->hover_mesh = 0;
-
-    p->toolbar = toolbar_alloc(p);
 
     p->status = 0;
     clock_gettime(CLOCK_MONOTONIC, &p->last_status);
@@ -44,19 +39,14 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->explorer = 0;
 
-    p->lights = malloc(sizeof(struct Mesh*) * p->sc->nlights);
-    p->nlights = p->sc->nlights;
+    p->sc = 0;
+    p->toolbar = 0;
 
-    for (size_t i = 0; i < p->sc->nlights; ++i)
-    {
-        p->lights[i] = mesh_alloc(p->sc->lights[i]->pos, (Vec3f){ 0.f, 0.f, 0.f }, "res/light.obj", 0);
-        p->lights[i]->col = (SDL_Color){ 239, 255, 166 };
-    }
+    p->lights = 0;
+    p->nlights = 0;
 
-    p->selected_type = OBJ_MESH;
-    p->hover_type = OBJ_MESH;
-
-    p->selected_light = 0;
+    prog_set_scene(p, scene_alloc("res/base"));
+    p->toolbar = toolbar_alloc(p);
 
     return p;
 }
@@ -348,6 +338,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     clock_gettime(CLOCK_MONOTONIC, &p->last_status);
                 }
             } break;
+
             case SDLK_f:
             {
                 prog_set_focus(p, false);
@@ -368,6 +359,21 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                 explorer_free(p->explorer);
                 p->explorer = 0;
             } break;
+            case SDLK_o:
+            {
+                prog_set_focus(p, false);
+                p->explorer = explorer_alloc(".", p);
+                char *path = explorer_find(p->explorer);
+
+                if (path)
+                {
+                    prog_set_scene(p, scene_alloc(path));
+                }
+
+                explorer_free(p->explorer);
+                p->explorer = 0;
+            } break;
+
             case SDLK_x:
             {
                 if (p->selected_mesh)
@@ -467,5 +473,45 @@ struct Mesh *prog_cast_ray(struct Prog *p)
         m = 0;
 
     return m;
+}
+
+
+void prog_set_scene(struct Prog *p, struct Scene *sc)
+{
+    struct Scene *prev = p->sc;
+    p->sc = sc;
+
+    if (p->toolbar)
+    {
+        toolbar_set_edited_mat(p, 0);
+        p->toolbar->mat_preview->spheres[0]->mat = p->sc->mats[0];
+    }
+
+    for (size_t i = 0; i < p->nlights; ++i)
+        mesh_free(p->lights[i]);
+
+    free(p->lights);
+
+    p->lights = malloc(sizeof(struct Mesh*) * p->sc->nlights);
+    p->nlights = p->sc->nlights;
+
+    for (size_t i = 0; i < p->sc->nlights; ++i)
+    {
+        p->lights[i] = mesh_alloc(p->sc->lights[i]->pos, (Vec3f){ 0.f, 0.f, 0.f }, "res/light.obj", 0);
+        p->lights[i]->col = (SDL_Color){ 239, 255, 166 };
+    }
+
+    p->selected_type = OBJ_MESH;
+    p->hover_type = OBJ_MESH;
+
+    p->selected_light = 0;
+
+    p->hover_mesh = 0;
+    p->selected_mesh = 0;
+    p->hover_type = OBJ_MESH;
+    p->selected_type = OBJ_MESH;
+
+    if (prev)
+        scene_free(prev);
 }
 

@@ -151,6 +151,9 @@ char *explorer_find(struct Explorer *e)
                                     free(s);
                                 }
 
+                                for (size_t i = 0; i < e->nodes_num; ++i)
+                                    enode_free(e->nodes[i]);
+
                                 free(e->nodes);
                                 e->nodes = explorer_read_dir(e, e->dir, &e->nodes_num);
                                 explorer_sort(e);
@@ -321,6 +324,9 @@ void explorer_sort(struct Explorer *e)
 
     free(e->nodes);
     e->nodes = nodes;
+
+    free(dirs);
+    free(files);
 }
 
 
