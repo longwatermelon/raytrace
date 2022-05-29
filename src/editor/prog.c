@@ -75,31 +75,34 @@ void prog_mainloop(struct Prog *p)
         render_set_size(ssize.x, ssize.y);
         SDL_Point center = { ssize.x / 2, ssize.y / 2 };
 
-        prog_events(p, &evt);
-
-        SDL_Point mouse;
-        SDL_GetMouseState(&mouse.x, &mouse.y);
-
-        if (p->focused)
+        if (!p->rendering)
         {
-            mouse.x -= center.x;
-            mouse.y -= center.y;
+            prog_events(p, &evt);
 
-            SDL_WarpMouseInWindow(p->window, center.x, center.y);
+            SDL_Point mouse;
+            SDL_GetMouseState(&mouse.x, &mouse.y);
 
-            p->sc->cam->angle.x += (float)mouse.x / 200.f;
-            p->sc->cam->angle.y -= (float)mouse.y / 200.f;
+            if (p->focused)
+            {
+                mouse.x -= center.x;
+                mouse.y -= center.y;
+
+                SDL_WarpMouseInWindow(p->window, center.x, center.y);
+
+                p->sc->cam->angle.x += (float)mouse.x / 200.f;
+                p->sc->cam->angle.y -= (float)mouse.y / 200.f;
+            }
+
+            if (p->focused)
+            {
+                Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
+                if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, (Point){ 0, 0 }, false, 0, 0, (void*)&p->hover_mesh, 0))
+                    p->hover_mesh = 0;
+            }
+
+            toolbar_main(p->toolbar);
         }
-
-        if (p->focused)
-        {
-            Vec3f dir = rasterize_rotate_cc((Vec3f){ 0.f, 0.f, 1.f }, p->sc->cam->angle);
-            if (!render_scene_cast_ray(p->sc, p->sc->cam->pos, dir, (Point){ 0, 0 }, false, 0, 0, (void*)&p->hover_mesh, 0))
-                p->hover_mesh = 0;
-        }
-
-        toolbar_main(p->toolbar);
-
+        
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
 
@@ -201,8 +204,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
             if (!p->focused && evt->button.x < ssize.x && evt->button.y < ssize.y)
             {
-                p->focused = true;
-                SDL_ShowCursor(SDL_FALSE);
+                prog_set_focus(p, true);
             }
 
             toolbar_buttons_pressed(p->toolbar, mouse);
@@ -251,8 +253,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             switch (evt->key.keysym.sym)
             {
             case SDLK_ESCAPE:
-                p->focused = false;
-                SDL_ShowCursor(SDL_TRUE);
+                prog_set_focus(p, false);
                 break;
             case SDLK_LCTRL:
             case SDLK_RCTRL:
@@ -262,6 +263,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             {
                 if (ctrl)
                 {
+                    prog_set_focus(p, false);
                     p->sc->progress = 0.f;
                     writer_image(p->sc, p->config, ".rtmp");
                     p->status = util_render_text(p->rend, p->font, "Rendering...", (SDL_Color){ 255, 255, 0 });
@@ -284,6 +286,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
             } break;
             case SDLK_f:
             {
+                prog_set_focus(p, false);
                 p->explorer = explorer_alloc(".", p);
                 char *path = explorer_find(p->explorer);
 
@@ -343,5 +346,12 @@ void prog_events(struct Prog *p, SDL_Event *evt)
         if (keys[SDL_SCANCODE_SPACE]) c->pos.y -= .1f;
         if (keys[SDL_SCANCODE_LSHIFT]) c->pos.y += .1f;
     }
+}
+
+
+void prog_set_focus(struct Prog *p, bool focus)
+{
+    p->focused = focus;
+    SDL_ShowCursor(focus ? SDL_FALSE : SDL_TRUE);
 }
 

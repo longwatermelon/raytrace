@@ -50,5 +50,7 @@ void prog_events(struct Prog *p, SDL_Event *evt);
 
 void prog_sample_button(struct Prog *p);
 
+void prog_set_focus(struct Prog *p, bool focus);
+
 #endif
 
