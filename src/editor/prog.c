@@ -48,12 +48,16 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     prog_set_scene(p, scene_alloc("res/base"));
     p->toolbar = toolbar_alloc(p);
 
+    p->anchor = cam_alloc(p->sc->cam->pos, p->sc->cam->angle);
+
     return p;
 }
 
 
 void prog_free(struct Prog *p)
 {
+    cam_free(p->anchor);
+
     if (p->sc)
         scene_free(p->sc);
 
@@ -320,6 +324,10 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     prog_set_focus(p, false);
                     p->sc->progress = 0.f;
                     writer_image(p->sc, p->config, ".rtmp");
+
+                    if (p->status)
+                        SDL_DestroyTexture(p->status);
+
                     p->status = util_render_text(p->rend, p->font, "Rendering...", (SDL_Color){ 255, 255, 0 });
                     p->rendering = true;
 
@@ -340,6 +348,9 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     char *s = calloc(sizeof(char), (strlen(p->sc->path) + 100));
                     sprintf(s, "[✔] Saved scene to '%s'", p->sc->path);
                     s = realloc(s, sizeof(char) * (strlen(s) + 1));
+
+                    if (p->status)
+                        SDL_DestroyTexture(p->status);
 
                     p->status = util_render_text(p->rend, p->font, s, (SDL_Color){ 0, 255, 0 });
                     clock_gettime(CLOCK_MONOTONIC, &p->last_status);
@@ -414,6 +425,32 @@ void prog_events(struct Prog *p, SDL_Event *evt)
 
                     mesh_free(p->selected_mesh);
                     p->selected_mesh = 0;
+                }
+            } break;
+
+            case SDLK_c:
+            {
+                if (ctrl)
+                {
+                    p->anchor->pos = p->sc->cam->pos;
+                    p->anchor->angle = p->sc->cam->angle;
+
+                    if (p->status)
+                        SDL_DestroyTexture(p->status);
+
+                    p->status = util_render_text(p->rend, p->font, "[✔] Set camera anchor", (SDL_Color){ 0, 255, 0 });
+                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+                }
+                else
+                {
+                    p->sc->cam->pos = p->anchor->pos;
+                    p->sc->cam->angle = p->anchor->angle;
+
+                    if (p->status)
+                        SDL_DestroyTexture(p->status);
+
+                    p->status = util_render_text(p->rend, p->font, "[✔] Moved camera to anchor", (SDL_Color){ 0, 255, 0 });
+                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
                 }
             } break;
             }

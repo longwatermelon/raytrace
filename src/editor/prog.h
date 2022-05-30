@@ -47,6 +47,8 @@ struct Prog
     int selected_type, hover_type;
 
     struct Light *selected_light;
+
+    struct Camera *anchor;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);
