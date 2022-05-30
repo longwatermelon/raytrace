@@ -64,6 +64,7 @@ void prog_set_focus(struct Prog *p, bool focus);
 struct Mesh *prog_cast_ray(struct Prog *p);
 
 void prog_set_scene(struct Prog *p, struct Scene *sc);
+void prog_set_status(struct Prog *p, const char *text, SDL_Color c);
 
 #endif
 

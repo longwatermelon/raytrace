@@ -150,13 +150,12 @@ void prog_mainloop(struct Prog *p)
                 {
                     if (!p->render_thread_args->done)
                     {
-                        p->status = util_render_text(p->rend, p->font, "Finishing up...", (SDL_Color){ 255, 255, 0 });
+                        prog_set_status(p, "Finishing up...", (SDL_Color){ 255, 255, 0 });
                     }
                     else
                     {
                         p->rendering = false;
-                        p->status = util_render_text(p->rend, p->font, "[✔] Done rendering", (SDL_Color){ 0, 255, 0 });
-                        clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+                        prog_set_status(p, "[✔] Done rendering", (SDL_Color){ 0, 255, 0 });
 
                         free(p->render_thread_args);
 
@@ -166,7 +165,7 @@ void prog_mainloop(struct Prog *p)
                 }
                 else
                 {
-                    p->status = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 0 });
+                    prog_set_status(p, s, (SDL_Color){ 255, 255, 0 });
                 }
             }
             else
@@ -325,10 +324,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     p->sc->progress = 0.f;
                     writer_image(p->sc, p->config, ".rtmp");
 
-                    if (p->status)
-                        SDL_DestroyTexture(p->status);
-
-                    p->status = util_render_text(p->rend, p->font, "Rendering...", (SDL_Color){ 255, 255, 0 });
+                    prog_set_status(p, "Rendering... [0.00%]", (SDL_Color){ 255, 255, 0 });
                     p->rendering = true;
 
                     raytrace_sc_args_t *args = malloc(sizeof(raytrace_sc_args_t));
@@ -336,6 +332,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     args->sc = p->sc;
                     args->done = false;
                     p->render_thread_args = args;
+
                     pthread_create(&p->render_thread, 0, raytrace_thr_sc_image, (void*)args);
                     pthread_detach(p->render_thread);
                 }
@@ -349,12 +346,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     sprintf(s, "[✔] Saved scene to '%s'", p->sc->path);
                     s = realloc(s, sizeof(char) * (strlen(s) + 1));
 
-                    if (p->status)
-                        SDL_DestroyTexture(p->status);
-
-                    p->status = util_render_text(p->rend, p->font, s, (SDL_Color){ 0, 255, 0 });
-                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
-
+                    prog_set_status(p, s, (SDL_Color){ 0, 255, 0 });
                     free(s);
                 }
             } break;
@@ -435,22 +427,14 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     p->anchor->pos = p->sc->cam->pos;
                     p->anchor->angle = p->sc->cam->angle;
 
-                    if (p->status)
-                        SDL_DestroyTexture(p->status);
-
-                    p->status = util_render_text(p->rend, p->font, "[✔] Set camera anchor", (SDL_Color){ 0, 255, 0 });
-                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+                    prog_set_status(p, "[✔] Set camera anchor", (SDL_Color){ 0, 255, 0 });
                 }
                 else
                 {
                     p->sc->cam->pos = p->anchor->pos;
                     p->sc->cam->angle = p->anchor->angle;
 
-                    if (p->status)
-                        SDL_DestroyTexture(p->status);
-
-                    p->status = util_render_text(p->rend, p->font, "[✔] Moved camera to anchor", (SDL_Color){ 0, 255, 0 });
-                    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+                    prog_set_status(p, "[✔] Moved camera to anchor", (SDL_Color){ 0, 255, 0 });
                 }
             } break;
             }
@@ -559,5 +543,15 @@ void prog_set_scene(struct Prog *p, struct Scene *sc)
 
     if (prev)
         scene_free(prev);
+}
+
+
+void prog_set_status(struct Prog *p, const char *text, SDL_Color c)
+{
+    if (p->status)
+        SDL_DestroyTexture(p->status);
+
+    p->status = util_render_text(p->rend, p->font, text, c);
+    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
 }
 
