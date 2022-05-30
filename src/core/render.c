@@ -208,7 +208,7 @@ Vec3f render_cast_ray(struct Scene *sc, Vec3f o, Vec3f dir, Point pixel, bool op
         }
 
         float dist = vec_len(vec_sub(sc->lights[i]->pos, hit));
-        float b = sc->lights[i]->in / (.02f * dist * dist);
+        float b = fmin(sc->lights[i]->in / (.02f * dist * dist), sc->lights[i]->in);
 
         // diffuse
         Vec3f l = vec_normalize(vec_sub(sc->lights[i]->pos, hit));
