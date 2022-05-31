@@ -2,7 +2,7 @@
 #include "util.h"
 #include <stdlib.h>
 
-// TODO Wrap button for loop in macro
+#define BTN_ITERATE for (int i = 0; i < 2; ++i)
 
 struct Bscale *bscale_alloc(SDL_Point pos, const char *label, const char *value,
     void (*min)(struct Prog *p), void (*add)(struct Prog *p), SDL_Renderer *rend, TTF_Font *font)
@@ -25,7 +25,7 @@ void bscale_free(struct Bscale *b)
     SDL_DestroyTexture(b->label);
     SDL_DestroyTexture(b->value);
 
-    for (int i = 0; i < 2; ++i)
+    BTN_ITERATE
         button_free(b->buttons[i]);
 
     free(b);
@@ -46,7 +46,7 @@ void bscale_render(struct Bscale *b, SDL_Renderer *rend)
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
-    for (int i = 0; i < 2; ++i)
+    BTN_ITERATE
         button_render(b->buttons[i], rend, mouse);
 }
 
@@ -80,7 +80,7 @@ void bscale_update_pos(struct Bscale *b, int x)
 {
     int diff = x - b->buttons[0]->rect.x;
 
-    for (int i = 0; i < 2; ++i)
+    BTN_ITERATE
         b->buttons[i]->rect.x += diff;
 }
 
