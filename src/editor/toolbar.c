@@ -7,29 +7,6 @@
 
 #define CLAMP(x, min, max) fmin(max, fmax(x, min))
 
-// button functions
-void decrease_threads(struct Prog *p)
-{
-    if (p->config->threads > 1)
-        --p->config->threads;
-
-    char s[20] = { 0 };
-    sprintf(s, "%d", p->config->threads);
-
-    SDL_DestroyTexture(p->toolbar->threads_num);
-    p->toolbar->threads_num = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
-}
-
-void increase_threads(struct Prog *p)
-{
-    ++p->config->threads;
-    char s[20] = { 0 };
-    sprintf(s, "%d", p->config->threads);
-
-    SDL_DestroyTexture(p->toolbar->threads_num);
-    p->toolbar->threads_num = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
-}
-
 void modify_mat_idx(struct Prog *p, int num)
 {
     if (p->selected_mesh)
@@ -40,10 +17,10 @@ void modify_mat_idx(struct Prog *p, int num)
         {
             idx += num;
             p->selected_mesh->mat = p->sc->mats[idx];
-            SDL_DestroyTexture(p->toolbar->obj_mat_idx);
+
             char s[20] = { 0 };
             sprintf(s, "%d", idx);
-            p->toolbar->obj_mat_idx = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
+            bscale_update_tex(p->toolbar->obj_mat_scale, s, p->rend, p->font);
         }
     }
 }
@@ -61,7 +38,7 @@ void increase_mat_idx(struct Prog *p)
 void update_edit_mat_info(struct Toolbar *t)
 {
     struct Slider **arr = t->mat_props;
-    struct Material *m = t->p->sc->mats[t->mat_idx_edited];
+    struct Material *m = t->p->sc->mats[t->mat_i];
 
     arr[0]->value = m->col.x;
     arr[1]->value = m->col.y;
@@ -79,21 +56,20 @@ void update_edit_mat_info(struct Toolbar *t)
 
 void modify_edit_mat_idx(struct Prog *p, int num)
 {
-    int idx = p->toolbar->mat_idx_edited;
+    int idx = p->toolbar->mat_i;
 
     if (idx + num >= 0 && idx + num < p->sc->nmats)
     {
         idx += num;
-        p->toolbar->mat_idx_edited = idx;
+        p->toolbar->mat_i = idx;
 
-        SDL_DestroyTexture(p->toolbar->mat_idx);
         char s[20] = { 0 };
         sprintf(s, "%d", idx);
-        p->toolbar->mat_idx = util_render_text(p->rend, p->font, s, (SDL_Color){ 255, 255, 255 });
+        bscale_update_tex(p->toolbar->mat_scale, s, p->rend, p->font);
 
         update_edit_mat_info(p->toolbar);
 
-        p->toolbar->mat_preview->spheres[0]->mat = p->sc->mats[p->toolbar->mat_idx_edited];
+        p->toolbar->mat_preview->spheres[0]->mat = p->sc->mats[p->toolbar->mat_i];
     }
 }
 
@@ -132,12 +108,11 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     t->obj_tex = util_render_text(p->rend, p->font, "None", (SDL_Color){ 255, 255, 255 });
 
     SDL_Point ssize = util_ssize(t->p->window);
-    t->nbuttons = 8;
+    t->nbuttons = 2;
     t->buttons = malloc(sizeof(struct Button*) * t->nbuttons);
 
     t->obj_y = 50;
     t->mat_y = 210;
-    t->threads_y = 500;
 
     t->selected_slider = 0;
     t->pressed_button = 0;
@@ -150,19 +125,17 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
     for (int i = 3; i < 6; ++i)
         t->obj_props[i] = slider_alloc((SDL_Point){ ssize.x + 10 + 100 + 20, t->obj_y + (i - 3) * 30 }, .01f, 0.f, labels[i], t->p->rend, t->p->font);
 
-    t->obj_mat_text = util_render_text(p->rend, p->font, "Object material", (SDL_Color){ 255, 255, 255 });
-    t->obj_mat_idx = util_render_text(p->rend, p->font, "0", (SDL_Color){ 255, 255, 255 });
-    t->buttons[2] = button_alloc((SDL_Rect){ 10, t->obj_y + 120, 20, 20 }, decrease_mat_idx, "-", p->rend, p->font);
-    t->buttons[3] = button_alloc((SDL_Rect){ 90, t->obj_y + 120, 20, 20 }, increase_mat_idx, "+", p->rend, p->font);
+    t->obj_mat_scale = bscale_alloc((SDL_Point){ ssize.x + 10, t->obj_y + 100 }, "Object material", "0",
+        decrease_mat_idx, increase_mat_idx, p->rend, p->font);
 
     // LIGHT
     t->light_in = slider_alloc((SDL_Point){ t->obj_props[0]->rect.x + 100, t->obj_props[0]->rect.y }, .01f, 0.f, "in: ", p->rend, p->font);
-    t->buttons[7] = button_alloc((SDL_Rect){ 10, 400, 90, 20 }, add_light, "New light", t->p->rend, t->p->font);
+    t->buttons[0] = button_alloc((SDL_Rect){ 10, 400, 90, 20 }, add_light, "New light", t->p->rend, t->p->font);
 
     // MATERIAL
-    t->mat_tex = util_render_text(p->rend, p->font, "Material editor", (SDL_Color){ 255, 255, 255 });
-    t->mat_idx = util_render_text(p->rend, p->font, "0", (SDL_Color){ 255, 255, 255 });
-    t->mat_idx_edited = 0;
+    t->mat_i = 0;
+    t->mat_scale = bscale_alloc((SDL_Point){ ssize.x + 10, t->mat_y }, "Material editor", "0",
+        decrease_edit_mat_idx, increase_edit_mat_idx, p->rend, p->font);
 
     char *mlabels[7] = { "r: ", "g: ", "b: ", "diff: ", "spec: ", "mirr: ", "exp: " };
     for (int i = 0; i < 3; ++i)
@@ -173,21 +146,19 @@ struct Toolbar *toolbar_alloc(struct Prog *p)
 
     t->mat_props[6] = slider_alloc((SDL_Point){ ssize.x + 10 + 60, 60 + t->mat_y + 90 }, .4f, 0.f, mlabels[6], t->p->rend, t->p->font);
 
-    t->buttons[4] = button_alloc((SDL_Rect){ 10, t->mat_y + 25, 20, 20 }, decrease_edit_mat_idx, "-", p->rend, p->font);
-    t->buttons[5] = button_alloc((SDL_Rect){ 90, t->mat_y + 25, 20, 20 }, increase_edit_mat_idx, "+", p->rend, p->font);
-
     update_edit_mat_info(t);
 
     t->mat_preview = scene_alloc("res/mat_preview");
     t->mat_preview->spheres[0]->mat = t->p->sc->mats[0];
     
-    t->buttons[6] = button_alloc((SDL_Rect){ t->mat_props[3]->rect.x - ssize.x + 20, t->mat_props[3]->rect.y - 115, 60, 20 }, add_mat, "New mat", p->rend, p->font);
+    t->buttons[1] = button_alloc((SDL_Rect){ t->mat_props[3]->rect.x - ssize.x + 20, t->mat_props[3]->rect.y - 115, 60, 20 }, add_mat, "New mat", p->rend, p->font);
 
-    // THREADS
-    t->threads_text = util_render_text(p->rend, p->font, "Threads", (SDL_Color){ 255, 255, 255 });
-    t->threads_num = util_render_text(p->rend, p->font, "4", (SDL_Color){ 255, 255, 255 });
-    t->buttons[0] = button_alloc((SDL_Rect){ 10, t->threads_y, 20, 20 }, decrease_threads, "-", p->rend, p->font);
-    t->buttons[1] = button_alloc((SDL_Rect){ 90, t->threads_y, 20, 20 }, increase_threads, "+", p->rend, p->font);
+    // SCALES
+    t->nscales = 2;
+    t->scales = malloc(sizeof(struct Bscale*) * t->nscales);
+
+    t->scales[0] = t->obj_mat_scale;
+    t->scales[1] = t->mat_scale;
 
     return t;
 }
@@ -211,14 +182,10 @@ void toolbar_free(struct Toolbar *t)
 
     free(t->buttons);
 
-    SDL_DestroyTexture(t->mat_tex);
-    SDL_DestroyTexture(t->mat_idx);
+    for (size_t i = 0; i < t->nscales; ++i)
+        bscale_free(t->scales[i]);
 
-    SDL_DestroyTexture(t->obj_mat_text);
-    SDL_DestroyTexture(t->obj_mat_idx);
-
-    SDL_DestroyTexture(t->threads_text);
-    SDL_DestroyTexture(t->threads_num);
+    free(t->scales);
 
     scene_free(t->mat_preview);
 
@@ -239,41 +206,18 @@ void toolbar_render(struct Toolbar *t)
     SDL_RenderCopy(t->p->rend, t->obj_tex, 0, &obj_r);
 
     for (int i = 0; i < 6; ++i)
-    {
         slider_render(t->obj_props[i], t->p->rend);
-    }
-
-    r.x = ssize.x + 10;
-    r.y = t->obj_y + 90;
-    SDL_QueryTexture(t->obj_mat_text, 0, 0, &r.w, &r.h);
-    SDL_RenderCopy(t->p->rend, t->obj_mat_text, 0, &r);
-
-    r.x = ssize.x + 55;
-    r.y = t->buttons[2]->rect.y + 2;
 
     if (t->p->selected_type == OBJ_LIGHT)
-    {
-        SDL_DestroyTexture(t->obj_mat_idx);
-        t->obj_mat_idx = util_render_text(t->p->rend, t->p->font, "NaN", (SDL_Color){ 255, 255, 255 });
-        r.x = ssize.x + 45;
-    }
+        bscale_update_tex(t->obj_mat_scale, "NaN", t->p->rend, t->p->font);
 
-    SDL_QueryTexture(t->obj_mat_idx, 0, 0, &r.w, &r.h);
-    SDL_RenderCopy(t->p->rend, t->obj_mat_idx, 0, &r);
+    bscale_render(t->obj_mat_scale, t->p->rend);
 
     // LIGHT
     slider_render(t->light_in, t->p->rend);
 
     // MATERIAL
-    r.x = ssize.x + 10;
-    r.y = t->mat_y;
-    SDL_QueryTexture(t->mat_tex, 0, 0, &r.w, &r.h);
-    SDL_RenderCopy(t->p->rend, t->mat_tex, 0, &r);
-
-    r.x = ssize.x + 55;
-    r.y = t->buttons[4]->rect.y + 2;
-    SDL_QueryTexture(t->mat_idx, 0, 0, &r.w, &r.h);
-    SDL_RenderCopy(t->p->rend, t->mat_idx, 0, &r);
+    bscale_render(t->mat_scale, t->p->rend);
 
     for (int i = 0; i < 7; ++i)
         slider_render(t->mat_props[i], t->p->rend);
@@ -309,16 +253,6 @@ void toolbar_render(struct Toolbar *t)
         button_render(t->buttons[i], t->p->rend, mouse);
         t->buttons[i]->rect.x -= ssize.x;
     }
-
-    // THREADS
-    r = (SDL_Rect){ ssize.x + 10, t->threads_y - 30 };
-    SDL_QueryTexture(t->threads_text, 0, 0, &r.w, &r.h);
-    SDL_RenderCopy(t->p->rend, t->threads_text, 0, &r);
-
-    SDL_QueryTexture(t->threads_num, 0, 0, &r.w, &r.h);
-    r.x = ssize.x + 55;
-    r.y = t->threads_y + 2;
-    SDL_RenderCopy(t->p->rend, t->threads_num, 0, &r);
 }
 
 
@@ -375,10 +309,9 @@ void toolbar_main(struct Toolbar *t)
                 t->light_in->value = t->p->selected_light->in;
             }
 
-            SDL_DestroyTexture(t->obj_mat_idx);
             char s[20] = { 0 };
             sprintf(s, "%zu", scene_mat_idx(t->p->sc, t->p->selected_mesh->mat));
-            t->obj_mat_idx = util_render_text(t->p->rend, t->p->font, s, (SDL_Color){ 255, 255, 255 });
+            bscale_update_tex(t->obj_mat_scale, s, t->p->rend, t->p->font);
         }
     }
     else
@@ -408,7 +341,7 @@ void toolbar_main(struct Toolbar *t)
     }
 
     struct Slider **ms = t->mat_props;
-    struct Material *mt = t->p->sc->mats[t->mat_idx_edited];
+    struct Material *mt = t->p->sc->mats[t->mat_i];
 
     mt->col = (Vec3f){
         ms[0]->value, ms[1]->value, ms[2]->value
@@ -455,6 +388,9 @@ void toolbar_update_positions(struct Toolbar *t)
         t->mat_props[i]->rect.x = ssize.x + 10 + 120;
 
     t->mat_props[6]->rect.x = ssize.x + 10 + 60;
+
+    for (size_t i = 0; i < t->nscales; ++i)
+        bscale_update_pos(t->scales[i], ssize.x + 10);
 }
 
 
@@ -536,11 +472,22 @@ void toolbar_buttons_pressed(struct Toolbar *t, SDL_Point mouse)
 
         t->buttons[i]->rect.x -= ssize.x;
     }
+
+    for (size_t i = 0; i < t->nscales; ++i)
+    {
+        struct Button *b = bscale_click(t->scales[i], mouse, t->p);
+
+        if (b)
+        {
+            t->pressed_button = b;
+            break;
+        }
+    }
 }
 
 
 void toolbar_set_edited_mat(struct Prog *p, int idx)
 {
-    modify_edit_mat_idx(p, idx - p->toolbar->mat_idx_edited);
+    modify_edit_mat_idx(p, idx - p->toolbar->mat_i);
 }
 

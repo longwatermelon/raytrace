@@ -3,6 +3,7 @@
 
 #include "button.h"
 #include "slider.h"
+#include "bscale.h"
 #include <limits.h>
 
 struct Prog;
@@ -23,23 +24,22 @@ struct Toolbar
     // Object modifiers
     int obj_y;
     struct Slider *obj_props[6];
-    SDL_Texture *obj_mat_text, *obj_mat_idx;
+    struct Bscale *obj_mat_scale;
 
     // Light modifiers
     struct Slider *light_in;
 
     // Material modifiers
     int mat_y;
-    SDL_Texture *mat_tex;
-    SDL_Texture *mat_idx;
-    int mat_idx_edited;
+    int mat_i;
+    struct Bscale *mat_scale;
     struct Slider *mat_props[7];
 
     struct Scene *mat_preview;
 
-    // Thread number customization
-    int threads_y;
-    SDL_Texture *threads_text, *threads_num;
+    // Scales
+    struct Bscale **scales;
+    size_t nscales;
 };
 
 struct Toolbar *toolbar_alloc(struct Prog *p);
