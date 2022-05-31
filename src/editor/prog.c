@@ -150,12 +150,12 @@ void prog_mainloop(struct Prog *p)
                 {
                     if (!p->render_thread_args->done)
                     {
-                        prog_set_status(p, "Finishing up...", (SDL_Color){ 255, 255, 0 });
+                        prog_set_status(p, "Finishing up...", (SDL_Color){ 255, 255, 0 }, false);
                     }
                     else
                     {
                         p->rendering = false;
-                        prog_set_status(p, "[✔] Done rendering", (SDL_Color){ 0, 255, 0 });
+                        prog_set_status(p, "[✔] Done rendering", (SDL_Color){ 0, 255, 0 }, true);
 
                         free(p->render_thread_args);
 
@@ -165,7 +165,7 @@ void prog_mainloop(struct Prog *p)
                 }
                 else
                 {
-                    prog_set_status(p, s, (SDL_Color){ 255, 255, 0 });
+                    prog_set_status(p, s, (SDL_Color){ 255, 255, 0 }, true);
                 }
             }
             else
@@ -324,7 +324,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     p->sc->progress = 0.f;
                     writer_image(p->sc, p->config, ".rtmp");
 
-                    prog_set_status(p, "Rendering... [0.00%]", (SDL_Color){ 255, 255, 0 });
+                    prog_set_status(p, "Rendering... [0.00%]", (SDL_Color){ 255, 255, 0 }, false);
                     p->rendering = true;
 
                     raytrace_sc_args_t *args = malloc(sizeof(raytrace_sc_args_t));
@@ -346,7 +346,7 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     sprintf(s, "[✔] Saved scene to '%s'", p->sc->path);
                     s = realloc(s, sizeof(char) * (strlen(s) + 1));
 
-                    prog_set_status(p, s, (SDL_Color){ 0, 255, 0 });
+                    prog_set_status(p, s, (SDL_Color){ 0, 255, 0 }, true);
                     free(s);
                 }
             } break;
@@ -427,14 +427,14 @@ void prog_events(struct Prog *p, SDL_Event *evt)
                     p->anchor->pos = p->sc->cam->pos;
                     p->anchor->angle = p->sc->cam->angle;
 
-                    prog_set_status(p, "[✔] Set camera anchor", (SDL_Color){ 0, 255, 0 });
+                    prog_set_status(p, "[✔] Set camera anchor", (SDL_Color){ 0, 255, 0 }, true);
                 }
                 else
                 {
                     p->sc->cam->pos = p->anchor->pos;
                     p->sc->cam->angle = p->anchor->angle;
 
-                    prog_set_status(p, "[✔] Moved camera to anchor", (SDL_Color){ 0, 255, 0 });
+                    prog_set_status(p, "[✔] Moved camera to anchor", (SDL_Color){ 0, 255, 0 }, true);
                 }
             } break;
             }
@@ -546,12 +546,14 @@ void prog_set_scene(struct Prog *p, struct Scene *sc)
 }
 
 
-void prog_set_status(struct Prog *p, const char *text, SDL_Color c)
+void prog_set_status(struct Prog *p, const char *text, SDL_Color c, bool set_last_status)
 {
     if (p->status)
         SDL_DestroyTexture(p->status);
 
     p->status = util_render_text(p->rend, p->font, text, c);
-    clock_gettime(CLOCK_MONOTONIC, &p->last_status);
+
+    if (set_last_status)
+        clock_gettime(CLOCK_MONOTONIC, &p->last_status);
 }
 
