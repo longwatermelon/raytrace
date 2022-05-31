@@ -184,6 +184,7 @@ void video_apply_delta(struct Video *v, void *obj, void *delta, int type)
         struct Mesh *d = (struct Mesh*)delta;
 
         m->pos = vec_addv(m->pos, d->pos);
+        m->rot = vec_addv(m->rot, d->rot);
         mesh_find_bounds(m, v->base->cam);
     } break;
     case OBJ_LIGHT:
