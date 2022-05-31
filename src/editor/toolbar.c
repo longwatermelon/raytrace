@@ -85,7 +85,7 @@ void increase_edit_mat_idx(struct Prog *p)
 void add_mat(struct Prog *p)
 {
     p->sc->mats = realloc(p->sc->mats, sizeof(struct Material*) * ++p->sc->nmats);
-    p->sc->mats[p->sc->nmats - 1] = mat_alloc((Vec3f){ 0.f, 0.f, 0.f }, 0.f, 0.f, 0.f, 1.f, 0);
+    p->sc->mats[p->sc->nmats - 1] = mat_alloc((Vec3f){ 0.f, 0.f, 0.f }, 1.f, 0.f, 0.f, 1.f, 0);
 }
 
 void add_light(struct Prog *p)
@@ -324,7 +324,13 @@ void toolbar_main(struct Toolbar *t)
 
         if (t->p->selected_type == OBJ_LIGHT)
         {
-            t->light_sliders->pvalues[0] = &t->p->selected_light->in;
+            struct Light *l = t->p->selected_light;
+            l->pos = (Vec3f){ *v[0], *v[1], *v[2] };
+
+            float **lv = t->light_sliders->pvalues;
+
+            lv[0] = &l->in;
+
             sliders_update_values(t->light_sliders, t->p->rend, t->p->font);
         }
     }
