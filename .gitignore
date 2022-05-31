@@ -7,7 +7,5 @@ lib
 *.jpg
 *.mp4
 circle
-/cli
-/editor
-/out
 /.rtmp
+/a.out

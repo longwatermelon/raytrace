@@ -7,7 +7,7 @@ SRC=$(wildcard src/editor/*.c)
 OBJS=$(addprefix obj/, $(SRC:.c=.o))
 
 editor: $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@ $(INC) $(LIBS)
+	$(CC) $(CFLAGS) $^ $(INC) $(LIBS)
 
 obj/src/editor/%.o: src/editor/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(INC) $(LIBS)

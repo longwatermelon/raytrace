@@ -4,7 +4,7 @@ INC=-Isrc
 LIBS=-Llib -lcore -lm -lpthread -lpng
 
 cli: obj/src/cli/main.o
-	$(CC) $(CFLAGS) $^ -o $@ $(INC) $(LIBS)
+	$(CC) $(CFLAGS) $^ $(INC) $(LIBS)
 
 obj/src/cli/main.o: src/cli/main.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(INC) $(LIBS)

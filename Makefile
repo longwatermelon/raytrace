@@ -20,4 +20,4 @@ circle: tools/circle.c
 	$(CC) $< -o $@ -lm
 
 clean:
-	-rm -rf obj/* lib/* raytrace
+	-rm -rf obj/* lib/* a.out
