@@ -2,8 +2,9 @@
 #define EDITOR_TOOLBAR_H
 
 #include "button.h"
-#include "slider.h"
 #include "bscale.h"
+#include "slider.h"
+#include "sliders.h"
 #include <limits.h>
 
 struct Prog;
@@ -15,7 +16,7 @@ struct Toolbar
     char obj[PATH_MAX];
     SDL_Texture *obj_tex;
 
-    struct Slider *selected_slider;
+    struct SliderWrapper *selected_slider;
     struct Button *pressed_button;
 
     struct Button **buttons;
@@ -23,23 +24,26 @@ struct Toolbar
 
     // Object modifiers
     int obj_y;
-    struct Slider *obj_props[6];
+    struct Sliders *obj_sliders;
     struct Bscale *obj_mat_scale;
 
     // Light modifiers
-    struct Slider *light_in;
+    struct Sliders *light_sliders;
 
     // Material modifiers
     int mat_y;
     int mat_i;
     struct Bscale *mat_scale;
-    struct Slider *mat_props[7];
+    struct Sliders *mat_sliders;
 
     struct Scene *mat_preview;
 
     // Scales
     struct Bscale **scales;
     size_t nscales;
+
+    struct Sliders **sliders;
+    size_t nsliders;
 };
 
 struct Toolbar *toolbar_alloc(struct Prog *p);

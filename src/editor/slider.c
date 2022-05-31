@@ -2,13 +2,17 @@
 #include "util.h"
 
 
-struct Slider *slider_alloc(SDL_Point pos, float upp, float value, const char *label, SDL_Renderer *rend, TTF_Font *font)
+struct Slider *slider_alloc(SDL_Point pos, float upp, float value, float min, float max, bool stop, const char *label, SDL_Renderer *rend, TTF_Font *font)
 {
     struct Slider *s = malloc(sizeof(struct Slider));
     s->rect = (SDL_Rect){ pos.x, pos.y, 100, 20 };
     s->value = value;
     s->upp = upp;
     s->tex = 0;
+
+    s->min = min;
+    s->max = max;
+    s->stop_at_limit = stop;
 
     s->label = strdup(label);
 
@@ -51,6 +55,19 @@ void slider_render(struct Slider *s, SDL_Renderer *rend)
 void slider_slide(struct Slider *s, int pixels, SDL_Renderer *rend, TTF_Font *font)
 {
     s->value += pixels * s->upp;
+
+    if (s->stop_at_limit)
+        s->value = fmin(s->max, fmax(s->value, s->min));
+    else
+    {
+        float diff = s->max - s->min;
+
+        if (s->value < s->min)
+            s->value += diff;
+        else if (s->value > s->max)
+            s->value -= diff;
+    }
+
     slider_redo_tex(s, rend, font);
 }
 
