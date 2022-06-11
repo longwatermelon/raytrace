@@ -231,6 +231,8 @@ void toolbar_render(struct Toolbar *t)
 
     if (t->p->selected_type == OBJ_LIGHT)
         bscale_update_tex(t->obj_mat_scale, "NaN", t->p->rend, t->p->font);
+    else
+        modify_mat_idx(t->p, 0);
 
     bscale_render(t->obj_mat_scale, t->p->rend);
 
